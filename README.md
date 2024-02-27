@@ -15,6 +15,9 @@ Repository dedicated to AngelScript embed for Warcraft 3 (UjAPI), bringing about
 
 Note, this project was made exclusively for UjAPI, so it's required to use it.
 
+## Extensions
+### Visual Studio Code: Syntax Highlighting https://github.com/UnryzeC/VSC_AngelScript
+
 ## Supported patches
 
 * 1.24e
