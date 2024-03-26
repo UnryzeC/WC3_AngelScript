@@ -173,7 +173,8 @@ float GetUnitStatePercentRW(unit whichUnit, unitstate whichState, unitstate whic
 
 void CreateNUnitsAtLocACF(int count, int unitId, player whichPlayer, location loc, float face)
 {
-    while (true) {
+    while (true)
+    {
         if (count == 0) break;
         GlobalUnit = CreateUnit(whichPlayer, unitId, GetLocationX(loc), GetLocationY(loc), face);
         count = count - 1;
@@ -208,8 +209,9 @@ void CheckForStun()
     {
         SetUnitUserData(LocUnit, LocData - 1);
     }
-    else {
-        UnitRemoveAbility(LocUnit, FourCC("B00A"));
+    else
+    {
+        UnitRemoveAbility(LocUnit, 'B00A' );
         PauseTimer(GetExpiredTimer());
         FlushChildHashtable(GameHashTable, GetHandleId(GetExpiredTimer()));
         DestroyTimer(GetExpiredTimer());
@@ -220,14 +222,16 @@ void StunUnitACF(unit LocUnit, float LocReal)
     timer tmr = CreateTimer();
     int hid = GetHandleId(tmr);
     SetUnitUserData(LocUnit, R2I(LocReal * 100 + GetUnitUserData(LocUnit)));
-    if (GetUnitAbilityLevel(LocUnit, FourCC("B00A")) == 0){
-        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), FourCC("u00C"), GetUnitX(LocUnit), GetUnitY(LocUnit), 0);
+    if (GetUnitAbilityLevel(LocUnit, 'B00A' ) == 0)
+    {
+        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u00C', GetUnitX(LocUnit), GetUnitY(LocUnit), 0);
         UnitShareVision(LocUnit, Player(PLAYER_NEUTRAL_PASSIVE), true);
         IssueTargetOrder(GlobalUnit, "firebolt", LocUnit);
         SaveUnitHandle(GameHashTable, hid, 0, LocUnit);
         TimerStart(tmr, 0.01f, true, @CheckForStun);
     }
-    else {
+    else
+    {
         DestroyTimer(tmr);
     }
 }
@@ -241,9 +245,11 @@ void SetUnitScaleAndTime(unit LocUnit, float LocSize, float LocTime)
 int GetInventoryIndexOfItemTypeRW(unit whichUnit, int itemId)
 {
     int index = 0;
-    while (true) {
+    while (true)
+    {
         SysItem = UnitItemInSlot(whichUnit, index);
-        if (SysItem != nil && GetItemTypeId(SysItem) == itemId){
+        if (SysItem != nil && GetItemTypeId(SysItem) == itemId)
+        {
             return index + 1;
         }
         index = index + 1;
@@ -268,9 +274,11 @@ int CountItemsOfTypeFromUnitRW(unit whichUnit, int whatItemtype)
 {
     int index = 0;
     int count = 0;
-    while (true) {
+    while (true)
+    {
         if (index >= 6 ) break;
-        if (GetItemTypeId(UnitItemInSlot(whichUnit, index)) == whatItemtype){
+        if (GetItemTypeId(UnitItemInSlot(whichUnit, index)) == whatItemtype)
+        {
             count = count + 1;
         }
         index = index + 1;
@@ -294,10 +302,13 @@ unit SelectedUnitACF(player LocPlayer)
 
 bool UnitHasItemById(unit LocaUnitId, int LocalTargetItemId)
 {
-int index = 0;
-    if (LocalTargetItemId != 0){
-        while (true) {
-            if (GetItemTypeId(UnitItemInSlot(LocaUnitId, index)) == LocalTargetItemId){
+    int index = 0;
+    if (LocalTargetItemId != 0)
+    {
+        while (true)
+        {
+            if (GetItemTypeId(UnitItemInSlot(LocaUnitId, index)) == LocalTargetItemId)
+            {
                 return true;
             }
             index = index + 1;
@@ -309,10 +320,12 @@ int index = 0;
 
 bool HasPersonalItemACF(unit LocUnit)
 {
-int index = 1;
-    while (true) {
+    int index = 1;
+    while (true)
+    {
         if (index > TotalHeroes) break;
-        if (UnitHasItemById(LocUnit, HeroItemIDArray[index])){
+        if (UnitHasItemById(LocUnit, HeroItemIDArray[index]))
+        {
             return true;
         }
         index = index + 1;
@@ -323,12 +336,13 @@ int index = 1;
 void GameCreateVariables()
 {
     int i = 0;
-    while (true) {
+    while (true)
+    {
         if (i > 7) break;
         TeleportationLocationArray[i] = Location(0.f, - 500.f);
         HeroSelectedArray1[i] = false;
         NotificationEnabledIntArray[i] = 1;
-        DummyUnitDamageArr[i] = CreateUnit(Player(i), FourCC("h005"), 8000, 8000, 270);
+        DummyUnitDamageArr[i] = CreateUnit(Player(i), 'h005', 8000, 8000, 270);
         i = i + 1;
     }
 }
@@ -376,7 +390,8 @@ bool DamageTargetACF(unit LocTrigUnit, unit LocTargUnit, float LocDamage)
 void DialogShow(dialog DialogName, bool Show)
 {
     int i = 0;
-    while (true) {
+    while (true)
+    {
         if (i > 7) break;
         DialogDisplay(Player(i), DialogName, Show);
         i = i + 1;
@@ -390,14 +405,18 @@ bool CombineItemsCondition()
 
 void CombineItemsAction()
 {
-int ItemLoop = 0;
-int Charges = 0;
-int Maximum = 2;
-    while (true) {
+    int ItemLoop = 0;
+    int Charges = 0;
+    int Maximum = 2;
+    while (true)
+    {
         if (ItemLoop > 6) break;
-        if (GetItemTypeId(GetManipulatedItem()) == GetItemTypeId(UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1))){
-            if (GetItemCharges(UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1)) + GetItemCharges(GetManipulatedItem()) <= Maximum){
-                if (UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1) != GetManipulatedItem()){
+        if (GetItemTypeId(GetManipulatedItem()) == GetItemTypeId(UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1)))
+        {
+            if (GetItemCharges(UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1)) + GetItemCharges(GetManipulatedItem()) <= Maximum)
+            {
+                if (UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1) != GetManipulatedItem())
+                {
                     Charges = GetItemCharges(UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1)) + GetItemCharges(GetManipulatedItem());
                     SetItemCharges(UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1), Charges);
                     RemoveItem(GetManipulatedItem());
@@ -476,7 +495,10 @@ void MapInfoAndContactsActions()
 
 void PlaySoundWithVolumeACF(sound soundHandle, float volumePercent, float startingOffset)
 {
-    if ( soundHandle == nil ) { return; }
+    if ( soundHandle == nil )
+    {
+        return;
+    }
 
     int result = MathIntegerClamp( R2I( volumePercent * I2R( 127 ) * .01f ), 0, 127 );
 
@@ -503,77 +525,82 @@ void MapStartData()
     {
         if (i > 7) break;
         player p = Player(i);
-    
-        SetPlayerAbilityAvailable( p, FourCC("A03Q"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A047"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A02N"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A02O"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A02Q"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A02R"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A02V"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A02W"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A02Y"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A02Z"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03M"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03N"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03O"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03P"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03D"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03G"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03H"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03I"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A039"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03A"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03B"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03C"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A04H"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A04I"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A04J"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A04K"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A032"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A034"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A036"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A037"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03S"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03U"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03V"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03W"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03X"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A049"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A04C"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A04B"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A04D"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A04E"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03Y"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A03Z"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A040"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A042"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A043"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A044"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A04N"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A052"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A01Y"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A026"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A027"), false );
-        SetPlayerAbilityAvailable( p, FourCC("A02A"), false );
+
+        SetPlayerAbilityAvailable( p, 'A03Q', false );
+        SetPlayerAbilityAvailable( p, 'A047', false );
+        SetPlayerAbilityAvailable( p, 'A02N', false );
+        SetPlayerAbilityAvailable( p, 'A02O', false );
+        SetPlayerAbilityAvailable( p, 'A02Q', false );
+        SetPlayerAbilityAvailable( p, 'A02R', false );
+        SetPlayerAbilityAvailable( p, 'A02V', false );
+        SetPlayerAbilityAvailable( p, 'A02W', false );
+        SetPlayerAbilityAvailable( p, 'A02Y', false );
+        SetPlayerAbilityAvailable( p, 'A02Z', false );
+        SetPlayerAbilityAvailable( p, 'A03M', false );
+        SetPlayerAbilityAvailable( p, 'A03N', false );
+        SetPlayerAbilityAvailable( p, 'A03O', false );
+        SetPlayerAbilityAvailable( p, 'A03P', false );
+        SetPlayerAbilityAvailable( p, 'A03D', false );
+        SetPlayerAbilityAvailable( p, 'A03G', false );
+        SetPlayerAbilityAvailable( p, 'A03H', false );
+        SetPlayerAbilityAvailable( p, 'A03I', false );
+        SetPlayerAbilityAvailable( p, 'A039', false );
+        SetPlayerAbilityAvailable( p, 'A03A', false );
+        SetPlayerAbilityAvailable( p, 'A03B', false );
+        SetPlayerAbilityAvailable( p, 'A03C', false );
+        SetPlayerAbilityAvailable( p, 'A04H', false );
+        SetPlayerAbilityAvailable( p, 'A04I', false );
+        SetPlayerAbilityAvailable( p, 'A04J', false );
+        SetPlayerAbilityAvailable( p, 'A04K', false );
+        SetPlayerAbilityAvailable( p, 'A032', false );
+        SetPlayerAbilityAvailable( p, 'A034', false );
+        SetPlayerAbilityAvailable( p, 'A036', false );
+        SetPlayerAbilityAvailable( p, 'A037', false );
+        SetPlayerAbilityAvailable( p, 'A03S', false );
+        SetPlayerAbilityAvailable( p, 'A03U', false );
+        SetPlayerAbilityAvailable( p, 'A03V', false );
+        SetPlayerAbilityAvailable( p, 'A03W', false );
+        SetPlayerAbilityAvailable( p, 'A03X', false );
+        SetPlayerAbilityAvailable( p, 'A049', false );
+        SetPlayerAbilityAvailable( p, 'A04C', false );
+        SetPlayerAbilityAvailable( p, 'A04B', false );
+        SetPlayerAbilityAvailable( p, 'A04D', false );
+        SetPlayerAbilityAvailable( p, 'A04E', false );
+        SetPlayerAbilityAvailable( p, 'A03Y', false );
+        SetPlayerAbilityAvailable( p, 'A03Z', false );
+        SetPlayerAbilityAvailable( p, 'A040', false );
+        SetPlayerAbilityAvailable( p, 'A042', false );
+        SetPlayerAbilityAvailable( p, 'A043', false );
+        SetPlayerAbilityAvailable( p, 'A044', false );
+        SetPlayerAbilityAvailable( p, 'A04N', false );
+        SetPlayerAbilityAvailable( p, 'A052', false );
+        SetPlayerAbilityAvailable( p, 'A01Y', false );
+        SetPlayerAbilityAvailable( p, 'A026', false );
+        SetPlayerAbilityAvailable( p, 'A027', false );
+        SetPlayerAbilityAvailable( p, 'A02A', false );
         SetPlayerState( p, PLAYER_STATE_GIVES_BOUNTY, 1);
         i++;
     }
     SetPlayerHandicapXP(GetOwningPlayer(MainBossUnit1), 3);
 }
-void AISetItem(){
+void AISetItem()
+{
     It_LastRemoved = GetEnumItem();
 }
-bool AIItemFilter(){
+bool AIItemFilter()
+{
     return IsItemVisible(GetFilterItem()) && GetWidgetLife(GetFilterItem()) > 0;
 }
-bool AIHasEmptyInventorySlot(unit u){
+bool AIHasEmptyInventorySlot(unit u)
+{
     return UnitItemInSlot(u, 0) == nil || UnitItemInSlot(u, 1) == nil || UnitItemInSlot(u, 2) == nil || UnitItemInSlot(u, 3) == nil || UnitItemInSlot(u, 4) == nil || UnitItemInSlot(u, 5) == nil;
 }
-bool AIFilterEnemyConditions(){
+bool AIFilterEnemyConditions()
+{
     return GetUnitCurrentLife(GetFilterUnit()) > 0 && IsPlayerEnemy(GetOwningPlayer(GetFilterUnit()), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 0)));
 }
-void AIHeroMoveLoop(){
+void AIHeroMoveLoop()
+{
     IssuePointOrder(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 0), "attack", GetRandomReal( - 1900.f, 1900.f), GetRandomReal( - 110.f, 180.f));
 }
 void AILoop()
@@ -583,15 +610,22 @@ void AILoop()
         unit source = LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 0);
         unit uTemp;
         unit utarg;
-        
+
         GroupClear( GroupEnum );
         GroupEnumUnitsInRange( GroupEnum, GetUnitX(source), GetUnitY(source), 600.f, Condition(@AIFilterEnemyConditions));
 
         for( int i = 0; i < GroupGetCount( GroupEnum ); i++ )
         {
-            uTemp = GroupGetUnitByIndex( GroupEnum, i ); if ( uTemp == nil ) { break; }
+            uTemp = GroupGetUnitByIndex( GroupEnum, i );
+            if ( uTemp == nil )
+            {
+                break;
+            }
 
-            if ( IsUnitType( uTemp, UNIT_TYPE_HERO ) ) { utarg = uTemp; break; }
+            if ( IsUnitType( uTemp, UNIT_TYPE_HERO ) )
+            {
+                utarg = uTemp; break;
+            }
         }
 
         if ( utarg == nil )
@@ -603,11 +637,13 @@ void AILoop()
         {
             It_LastRemoved = nil;
             EnumItemsInRange( GetUnitX(source), GetUnitY(source), 1600.f, Condition(@AIItemFilter), @AISetItem);
-            if (It_LastRemoved != nil && (GetItemType(It_LastRemoved) == ITEM_TYPE_POWERUP || AIHasEmptyInventorySlot(source))){
+            if (It_LastRemoved != nil && (GetItemType(It_LastRemoved) == ITEM_TYPE_POWERUP || AIHasEmptyInventorySlot(source)))
+            {
                 IssueTargetOrder(source, "smart", It_LastRemoved);
             }
         }
-        else {
+        else
+        {
             IssueTargetOrder(source, "attack", uTemp);
             IssueTargetOrder(source, "purge", uTemp);
             IssueTargetOrder(source, "drain", uTemp);
@@ -618,7 +654,8 @@ void AILoop()
             IssuePointOrderLoc(source, "carrionswarm", GetUnitLoc(uTemp));
             IssueImmediateOrder(source, "stomp");
             IssueImmediateOrder(source, "roar");
-            if ((IsUnitType(uTemp, UNIT_TYPE_HERO) == false && GetUnitCurrentLife(uTemp) >= 500) || IsUnitType(uTemp, UNIT_TYPE_HERO)){
+            if ((IsUnitType(uTemp, UNIT_TYPE_HERO) == false && GetUnitCurrentLife(uTemp) >= 500) || IsUnitType(uTemp, UNIT_TYPE_HERO))
+            {
                 IssueImmediateOrder(source, "thunderclap");
                 IssueTargetOrder(source, "cripple", uTemp);
                 IssueTargetOrder(source, "hex", uTemp);
@@ -626,12 +663,14 @@ void AILoop()
                 IssuePointOrderLoc(source, "breathoffire", GetUnitLoc(uTemp));
                 IssuePointOrderLoc(source, "earthquake", GetUnitLoc(uTemp));
             }
-            if (GetUnitStatePercentRW(source, UNIT_STATE_LIFE, UNIT_STATE_MAX_LIFE) <= 20 && source != MainBossUnit1){
+            if (GetUnitStatePercentRW(source, UNIT_STATE_LIFE, UNIT_STATE_MAX_LIFE) <= 20 && source != MainBossUnit1)
+            {
                 if (GetPlayerTeam(GetOwningPlayer(source)) == 0)
                 {
                     IssuePointOrder(source, "move", -4288.f, -576.f);
                 }
-                else {
+                else
+                {
                     IssuePointOrder(source, "move", 4288.f, - 576.f);
                 }
             }
@@ -649,15 +688,18 @@ void StartAI( unit u )
 
     if (u != MainBossUnit1)
     {
-        if (GetAIDifficulty(GetOwningPlayer(u)) == AI_DIFFICULTY_NEWBIE){
+        if (GetAIDifficulty(GetOwningPlayer(u)) == AI_DIFFICULTY_NEWBIE)
+        {
             SetPlayerHandicapXP(GetOwningPlayer(u), 1.5f);
         }
-        else if (GetAIDifficulty(GetOwningPlayer(u)) == AI_DIFFICULTY_NORMAL){
+        else if (GetAIDifficulty(GetOwningPlayer(u)) == AI_DIFFICULTY_NORMAL)
+        {
             SetPlayerHandicapXP(GetOwningPlayer(u), 2.f );
         }
-        else if (GetAIDifficulty(GetOwningPlayer(u)) == AI_DIFFICULTY_INSANE){
-                SetPlayerHandicapXP(GetOwningPlayer(u), 3.f );
-            }
+        else if (GetAIDifficulty(GetOwningPlayer(u)) == AI_DIFFICULTY_INSANE)
+        {
+            SetPlayerHandicapXP(GetOwningPlayer(u), 3.f );
+        }
         IssuePointOrder(u, "attack", GetRandomReal( -1900.f, 1900.f), GetRandomReal( -1200.f, 200.f));
 
         tmr = CreateTimer();
@@ -686,27 +728,27 @@ void HeroPickArrayCreation()
     EF_SelectionIconArray.resize( size );
     EF_SelectionHeroModelArray.resize( size );
 
-    BossIDArray[1] = FourCC("U001");
-    BossIDArray[2] = FourCC("U002");
-    BossIDArray[3] = FourCC("U003");
-    BossIDArray[4] = FourCC("U004");
-    BossIDArray[5] = FourCC("U005");
-    BossIDArray[6] = FourCC("U006");
-    BossIDArray[7] = FourCC("U007");
-    BossIDArray[8] = FourCC("U008");
+    BossIDArray[1] = 'U001';
+    BossIDArray[2] = 'U002';
+    BossIDArray[3] = 'U003';
+    BossIDArray[4] = 'U004';
+    BossIDArray[5] = 'U005';
+    BossIDArray[6] = 'U006';
+    BossIDArray[7] = 'U007';
+    BossIDArray[8] = 'U008';
 
 
-    HeroIDArray[1] = FourCC("H00A");
-    HeroIDArray[2] = FourCC("H00B");
-    HeroIDArray[3] = FourCC("H00C");
-    HeroIDArray[4] = FourCC("H00D");
-    HeroIDArray[5] = FourCC("H00E");
-    HeroIDArray[6] = FourCC("H00F");
-    HeroIDArray[7] = FourCC("H00G");
-    HeroIDArray[8] = FourCC("H00H");
-    HeroIDArray[9] = FourCC("H00I");
-    HeroIDArray[10] = FourCC("H00J");
-    HeroIDArray[11] = FourCC("H00K");
+    HeroIDArray[1] =  'H00A';
+    HeroIDArray[2] =  'H00B';
+    HeroIDArray[3] =  'H00C';
+    HeroIDArray[4] =  'H00D';
+    HeroIDArray[5] =  'H00E';
+    HeroIDArray[6] =  'H00F';
+    HeroIDArray[7] =  'H00G';
+    HeroIDArray[8] =  'H00H';
+    HeroIDArray[9] =  'H00I';
+    HeroIDArray[10] = 'H00J';
+    HeroIDArray[11] = 'H00K';
 
     SetScaleArr[1] = 1.4f;
     SetScaleArr[2] = 1.4f;
@@ -720,17 +762,17 @@ void HeroPickArrayCreation()
     SetScaleArr[10] = 2.4f;
     SetScaleArr[11] = 2.4f;
 
-    HeroItemIDArray[1] = FourCC("I006");
-    HeroItemIDArray[2] = FourCC("I01J");
-    HeroItemIDArray[3] = FourCC("I01F");
-    HeroItemIDArray[4] = FourCC("I01W");
-    HeroItemIDArray[5] = FourCC("I008");
-    HeroItemIDArray[6] = FourCC("I016");
-    HeroItemIDArray[7] = FourCC("I01V");
-    HeroItemIDArray[8] = FourCC("I01P");
-    HeroItemIDArray[9] = FourCC("I018");
-    HeroItemIDArray[10] = FourCC("I010");
-    HeroItemIDArray[11] = FourCC("I00E");
+    HeroItemIDArray[1] =  'I006';
+    HeroItemIDArray[2] =  'I01J';
+    HeroItemIDArray[3] =  'I01F';
+    HeroItemIDArray[4] =  'I01W';
+    HeroItemIDArray[5] =  'I008';
+    HeroItemIDArray[6] =  'I016';
+    HeroItemIDArray[7] =  'I01V';
+    HeroItemIDArray[8] =  'I01P';
+    HeroItemIDArray[9] =  'I018';
+    HeroItemIDArray[10] = 'I010';
+    HeroItemIDArray[11] = 'I00E';
 
     HeroModelArray[1] = "Characters\\NanayaShiki\\NanayaShiki";
     HeroModelArray[2] = "Characters\\ToonoShiki\\ToonoShiki";
@@ -756,19 +798,21 @@ void HeroPickArrayCreation()
     HeroIconArray[10] = "Characters\\Reinforce\\ReplaceableTextures\\CommandButtons\\BTNReinforceIcon.blp";
     HeroIconArray[11] = "Characters\\Arcueid\\ReplaceableTextures\\CommandButtons\\BTNArcueidIcon.blp";
 
-    SelectionUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), FourCC("u012"), - 1800, 5525, 270);
+    SelectionUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u012', - 1800, 5525, 270);
     SetUnitScale( SelectionUnit, 2.5f, 2.5f, 2.5f);
     Ef_Selection = AddSpecialEffectTarget("HeroSelectionSystem\\HeroSelectionEffect.mdl", SelectionUnit, "origin");
     Ef_SelectionBack = AddSpecialEffectTarget("HeroSelectionSystem\\HeroSelectionBackground.mdl", SelectionUnit, "origin");
-    while (true) {
+    while (true)
+    {
         if (i > TotalHeroes) break;
-        if (i == 6 || i == 11){
+        if (i == 6 || i == 11)
+        {
             SysHeroX = - 2600;
             SysHeroY = SysHeroY - 100;
             startX = 700;
             startY -= 150;
         }
-        U_SelectionHeroDummyArr[i] = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), FourCC("u013"), SysHeroX, SysHeroY, 270);
+        U_SelectionHeroDummyArr[i] = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u013', SysHeroX, SysHeroY, 270);
         SetUnitVertexColor(U_SelectionHeroDummyArr[i], 255, 255, 255, 0);
         SetUnitUserData(U_SelectionHeroDummyArr[i], i);
         EF_SelectionIconArray[i] = AddSpecialEffect(HeroModelArray[i] + "Icon.mdl", SysHeroX, SysHeroY);
@@ -790,7 +834,8 @@ void MoveHeroToTeamLocation(int pid, int HeroID)
         HeroesSelected = HeroesSelected + 1;
         HeroSelectedArray1[pid] = true;
     }
-    if ((TeamPlayers[0] != 0 && TeamPlayers[1] != 0) && (TeamOneSelected[HeroID] == false && TeamTwoSelected[HeroID] == false)){
+    if ((TeamPlayers[0] != 0 && TeamPlayers[1] != 0) && (TeamOneSelected[HeroID] == false && TeamTwoSelected[HeroID] == false))
+    {
         HeroInit(HeroID);
     }
     if (GetPlayerTeam(Player(pid)) == 0)
@@ -798,7 +843,8 @@ void MoveHeroToTeamLocation(int pid, int HeroID)
         DataID = pid + 1;
         TeamOneSelected[HeroID] = true;
     }
-    else {
+    else
+    {
         DataID = pid + 2;
         TeamTwoSelected[HeroID] = true;
         RevInt = true;
@@ -826,7 +872,7 @@ void MoveHeroToTeamLocation(int pid, int HeroID)
         RemoveUnit(HeroUnitArray[HeroID]);
         RemoveUnit(U_SelectionHeroDummyArr[HeroID]);
     }
-    
+
     multiboarditem mbitem = MultiboardGetItem(MainMultiboard, DataID, 0);
     MultiboardSetItemIcon(mbitem, HeroIconArray[HeroID]);
     MultiboardReleaseItem( mbitem );
@@ -846,10 +892,13 @@ void ComputerHeroSelection()
         DestroyEffect( Ef_Selection );
         DestroyEffect( Ef_SelectionBack );
         RemoveUnit(SelectionUnit);
-        while (true) {
+        while (true)
+        {
             if (i > 7) break;
-            if (GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING && GetPlayerController(Player(i)) == MAP_CONTROL_COMPUTER){
-                while (true) {
+            if (GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING && GetPlayerController(Player(i)) == MAP_CONTROL_COMPUTER)
+            {
+                while (true)
+                {
                     if (TeamOneSelected[HeroID] == false && TeamTwoSelected[HeroID] == false) break;
                     HeroID = GetRandomInt(1, TotalHeroes);
                 }
@@ -858,7 +907,8 @@ void ComputerHeroSelection()
             i = i + 1;
         }
         i = 1;
-        while (true) {
+        while (true)
+        {
             if (i > TotalHeroes) break;
             DestroyEffect(EF_SelectionIconArray[i]);
             RemoveUnit(U_SelectionHeroDummyArr[i]);
@@ -877,7 +927,7 @@ void HeroSelectionAction()
     int heroId = GetUnitUserData(GetTriggerUnit());
     string smdl = "";
 
-    if ( not HeroSelectedArray1[pid] && GetUnitTypeId(GetTriggerUnit()) == FourCC( 'u013' ) )
+    if ( not HeroSelectedArray1[pid] && GetUnitTypeId(GetTriggerUnit()) == 'u013' )
     {
         if (U_SelectionSelArr[pid] != HeroUnitArray[heroId])
         {
@@ -889,14 +939,14 @@ void HeroSelectionAction()
             }
             DestroyEffect(EF_SelectionHeroModelArray[pid]);
             RemoveUnit(U_SelectionDumArr[pid]);
-            U_SelectionDumArr[pid] = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), FourCC( 'u012' ), -1800.f, 5525.f, 270.f );
+            U_SelectionDumArr[pid] = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u012', -1800.f, 5525.f, 270.f );
             SetUnitTimeScale(U_SelectionDumArr[pid], 1.5f);
             SetUnitScale(U_SelectionDumArr[pid], SetScaleArr[heroId], SetScaleArr[heroId], SetScaleArr[heroId]);
             EF_SelectionHeroModelArray[pid] = AddSpecialEffectTarget(smdl, U_SelectionDumArr[pid], "origin" );
 
             U_SelectionSelArr[pid] = HeroUnitArray[heroId];
         }
-        else 
+        else
         {
             if ((TeamOneSelected[heroId] == false && TeamID == 0) || (TeamTwoSelected[heroId] == false && TeamID == 1))
             {
@@ -945,7 +995,10 @@ void PlayerNameSettingAction()
             tid++;
         }
 
-        if ( name.isEmpty( ) ) { continue; }
+        if ( name.isEmpty( ) )
+        {
+            continue;
+        }
 
         PlayerNameArray[i] = name;
         PlayerColoredNameArray[i] = PlayerColorStringArray[i] + PlayerNameArray[i] + "|r";
@@ -954,39 +1007,49 @@ void PlayerNameSettingAction()
     }
 }
 
-bool ResetCDTargets(){
-    if (GetOwningPlayer(GetFilterUnit()) != Player(PLAYER_NEUTRAL_AGGRESSIVE)){
+bool ResetCDTargets()
+{
+    if (GetOwningPlayer(GetFilterUnit()) != Player(PLAYER_NEUTRAL_AGGRESSIVE))
+    {
         UnitResetCooldown(GetFilterUnit());
     }
     return true;
 }
-void ResetCooldownTimedAction(){
+void ResetCooldownTimedAction()
+{
     GroupEnumUnitsInRect(GroupEnum, worldBounds, Condition(@ResetCDTargets));
 }
-void NoCooldownActivationAction(){
-    if (IsTriggerEnabled(ResetCDTrigger)){
+void NoCooldownActivationAction()
+{
+    if (IsTriggerEnabled(ResetCDTrigger))
+    {
         DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c00ff0000No-CoolDown Mode Operation Disabled!");
         DisableTrigger(ResetCDTrigger);
     }
-    else {
+    else
+    {
         DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c0000FF00No-CoolDown Mode Operation Enabled!");
         EnableTrigger(ResetCDTrigger);
     }
 }
-void AllHeroPickAction(){
-int i = 1;
-float CenterX = 4288.f;
+void AllHeroPickAction()
+{
+    int i = 1;
+    float CenterX = 4288.f;
     DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c0000ff00The host got all heroes.|r");
-    if (GetPlayerTeam(GetTriggerPlayer()) == 0){
+    if (GetPlayerTeam(GetTriggerPlayer()) == 0)
+    {
         CenterX = - 4288.f;
     }
-    while (true) {
+    while (true)
+    {
         if (i > TotalHeroes) break;
         CreateUnit(GetTriggerPlayer(), HeroIDArray[i], CenterX, -576.f, 270.f );
         i = i + 1;
     }
 }
-void NoCreepAction(){
+void NoCreepAction()
+{
     if ( B_IsCreepSpawn )
     {
         DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c00ff0000Creeps on mid will no longer spawn.|r");
@@ -998,30 +1061,36 @@ void NoCreepAction(){
         B_IsCreepSpawn = true;
     }
 }
-void TestUnitSpawnAction(){
+void TestUnitSpawnAction()
+{
     DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ff00Test Unit Has Been Spawned.|r");
-    CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("tstu"), 0.f, -500.f, 270.f );
+    CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'tstu', 0.f, -500.f, 270.f );
 }
-void GetUsedAbilityIDAction(){
+void GetUsedAbilityIDAction()
+{
     DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c0000ff00Used Ability ID|r: " + "[" + Id2String(GetSpellAbilityId()) + "]");
 }
-void UnitIDAction(){
+void UnitIDAction()
+{
     DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c0000ff00Selected unit ID|r: " + "[" + Id2String(GetUnitTypeId(GetTriggerUnit())) + "]");
 }
-void PickedUpItemIDAction(){
+void PickedUpItemIDAction()
+{
     DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c0000ff00Picked Item ID|r: " + "[" + Id2String(GetItemTypeId(GetManipulatedItem())) + "]");
 }
 location CreateLocationACF(location LocalLocation1, float LocalReal1, float LocalReal2)
 {
     return Location(GetLocationX(LocalLocation1) + LocalReal1 * Cos( Deg2Rad( LocalReal2 ) ), GetLocationY(LocalLocation1) + LocalReal1 * Sin( Deg2Rad( LocalReal2 ) ));
 }
-void SetUnitFacing2(unit LocalCaster1, location LocalLocation2, float LocalReal24){
-location LocalLocation3 = GetUnitLoc(LocalCaster1);
+void SetUnitFacing2(unit LocalCaster1, location LocalLocation2, float LocalReal24)
+{
+    location LocalLocation3 = GetUnitLoc(LocalCaster1);
     SetUnitFacingTimed(LocalCaster1, AngleBetweenPointsRW(LocalLocation3, LocalLocation2), LocalReal24);
     RemoveLocation(LocalLocation3);
 }
-void SetUnitFacing1(unit LocalCaster1, unit LocalTarg1, float LocalReal24){
-location LocalLocation2 = GetUnitLoc(LocalTarg1);
+void SetUnitFacing1(unit LocalCaster1, unit LocalTarg1, float LocalReal24)
+{
+    location LocalLocation2 = GetUnitLoc(LocalTarg1);
     SetUnitFacing2(LocalCaster1, LocalLocation2, LocalReal24);
     RemoveLocation(LocalLocation2);
 }
@@ -1046,39 +1115,50 @@ void LinearDisplacementAction()
     float LocMoveY = GetUnitY(LocTrigUnit) + LocReal1 * LocSin;
     float LocDuration = LoadReal(GameHashTable, hid, 13);
 
-    if (LocDuration > 0 && GetUnitCurrentLife(LocTrigUnit) > 0){
+    if (LocDuration > 0 && GetUnitCurrentLife(LocTrigUnit) > 0)
+    {
         SaveReal(GameHashTable, hid, 13, LocDuration - 1);
-        if (LocPathing == false){
-            if (IsTerrainPathable(LocMoveX, LocMoveY, PATHING_TYPE_WALKABILITY)){
+        if (LocPathing == false)
+        {
+            if (IsTerrainPathable(LocMoveX, LocMoveY, PATHING_TYPE_WALKABILITY))
+            {
                 SaveInteger(GameHashTable, hid, 11, 0);
             }
-            else {
+            else
+            {
                 SetUnitX(LocTrigUnit, LocMoveX);
                 SetUnitY(LocTrigUnit, LocMoveY);
             }
         }
-        else {
+        else
+        {
             SetUnitX(LocTrigUnit, LocMoveX);
             SetUnitY(LocTrigUnit, LocMoveY);
         }
-        if (LocInt2 == 0){
-            if (GetUnitFlyHeight(LocTrigUnit) < 5.f){
+        if (LocInt2 == 0)
+        {
+            if (GetUnitFlyHeight(LocTrigUnit) < 5.f)
+            {
                 DestroyEffect(AddSpecialEffect(LocEffect, GetUnitX(LocTrigUnit), GetUnitY(LocTrigUnit)));
             }
         }
-        if (LocInt2 == 2){
+        if (LocInt2 == 2)
+        {
             SaveInteger(GameHashTable, hid, 12, 0);
         }
         SaveReal(GameHashTable, hid, 2, LocReal1 - LocReal2);
-        if (LocReal1 <= 0 || RMinACF(RMaxACF(LocTrigUnitX * 1, MapMinX), MapMaxX) != LocTrigUnitX || RMinACF(RMaxACF(LocTrigUnitY * 1, MapMinY), MapMaxY) != LocTrigUnitY){
+        if (LocReal1 <= 0 || RMinACF(RMaxACF(LocTrigUnitX * 1, MapMinX), MapMaxX) != LocTrigUnitX || RMinACF(RMaxACF(LocTrigUnitY * 1, MapMinY), MapMaxY) != LocTrigUnitY)
+        {
             SaveInteger(GameHashTable, hid, 11, 0);
         }
-        if (LocInt1 == 0){
+        if (LocInt1 == 0)
+        {
             SetUnitFlyHeight(LocTrigUnit, GetUnitDefaultFlyHeight(LocTrigUnit), 200);
             SetUnitTimeScale(LocTrigUnit, 1);
         }
     }
-    else {
+    else
+    {
         PauseTimer( tmr );
         FlushChildHashtable(GameHashTable, hid);
         DestroyTimer( tmr );
@@ -1087,7 +1167,10 @@ void LinearDisplacementAction()
 
 void LinearDisplacement(unit u, float LocFacing, float LocDistance, float LocTime, float LocRate, bool LocDestrDestruct, bool LocPathing, string LocAttach, string LocEffect)
 {
-    if ( u == nil ) { return; }
+    if ( u == nil )
+    {
+        return;
+    }
 
     timer t = CreateTimer();
     int hid = GetHandleId(t);
@@ -1144,8 +1227,15 @@ void DisplaceUnitAction()
 
 void DisplaceUnitWithArgs(unit u, float LocAngle, float LocTotalDist, float LocTotalTime, float LocRate, float LocHeightMax)
 {
-    if ( u == nil ) { return; }
-    int LocIsAffected = LoadInteger(GameHashTable, GetHandleId(u), 50); if (LocIsAffected == 1) { return; }
+    if ( u == nil )
+    {
+        return;
+    }
+    int LocIsAffected = LoadInteger(GameHashTable, GetHandleId(u), 50);
+    if (LocIsAffected == 1)
+    {
+        return;
+    }
 
     timer t = CreateTimer();
     int hid = GetHandleId(t);
@@ -1157,7 +1247,7 @@ void DisplaceUnitWithArgs(unit u, float LocAngle, float LocTotalDist, float LocT
     float LocDHeight = 1.f / LocSteepMax;
     float LocOrigHeigth = GetUnitFlyHeight(u);
 
-    int aid = FourCC( "Amrf" );
+    int aid = 'Amrf';
 
     if ( GetUnitAbility( u, aid ) == nil )
     {
@@ -1179,59 +1269,71 @@ void DisplaceUnitWithArgs(unit u, float LocAngle, float LocTotalDist, float LocT
     SaveInteger(GameHashTable, hid, 9, LocSteepMax);
     TimerStart(t, LocRate, true, @DisplaceUnitAction);
 }
-void DamageVisualDrawNumber(string LocNumber, float LocPosX, float LocPosY, string LocSuffix){
+void DamageVisualDrawNumber(string LocNumber, float LocPosX, float LocPosY, string LocSuffix)
+{
     DestroyEffect(AddSpecialEffect("DamageSystemVisual\\Number_" + LocNumber + LocSuffix + ".mdx", LocPosX, LocPosY));
 }
-float DamageVisualGetPosition(float GraphicSpacement, float LocInitPos, int LocActual, int LocFinal, float LocRatio){
+float DamageVisualGetPosition(float GraphicSpacement, float LocInitPos, int LocActual, int LocFinal, float LocRatio)
+{
     return LocInitPos - (GraphicSpacement * LocRatio * (LocFinal / 2)) + (GraphicSpacement * LocRatio * LocActual);
 }
-void DamageVisualDrawNumberAction(unit LocSource, unit LocTarget, float LocAmount){
-float GraphicSpacement = 70.f;
-float LocPosX = GetUnitX(LocTarget);
-float LocPosY = GetUnitY(LocTarget) + GetUnitFlyHeight(LocTarget) + 150;
-string LocNumbers = I2S(R2I(LocAmount));
-int LocSize = StringLength(LocNumbers);
-float LocNewPosX = 0;
-string LocSuffix = "";
-float LocRatio = 0;
-int index = 0;
-    if (LocAmount >= 5000){
+void DamageVisualDrawNumberAction(unit LocSource, unit LocTarget, float LocAmount)
+{
+    float GraphicSpacement = 70.f;
+    float LocPosX = GetUnitX(LocTarget);
+    float LocPosY = GetUnitY(LocTarget) + GetUnitFlyHeight(LocTarget) + 150;
+    string LocNumbers = I2S(R2I(LocAmount));
+    int LocSize = StringLength(LocNumbers);
+    float LocNewPosX = 0;
+    string LocSuffix = "";
+    float LocRatio = 0;
+    int index = 0;
+    if (LocAmount >= 5000)
+    {
         LocSuffix = "_Large";
         LocRatio = 1.3f;
     }
-    else if (LocAmount >= 500){
+    else if (LocAmount >= 500)
+    {
         LocSuffix = "";
         LocRatio = 1.0f;
     }
-    else {
-            LocSuffix = "_Small";
-            LocRatio = 0.7f;
-        }
+    else
+    {
+        LocSuffix = "_Small";
+        LocRatio = 0.7f;
+    }
 
     index = - 1;
-    while (true) {
+    while (true)
+    {
         index = index + 1;
         if (index > LocSize - 1) break;
         LocNewPosX = DamageVisualGetPosition(GraphicSpacement, LocPosX, index, LocSize, LocRatio);
-        if (IsUnitInvisible(LocTarget, GetOwningPlayer(LocSource)) == false){
+        if (IsUnitInvisible(LocTarget, GetOwningPlayer(LocSource)) == false)
+        {
             DamageVisualDrawNumber(SubString(LocNumbers, index, index + 1), LocNewPosX, LocPosY, LocSuffix);
         }
     }
 }
-void AkamePoisonDamage(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 10 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) + .1f * GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("B006")) > 0){
+void AkamePoisonDamage()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 10 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) + .1f * GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iTarget), 'B006' ) > 0)
+    {
         DamageTargetACF(DummyUnitDamageArr[GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
     }
-    else {
+    else
+    {
         FlushChildHashtable(GameHashTable, hid);
         DestroyTimer(GetExpiredTimer());
     }
 }
-void AkamePoisonCheck(unit LocTrigUnit, unit LocTargUnit){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void AkamePoisonCheck(unit LocTrigUnit, unit LocTargUnit)
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveUnitHandle(GameHashTable, hid, iCaster, LocTrigUnit);
     SaveUnitHandle(GameHashTable, hid, iTarget, LocTargUnit);
     TimerStart(tmr, 1, true, @AkamePoisonDamage);
@@ -1246,7 +1348,7 @@ void OnPlayerUnitDamaged()
         unit Source = GetEventDamageSource();
         unit Target = GetTriggerUnit();
         int LocID = GetUnitTypeId(Target);
-        
+
         float Multiplier = 1;
         float DealtTrigDmg = 0;
         float DmgMult = 0;
@@ -1255,53 +1357,60 @@ void OnPlayerUnitDamaged()
         DisableTrigger( t );
         if ( GetEventIsAttack( ) )
         {
-            if ( LocID == FourCC("n000") && ( GetUnitTypeId(Source) == FourCC( "base" ) || IsUnitType( Source, UNIT_TYPE_HERO ) ) )
+            if ( LocID == 'n000' && ( GetUnitTypeId(Source) == 'base' || IsUnitType( Source, UNIT_TYPE_HERO ) ) )
             {
                 SetUnitPosition(KawarimiTriggerUnitArray[GetPlayerId(GetOwningPlayer(Target))], GetUnitX(Source), GetUnitY(Source));
-                UnitApplyTimedLife(Target, FourCC("BOmi"), .01f);
+                UnitApplyTimedLife(Target, 'BOmi', .01f);
             }
 
-            if ( GetUnitTypeId( Source ) == FourCC("H00G") )
+            if ( GetUnitTypeId( Source ) == 'H00G' )
             {
-                if (GetUnitAbilityLevel(Target, FourCC("B006")) <= 0)
+                if (GetUnitAbilityLevel(Target, 'B006' ) <= 0)
                 {
                     AkamePoisonCheck(Source, Target);
                 }
                 IssueTargetOrder(DummyUnitDamageArr[GetPlayerId(GetOwningPlayer(Source))], "slow", Target);
             }
-            else if (GetUnitTypeId(Source) == FourCC("H00K"))
+            else if (GetUnitTypeId(Source) == 'H00K' )
             {
                 SetUnitCurrentLife(Source, SourceDmg * .15f + GetUnitCurrentLife(Source));
             }
 
-            if (GetUnitAbilityLevel(Source, FourCC("B002")) > 0 || GetUnitAbilityLevel(Source, FourCC("B000")) > 0)
+            if (GetUnitAbilityLevel(Source, 'B002' ) > 0 || GetUnitAbilityLevel(Source, 'B000' ) > 0)
             {
-                if (GetUnitAbilityLevel(Source, FourCC("B002")) > 0){
+                if (GetUnitAbilityLevel(Source, 'B002' ) > 0)
+                {
                     DmgMult = 10;
                 }
-                if (GetUnitAbilityLevel(Source, FourCC("B000")) > 0){
+                if (GetUnitAbilityLevel(Source, 'B000' ) > 0)
+                {
                     DmgMult = 20;
                 }
-                if (HasPersonalItemACF(Source)){
+                if (HasPersonalItemACF(Source))
+                {
                     DmgMult = DmgMult + DmgMult / 2;
                     LocReqHP = 10;
                 }
-                else {
+                else
+                {
                     LocReqHP = 5;
                 }
                 DealtTrigDmg = GetHeroLevel(Source) * DmgMult + GetHeroInt(Source, true) * DmgMult / 100;
-                if (GetUnitStatePercentRW(Target, UNIT_STATE_LIFE, UNIT_STATE_MAX_LIFE) <= LocReqHP && Target != MainBossUnit1){
-                    if (GetUnitAbilityLevel(Source, FourCC("B002")) > 0){
-                        UnitRemoveAbility(Source, FourCC("A02X"));
-                        UnitAddAbility(Source, FourCC("A02X"));
-                        UnitRemoveAbility(Source, FourCC("B002"));
+                if (GetUnitStatePercentRW(Target, UNIT_STATE_LIFE, UNIT_STATE_MAX_LIFE) <= LocReqHP && Target != MainBossUnit1)
+                {
+                    if (GetUnitAbilityLevel(Source, 'B002' ) > 0)
+                    {
+                        UnitRemoveAbility(Source, 'A02X' );
+                        UnitAddAbility(Source, 'A02X' );
+                        UnitRemoveAbility(Source, 'B002' );
                     }
-                    if (GetUnitAbilityLevel(Source, FourCC("B000")) > 0){
-                        UnitRemoveAbility(Source, FourCC("A035"));
-                        UnitAddAbility(Source, FourCC("A035"));
-                        UnitRemoveAbility(Source, FourCC("B000"));
+                    if (GetUnitAbilityLevel(Source, 'B000' ) > 0)
+                    {
+                        UnitRemoveAbility(Source, 'A035' );
+                        UnitAddAbility(Source, 'A035' );
+                        UnitRemoveAbility(Source, 'B000' );
                     }
-                    CreateUnit(GetOwningPlayer(Source), FourCC("u00J"), GetUnitX(Target), GetUnitY(Target), 270);
+                    CreateUnit(GetOwningPlayer(Source), 'u00J' , GetUnitX(Target), GetUnitY(Target), 270);
                     DealtTrigDmg = 100000000;
                     DestroyEffect(AddSpecialEffect("GeneralEffects\\BloodEffect1.mdx", GetUnitX(Target), GetUnitY(Target)));
                     DestroyEffect(AddSpecialEffect("GeneralEffects\\26.mdx", GetUnitX(Target), GetUnitY(Target)));
@@ -1309,18 +1418,21 @@ void OnPlayerUnitDamaged()
 
                 SetEventDamage( GetEventDamage( ) + DealtTrigDmg );
             }
-            if (GetUnitTypeId(Source) == FourCC("H00J") && GetRandomInt(0, 100) <= 15){
+            if (GetUnitTypeId(Source) == 'H00J'  && GetRandomInt(0, 100) <= 15)
+            {
                 DealtTrigDmg = GetHeroLevel(Source) * 50 + GetHeroInt(Source, true);
-                GlobalUnit = CreateUnit(GetOwningPlayer(Source), FourCC("u00E"), GetUnitX(Source), GetUnitY(Source), GetRandomReal(0, 360));
+                GlobalUnit = CreateUnit(GetOwningPlayer(Source), 'u00E', GetUnitX(Source), GetUnitY(Source), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 1.5f, .3f);
-                GlobalUnit = CreateUnit(GetOwningPlayer(Source), FourCC("u00L"), GetUnitX(Source), GetUnitY(Source), AngleBetweenUnits(Source, Target));
+                GlobalUnit = CreateUnit(GetOwningPlayer(Source), 'u00L', GetUnitX(Source), GetUnitY(Source), AngleBetweenUnits(Source, Target));
                 SetUnitScaleAndTime(GlobalUnit, 1.5f, .3f);
                 DisplaceUnitWithArgs(Target, AngleBetweenUnits(Source, Target), 200, .25f, .01f, 0);
                 SetEventDamage( GetEventDamage( ) + DealtTrigDmg );
                 //DamageTargetACF(Source, Target, DealtTrigDmg);
             }
-            if (GetUnitTypeId(Source) == FourCC("H00H")){
-                if (IsUnitType(Target, UNIT_TYPE_HERO) == false){
+            if (GetUnitTypeId(Source) == 'H00H' )
+            {
+                if (IsUnitType(Target, UNIT_TYPE_HERO) == false)
+                {
                     DmgMult = 2;
                 }
                 DmgMult = 0.01f * Multiplier;
@@ -1333,18 +1445,18 @@ void OnPlayerUnitDamaged()
             }
         }
 
-        if (GetUnitTypeId(Source) == FourCC("base"))
+        if (GetUnitTypeId(Source) == 'base' )
         {
             SetEventDamage( GetEventDamage( ) + GetUnitMaxLife(Target) * .02f );
         }
 
-        SourceDmg = GetEventDamage(); // DealtTrigDmg + 
-        if (GetUnitTypeId(Source) != FourCC("base"))
+        SourceDmg = GetEventDamage(); // DealtTrigDmg +
+        if (GetUnitTypeId(Source) != 'base' )
         {
             DamageVisualDrawNumberAction(Source, Target, SourceDmg);
         }
 
-        if ( LocID == FourCC("tstu") )
+        if ( LocID == 'tstu'  )
         {
             SetEventDamage( .0f );
         }
@@ -1352,76 +1464,91 @@ void OnPlayerUnitDamaged()
         EnableTrigger( t );
     }
 }
-void SaberNeroHealthRegen(){
-int hid = GetHandleId(GetExpiredTimer());
-float MaxHP = GetUnitMaxLife(LoadUnitHandle(GameHashTable, hid, iCaster));
-float CurrentHP = GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster));
+void SaberNeroHealthRegen()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float MaxHP = GetUnitMaxLife(LoadUnitHandle(GameHashTable, hid, iCaster));
+    float CurrentHP = GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster));
     SetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster), (MaxHP - CurrentHP) * .04f + CurrentHP);
 }
-void EnteringUnitCheckAction(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-unit Unit = GetEnteringUnit();
-player TrigPlayer = GetOwningPlayer(Unit);
-int ID = GetPlayerId(TrigPlayer);
-    if (IsUnitType(Unit, UNIT_TYPE_HERO) && Unit != MainBossUnit1){
-        if (GetUnitTypeId(Unit) == FourCC("H00E")){
+void EnteringUnitCheckAction()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    unit Unit = GetEnteringUnit();
+    player TrigPlayer = GetOwningPlayer(Unit);
+    int ID = GetPlayerId(TrigPlayer);
+    if (IsUnitType(Unit, UNIT_TYPE_HERO) && Unit != MainBossUnit1)
+    {
+        if (GetUnitTypeId(Unit) == 'H00E' )
+        {
             SaveUnitHandle(GameHashTable, hid, iCaster, MUnitArray[ID]);
             TimerStart(tmr, 1, true, @SaberNeroHealthRegen);
         }
     }
 }
-void ReviveSystemTriggerFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-unit ReviveSystemLocalUnit1 = LoadUnitHandle(GameHashTable, hid, 0);
-int ReviveUnitID = LoadInteger(GameHashTable, hid, 1);
-bool RevInt = false;
-    if (GetPlayerTeam(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, 0))) == 0){
+void ReviveSystemTriggerFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    unit ReviveSystemLocalUnit1 = LoadUnitHandle(GameHashTable, hid, 0);
+    int ReviveUnitID = LoadInteger(GameHashTable, hid, 1);
+    bool RevInt = false;
+    if (GetPlayerTeam(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, 0))) == 0)
+    {
         RevInt = true;
     }
     DestroyEffect(LoadEffectHandle(GameHashTable, hid, 1));
     ReviveHero(ReviveSystemLocalUnit1, SwapAmount(4288, RevInt), - 576, true);
     SetUnitFlyHeight(ReviveSystemLocalUnit1, 0, 2000);
-    if (GetLocalPlayer() == GetOwningPlayer(ReviveSystemLocalUnit1)){
+    if (GetLocalPlayer() == GetOwningPlayer(ReviveSystemLocalUnit1))
+    {
         ClearSelection();
         PanCameraToTimed(SwapAmount(4288, RevInt), - 576, .2f);
         SelectUnit(ReviveSystemLocalUnit1, true);
     }
-    if (GetPlayerController(GetOwningPlayer(ReviveSystemLocalUnit1)) == MAP_CONTROL_COMPUTER){
+    if (GetPlayerController(GetOwningPlayer(ReviveSystemLocalUnit1)) == MAP_CONTROL_COMPUTER)
+    {
         IssuePointOrder(ReviveSystemLocalUnit1, "attack", GetRandomReal( - 1900.f, 1900.f), GetRandomReal( - 1200.f, 200.f));
     }
     PauseTimer(GetExpiredTimer());
     FlushChildHashtable(GameHashTable, hid);
     DestroyTimer(GetExpiredTimer());
 }
-void ReviveSystemAction(){
-timer ReviveSystemLocalTimer1 = CreateTimer();
-int hid = GetHandleId(ReviveSystemLocalTimer1);
-    if (IsUnitType(GetDyingUnit(), UNIT_TYPE_HERO) && GetPlayerSlotState(GetTriggerPlayer()) == PLAYER_SLOT_STATE_PLAYING && GetPlayerId(GetTriggerPlayer()) < 12){
+void ReviveSystemAction()
+{
+    timer ReviveSystemLocalTimer1 = CreateTimer();
+    int hid = GetHandleId(ReviveSystemLocalTimer1);
+    if (IsUnitType(GetDyingUnit(), UNIT_TYPE_HERO) && GetPlayerSlotState(GetTriggerPlayer()) == PLAYER_SLOT_STATE_PLAYING && GetPlayerId(GetTriggerPlayer()) < 12)
+    {
         SaveUnitHandle(GameHashTable, hid, 0, GetTriggerUnit());
         SaveEffectHandle(GameHashTable, hid, 1, AddSpecialEffect("GeneralEffects\\UnitEffects\\DeathIndicator.mdl", GetUnitX(GetDyingUnit()), GetUnitY(GetDyingUnit()) + 300));
         TimerStart(ReviveSystemLocalTimer1, 4, false, @ReviveSystemTriggerFunction3);
     }
-    else {
+    else
+    {
         DestroyTimer(ReviveSystemLocalTimer1);
     }
 }
-void AbilityTextTagCreationAction(){
-texttag TextTag = CreateTextTag();
-float speed = 100.f;
-float angle = 90.f;
-float size = 13.f;
-float vel = speed * 0.071f / 128.f;
-float xvel = vel * Cos( Deg2Rad( angle ) );
-float yvel = vel * Sin( Deg2Rad( angle ) );
-float textHeight = size * 0.023f / 10.f;
-    if (GetSpellAbilityId() == FourCC("A021") || GetSpellAbilityId() == FourCC("A00X")){
+void AbilityTextTagCreationAction()
+{
+    texttag TextTag = CreateTextTag();
+    float speed = 100.f;
+    float angle = 90.f;
+    float size = 13.f;
+    float vel = speed * 0.071f / 128.f;
+    float xvel = vel * Cos( Deg2Rad( angle ) );
+    float yvel = vel * Sin( Deg2Rad( angle ) );
+    float textHeight = size * 0.023f / 10.f;
+    if (GetSpellAbilityId() == 'A021'  || GetSpellAbilityId() == 'A00X' )
+    {
     }
-    else {
-        UnitRemoveAbility(GetTriggerUnit(), FourCC("B018"));
-        UnitRemoveAbility(GetTriggerUnit(), FourCC("Binv"));
+    else
+    {
+        UnitRemoveAbility(GetTriggerUnit(), 'B018' );
+        UnitRemoveAbility(GetTriggerUnit(), 'Binv' );
     }
-    if (IsUnitType(GetTriggerUnit(), UNIT_TYPE_HERO) && GetSpellAbilityId() != FourCC("A055") && GetSpellAbilityId() != FourCC("A01S")){
+    if (IsUnitType(GetTriggerUnit(), UNIT_TYPE_HERO) && GetSpellAbilityId() != 'A055'  && GetSpellAbilityId() != 'A01S' )
+    {
         SetTextTagText(TextTag, GetObjectName(GetSpellAbilityId()), textHeight);
         SetTextTagColor(TextTag, 255, 0, 0, 100);
         SetTextTagPosUnit(TextTag, GetTriggerUnit(), 50);
@@ -1431,14 +1558,17 @@ float textHeight = size * 0.023f / 10.f;
         SetTextTagFadepoint(TextTag, .25f);
     }
 }
-void BossCheckFunction1(){
-    if ( ! (GetUnitX(MainBossUnit1) >=  - 544.f && GetUnitX(MainBossUnit1) <= 544.f && GetUnitY(MainBossUnit1) >=  - 4100.f && GetUnitY(MainBossUnit1) <=  - 2800.f)){
+void BossCheckFunction1()
+{
+    if ( ! (GetUnitX(MainBossUnit1) >=  - 544.f && GetUnitX(MainBossUnit1) <= 544.f && GetUnitY(MainBossUnit1) >=  - 4100.f && GetUnitY(MainBossUnit1) <=  - 2800.f))
+    {
         DestroyEffect(AddSpecialEffect("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(MainBossUnit1), GetUnitY(MainBossUnit1)));
         SetUnitPosition(MainBossUnit1, 0.f, - 3850.f);
     }
 }
-void BossCheckInit(){
-    TimerStart(CreateTimer(), 1, true, @BossCheckFunction1);
+void BossCheckInit()
+{
+    TimerStart(CreateTimer(), 1.f, true, @BossCheckFunction1);
 }
 void MultiBoardCreationFunction1()
 {
@@ -1458,7 +1588,7 @@ void MultiBoardCreationFunction1()
     MultiboardReleaseItem(MBItem);
     int i = 0;
     int j = 0;
-    while (true) 
+    while (true)
     {
         if (i > 9) break;
         MBItem = MultiboardGetItem(MainMultiboard, i, 0);
@@ -1470,7 +1600,8 @@ void MultiBoardCreationFunction1()
         MBItem = MultiboardGetItem(MainMultiboard, i, 2);
         MultiboardSetItemWidth(MBItem, 4 / 100.0f);
         MultiboardReleaseItem(MBItem);
-        if (i == 0 || i == 5){
+        if (i == 0 || i == 5)
+        {
             MBItem = MultiboardGetItem(MainMultiboard, i, 1);
             MultiboardSetItemValue(MBItem, "0");
             MultiboardReleaseItem(MBItem);
@@ -1484,12 +1615,15 @@ void MultiBoardCreationFunction1()
             MultiboardSetItemIcon(MBItem, "ReplaceableTextures\\CommandButtons\\BTNDeathCoil.blp");
             MultiboardReleaseItem(MBItem);
         }
-        if (i != 0 && i != 5){
+        if (i != 0 && i != 5)
+        {
             MBItem = MultiboardGetItem(MainMultiboard, i, 0);
-            if (GetPlayerSlotState(Player(j)) == PLAYER_SLOT_STATE_PLAYING){
+            if (GetPlayerSlotState(Player(j)) == PLAYER_SLOT_STATE_PLAYING)
+            {
                 MultiboardSetItemValue(MBItem, PlayerColoredNameArray[j] + "|r");
             }
-            else {
+            else
+            {
                 MultiboardSetItemValue(MBItem, PlayerColorStringArray[j] + "- Empty Slot -|r");
             }
             MultiboardSetItemIcon(MBItem, "UI\\Widgets\\Console\\Human\\CommandButton\\human-button-lvls-overlay.blp");
@@ -1563,27 +1697,32 @@ void InGameTimerAction()
     MultiboardSetItemValue( mbitem, I2S( hours ) + ":" + I2S( mins ) + ":" + I2S( secs ) );
     MultiboardReleaseItem( mbitem );
 }
-bool RegisterHeroDeathCondition(){
+bool RegisterHeroDeathCondition()
+{
     return IsUnitType(GetDyingUnit(), UNIT_TYPE_HERO) && IsUnitAlly(GetKillingUnit(), GetOwningPlayer(GetDyingUnit())) != true && GetOwningPlayer(GetDyingUnit()) != Player(PLAYER_NEUTRAL_AGGRESSIVE);
 }
-void RegisterHeroDeathAction(){
-int FirstIndex = 0;
-int SecondIndex = 0;
-int FirstID = 0;
-int SecondID = 0;
-int KillingID = 1 + GetPlayerId(GetOwningPlayer(GetKillingUnit()));
-int DyingID = 1 + GetPlayerId(GetOwningPlayer(GetDyingUnit()));
-    if (GetPlayerTeam(GetOwningPlayer(GetDyingUnit())) == 0){
+void RegisterHeroDeathAction()
+{
+    int FirstIndex = 0;
+    int SecondIndex = 0;
+    int FirstID = 0;
+    int SecondID = 0;
+    int KillingID = 1 + GetPlayerId(GetOwningPlayer(GetKillingUnit()));
+    int DyingID = 1 + GetPlayerId(GetOwningPlayer(GetDyingUnit()));
+    if (GetPlayerTeam(GetOwningPlayer(GetDyingUnit())) == 0)
+    {
         FirstIndex = 5;
         FirstID = 1;
         KillingID = KillingID + 1;
     }
-    else {
+    else
+    {
         SecondIndex = 5;
         SecondID = 1;
         DyingID = DyingID + 1;
     }
-    if (GetOwningPlayer(GetKillingUnit()) != Player(PLAYER_NEUTRAL_AGGRESSIVE) && GetUnitTypeId(GetKillingUnit()) != FourCC("base")){
+    if (GetOwningPlayer(GetKillingUnit()) != Player(PLAYER_NEUTRAL_AGGRESSIVE) && GetUnitTypeId(GetKillingUnit()) != 'base' )
+    {
         DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 5, PlayerColoredNameArray[GetPlayerId(GetOwningPlayer(GetKillingUnit()))] + " |c008080c0Killed|r " + PlayerColoredNameArray[GetPlayerId(GetOwningPlayer(GetDyingUnit()))]);
         KillingUnitIntegerArray[KillingID] = KillingUnitIntegerArray[KillingID] + 1;
         MBItem = MultiboardGetItem(MainMultiboard, KillingID, 1);
@@ -1604,79 +1743,100 @@ int DyingID = 1 + GetPlayerId(GetOwningPlayer(GetDyingUnit()));
     MultiboardReleaseItem(MBItem);
     MultiboardSetTitleText(MainMultiboard, "|Cff00ff00Scoreboard|r |c00ff0000" + I2S(TeamKills[0]) + "|r/|c000000ff" + I2S(TeamKills[1]) + "|r");
 }
-void KillSelectionDialogAction(){
-int i = 0;
-    while (true) {
+void KillSelectionDialogAction()
+{
+    int i = 0;
+    while (true)
+    {
         if (i > 8) break;
-        if (GetClickedButton() == SameHeroModeButtonArray[i]){
+        if (GetClickedButton() == SameHeroModeButtonArray[i])
+        {
             MBArr1[i] = MBArr1[i] + 1;
         }
         i = i + 1;
     }
 }
-void KillSelectionTimerExpireAction(){
-int MaxVotes = 0;
-int TotalVotes = 0;
-int MaxVotesID = 0;
-int index = 0;
-bool VotesTied = false;
+void KillSelectionTimerExpireAction()
+{
+    int MaxVotes = 0;
+    int TotalVotes = 0;
+    int MaxVotesID = 0;
+    int index = 0;
+    bool VotesTied = false;
     DialogShow(KillSelectionDialog, false);
     DialogClear(KillSelectionDialog);
     DialogDestroy(KillSelectionDialog);
     TimerDialogDisplay(ModeSelectionTD, false);
     DestroyTimerDialog(ModeSelectionTD);
     MultiboardDisplay(MainMultiboard, true);
-    while (true) {
+    while (true)
+    {
         if (index > 8) break;
-        if (MBArr1[index] > 0){
+        if (MBArr1[index] > 0)
+        {
             TotalVotes = TotalVotes + 1;
         }
-        if (MBArr1[index] == MaxVotes){
+        if (MBArr1[index] == MaxVotes)
+        {
             VotesTied = true;
         }
-        if (MBArr1[index] > MaxVotes){
+        if (MBArr1[index] > MaxVotes)
+        {
             MaxVotes = MBArr1[index];
             MaxVotesID = index;
             VotesTied = false;
         }
         index = index + 1;
     }
-    if (MaxVotesID == 0){
+    if (MaxVotesID == 0)
+    {
         KillLimitInteger1 = 20 * GetRandomInt(1, 7);
     }
-    else if (MaxVotesID == 8){
+    else if (MaxVotesID == 8)
+    {
         KillLimitInteger1 = 999999999;
     }
-    else if (MaxVotesID != 0 && MaxVotesID != 8){
-            KillLimitInteger1 = 20 * MaxVotesID;
-        }
-    if (VotesTied == true || TotalVotes <= 0){
-        if (TotalPlayers == 1 || TeamPlayers[0] == 0 || TeamPlayers[1] == 0){
+    else if (MaxVotesID != 0 && MaxVotesID != 8)
+    {
+        KillLimitInteger1 = 20 * MaxVotesID;
+    }
+    if (VotesTied == true || TotalVotes <= 0)
+    {
+        if (TotalPlayers == 1 || TeamPlayers[0] == 0 || TeamPlayers[1] == 0)
+        {
             KillLimitInteger1 = 999999999;
         }
-        if (TeamPlayers[0] == 1 && TeamPlayers[1] == 1){
+        if (TeamPlayers[0] == 1 && TeamPlayers[1] == 1)
+        {
             KillLimitInteger1 = 20;
         }
-        if ((TeamPlayers[0] == 1 && TeamPlayers[1] == 2) || (TeamPlayers[0] == 2 && TeamPlayers[1] == 1)){
+        if ((TeamPlayers[0] == 1 && TeamPlayers[1] == 2) || (TeamPlayers[0] == 2 && TeamPlayers[1] == 1))
+        {
             KillLimitInteger1 = 40;
         }
-        if (TeamPlayers[0] == 2 && TeamPlayers[1] == 2){
+        if (TeamPlayers[0] == 2 && TeamPlayers[1] == 2)
+        {
             KillLimitInteger1 = 60;
         }
-        if ((TeamPlayers[0] == 2 && TeamPlayers[1] == 3) || (TeamPlayers[0] == 3 && TeamPlayers[1] == 2)){
+        if ((TeamPlayers[0] == 2 && TeamPlayers[1] == 3) || (TeamPlayers[0] == 3 && TeamPlayers[1] == 2))
+        {
             KillLimitInteger1 = 80;
         }
-        if (TeamPlayers[0] == 3 && TeamPlayers[1] == 3){
+        if (TeamPlayers[0] == 3 && TeamPlayers[1] == 3)
+        {
             KillLimitInteger1 = 100;
         }
-        if ((TeamPlayers[0] == 3 && TeamPlayers[1] == 4) || (TeamPlayers[0] == 4 && TeamPlayers[1] == 3)){
+        if ((TeamPlayers[0] == 3 && TeamPlayers[1] == 4) || (TeamPlayers[0] == 4 && TeamPlayers[1] == 3))
+        {
             KillLimitInteger1 = 120;
         }
-        if (TeamPlayers[0] == 4 && TeamPlayers[1] == 4){
+        if (TeamPlayers[0] == 4 && TeamPlayers[1] == 4)
+        {
             KillLimitInteger1 = 140;
         }
     }
-    if (TotalVotes > 0){
+    if (TotalVotes > 0)
+    {
         DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "
 		|cFFFFCC00Votes for |c0000ffff[Random]|r|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[0]) + "|r
 		|cFFFFCC00Votes for |c0000ffff[20 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[1]) + "|r
@@ -1689,11 +1849,13 @@ bool VotesTied = false;
 		|cFFFFCC00Votes for |c0000ffff[Unlimited Kills]|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[8]) + "|r");
     }
     MBItem = MultiboardGetItem(MainMultiboard, 10, 0);
-    if (KillLimitInteger1 <= 140){
+    if (KillLimitInteger1 <= 140)
+    {
         DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|cFFFFCC00Kill Limit is:|r |c0000ffff[" + I2S(KillLimitInteger1) + "]|r |cFFFFCC00Kills|r");
         MultiboardSetItemValue(MBItem, "Kills: " + I2S(KillLimitInteger1));
     }
-    else {
+    else
+    {
         DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|cFFFFCC00Kill Limit is:|r |c0000ffff[Unlimited]|r |cFFFFCC00Kills.|r");
         MultiboardSetItemValue(MBItem, "Kills: Unlimited");
     }
@@ -1704,7 +1866,8 @@ bool VotesTied = false;
     MultiboardDisplay(MainMultiboard, true);
     TimerStart(CreateTimer(), 1, true, @InGameTimerAction);
 }
-void KillSelectionAction(){
+void KillSelectionAction()
+{
     DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|c0000ffffAttention to All Players!
 
 	You have 5 seconds to choose desirable Kill Limit");
@@ -1724,15 +1887,19 @@ void KillSelectionAction(){
     SameHeroModeButtonArray[8] = DialogAddButton(KillSelectionDialog, "Unlimited Kills", 0);
     DialogShow(KillSelectionDialog, true);
 }
-void ModeSelectionFunction2(){
-    if (GetClickedButton() == SameHeroModeButtonArray[10]){
+void ModeSelectionFunction2()
+{
+    if (GetClickedButton() == SameHeroModeButtonArray[10])
+    {
         MBArr1[10] = MBArr1[10] + 1;
     }
-    if (GetClickedButton() == SameHeroModeButtonArray[11]){
+    if (GetClickedButton() == SameHeroModeButtonArray[11])
+    {
         MBArr1[11] = MBArr1[11] + 1;
     }
 }
-void ModeSelectionFunction3(){
+void ModeSelectionFunction3()
+{
     DialogShow(ModeSelectionDialog, false);
     DialogClear(ModeSelectionDialog);
     DialogDestroy(ModeSelectionDialog);
@@ -1740,16 +1907,19 @@ void ModeSelectionFunction3(){
     MultiboardDisplay(MainMultiboard, true);
     DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|cFFFFCC00Same Hero Mode Results:
 	For:|r |c0000ffff" + I2S(MBArr1[10]) + "|r |cFFFFCC00Against:|r |c0000ffff" + I2S(MBArr1[11]) + "|r" );
-    if (MBArr1[10] > MBArr1[11]){
+    if (MBArr1[10] > MBArr1[11])
+    {
         SameHeroBoolean = true;
         DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|c0000FF00Same Hero Mode Enabled!");
     }
-    else {
+    else
+    {
         DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|c00ff0000Same Hero Mode Disabled!");
     }
     TimerStart(KillSelectionTimer, 1, false, @KillSelectionAction);
 }
-void ModeSelectionFunction1(){
+void ModeSelectionFunction1()
+{
     timer tmr = CreateTimer();
     DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|c00FFFF00Hero Selection is disabled
 	To enable it:
@@ -1763,16 +1933,20 @@ void ModeSelectionFunction1(){
     DialogShow(ModeSelectionDialog, true);
     TimerStart( tmr, 5, false, @ModeSelectionFunction3);
 }
-void DecideWinnersAction(){
-int index = 0;
-    while (true) {
+void DecideWinnersAction()
+{
+    int index = 0;
+    while (true)
+    {
         if (index > 7) break;
-        if (GetPlayerSlotState(Player(index)) == PLAYER_SLOT_STATE_PLAYING){
+        if (GetPlayerSlotState(Player(index)) == PLAYER_SLOT_STATE_PLAYING)
+        {
             if (GetPlayerTeam(Player(index)) == I_WinningTeam )
             {
                 RemovePlayer(Player(index), PLAYER_GAME_RESULT_VICTORY);
             }
-            else {
+            else
+            {
                 RemovePlayer(Player(index), PLAYER_GAME_RESULT_DEFEAT);
             }
         }
@@ -1780,15 +1954,19 @@ int index = 0;
     }
     EndGame(true);
 }
-void GameEndUnitPauseFunction(){
-bool RevInt = false;
-int index = 0;
-    while (true) {
+void GameEndUnitPauseFunction()
+{
+    bool RevInt = false;
+    int index = 0;
+    while (true)
+    {
         if (index > 7) break;
-        if (GetLocalPlayer() == GetOwningPlayer(MUnitArray[index])){
+        if (GetLocalPlayer() == GetOwningPlayer(MUnitArray[index]))
+        {
             PanCameraToTimed(GetUnitX(MUnitArray[index]), GetUnitY(MUnitArray[index]), 0);
         }
-        if (GetPlayerTeam(Player(index)) == 1){
+        if (GetPlayerTeam(Player(index)) == 1)
+        {
             RevInt = true;
         }
         SetUnitPosition(MUnitArray[index], SwapAmount( - 800, RevInt), 1536.f);
@@ -1798,10 +1976,12 @@ int index = 0;
         index = index + 1;
     }
 }
-void PrepareFinishGameAction(int LocTeam){
-bool RevInt = true;
+void PrepareFinishGameAction(int LocTeam)
+{
+    bool RevInt = true;
     I_WinningTeam = LocTeam;
-    if (LocTeam == 0){
+    if (LocTeam == 0)
+    {
         RevInt = false;
     }
     TextTagCreate("|c0000FF00Winners!|r", SwapAmount( - 800, RevInt), 1700.f, 0, 20, 255, 255, 255, 0);
@@ -1809,27 +1989,34 @@ bool RevInt = true;
     TimerStart(CreateTimer(), 1, true, @GameEndUnitPauseFunction);
     TimerStart(CreateTimer(), 10, false, @DecideWinnersAction);
 }
-bool WinGameEndCondition1(){
+bool WinGameEndCondition1()
+{
     return TeamKills[0] >= KillLimitInteger1 || TeamKills[1] >= KillLimitInteger1;
 }
-void WinGameEndFunction1(){
-    if (TeamKills[0] >= KillLimitInteger1){
+void WinGameEndFunction1()
+{
+    if (TeamKills[0] >= KillLimitInteger1)
+    {
         PrepareFinishGameAction(0);
     }
-    if (TeamKills[1] >= KillLimitInteger1){
+    if (TeamKills[1] >= KillLimitInteger1)
+    {
         PrepareFinishGameAction(1);
     }
 }
-void BossKillFunction1(){
+void BossKillFunction1()
+{
     DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 10, PlayerColoredNameArray[GetPlayerId(GetOwningPlayer(GetKillingUnit()))] + " |c008080c0Killed|r " + "|c0000FF00" + GetHeroProperName(GetDyingUnit()));
     PrepareFinishGameAction(GetPlayerTeam(GetOwningPlayer(GetKillingUnit())));
 }
-void RegisterPlayerLeaveAction(){
-int PlayerID = GetPlayerId(GetTriggerPlayer());
-int ID = PlayerID + 1;
-int TeamID = GetPlayerTeam(GetTriggerPlayer());
-int LocRecievedGold = GetPlayerState(GetTriggerPlayer(), PLAYER_STATE_RESOURCE_GOLD) / (TeamPlayers[TeamID] - 1);
-    if (TeamID == 1){
+void RegisterPlayerLeaveAction()
+{
+    int PlayerID = GetPlayerId(GetTriggerPlayer());
+    int ID = PlayerID + 1;
+    int TeamID = GetPlayerTeam(GetTriggerPlayer());
+    int LocRecievedGold = GetPlayerState(GetTriggerPlayer(), PLAYER_STATE_RESOURCE_GOLD) / (TeamPlayers[TeamID] - 1);
+    if (TeamID == 1)
+    {
         ID = ID + 1;
     }
     MBItem = MultiboardGetItem(MainMultiboard, ID, 0);
@@ -1841,46 +2028,59 @@ int LocRecievedGold = GetPlayerState(GetTriggerPlayer(), PLAYER_STATE_RESOURCE_G
     DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 5, PlayerColoredNameArray[PlayerID] + "|r Has left the game!");
     RemoveUnit(MUnitArray[PlayerID]);
     RemovePlayer(GetTriggerPlayer(), PLAYER_GAME_RESULT_DEFEAT);
-    while (true) {
+    while (true)
+    {
         if (ID > 7) break;
-        if (GetPlayerSlotState(Player(ID)) == PLAYER_SLOT_STATE_PLAYING && IsPlayerAlly(GetTriggerPlayer(), Player(ID))){
+        if (GetPlayerSlotState(Player(ID)) == PLAYER_SLOT_STATE_PLAYING && IsPlayerAlly(GetTriggerPlayer(), Player(ID)))
+        {
             SetPlayerState(Player(ID), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(Player(ID), PLAYER_STATE_RESOURCE_GOLD) + LocRecievedGold);
         }
         ID = ID + 1;
     }
     DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Each player in Team " + I2S(TeamID + 1) + " has received |cFFFFCC00" + I2S(LocRecievedGold) + "|r gold from a leaver.");
-    if (TeamPlayers[TeamID] == 0){
-        if (TeamID == 0){
+    if (TeamPlayers[TeamID] == 0)
+    {
+        if (TeamID == 0)
+        {
             ID = 1;
         }
-        else {
+        else
+        {
             ID = 0;
         }
         PrepareFinishGameAction(ID);
     }
 }
-void CreepAndIllusionRemoverAction(){
-    if (IsUnitType(GetEnteringUnit(), UNIT_TYPE_HERO) == false && IsUnitIllusion(GetEnteringUnit()) == false && IsUnitEnemy(GetEnteringUnit(), GetOwningPlayer(GetFilterUnit())) && GetOwningPlayer(GetEnteringUnit()) == Player(PLAYER_NEUTRAL_AGGRESSIVE)){
+void CreepAndIllusionRemoverAction()
+{
+    if (IsUnitType(GetEnteringUnit(), UNIT_TYPE_HERO) == false && IsUnitIllusion(GetEnteringUnit()) == false && IsUnitEnemy(GetEnteringUnit(), GetOwningPlayer(GetFilterUnit())) && GetOwningPlayer(GetEnteringUnit()) == Player(PLAYER_NEUTRAL_AGGRESSIVE))
+    {
         KillUnit(GetEnteringUnit());
     }
 }
-void DisableSharedUnitsAct(){
-int IndexA = 0;
-int IndexB = 0;
-    while (true) {
+void DisableSharedUnitsAct()
+{
+    int IndexA = 0;
+    int IndexB = 0;
+    while (true)
+    {
         if (IndexA > 11) break;
-        if (Player(IndexA) != Player(IndexB)){
+        if (Player(IndexA) != Player(IndexB))
+        {
             SetPlayerAlliance(Player(IndexA), Player(IndexB), ALLIANCE_SHARED_CONTROL, false);
         }
         IndexB = IndexB + 1;
-        if (IndexB > 11){
+        if (IndexB > 11)
+        {
             IndexB = 0;
             IndexA = IndexA + 1;
         }
     }
 }
-void MainBossStatBoostAction(){
-    if (IsUnitOwnedByPlayer(MainBossUnit1, Player(PLAYER_NEUTRAL_AGGRESSIVE)) && IsUnitType(GetDyingUnit(), UNIT_TYPE_HERO) && IsUnitEnemy(GetDyingUnit(), Player(PLAYER_NEUTRAL_AGGRESSIVE))){
+void MainBossStatBoostAction()
+{
+    if (IsUnitOwnedByPlayer(MainBossUnit1, Player(PLAYER_NEUTRAL_AGGRESSIVE)) && IsUnitType(GetDyingUnit(), UNIT_TYPE_HERO) && IsUnitEnemy(GetDyingUnit(), Player(PLAYER_NEUTRAL_AGGRESSIVE)))
+    {
         SetHeroStr(MainBossUnit1, GetHeroStr(MainBossUnit1, false) + GetHeroLevel(GetDyingUnit()) * 2, true);
         SetHeroAgi(MainBossUnit1, GetHeroAgi(MainBossUnit1, false) + GetHeroLevel(GetDyingUnit()) * 2, true);
         SetHeroInt(MainBossUnit1, GetHeroInt(MainBossUnit1, false) + GetHeroLevel(GetDyingUnit()) * 2, true);
@@ -1889,303 +2089,371 @@ void MainBossStatBoostAction(){
         DestroyEffect(AddSpecialEffect("Characters\\Arcueid\\ArcueidREffect2.mdl", GetUnitX(MainBossUnit1), GetUnitY(MainBossUnit1)));
     }
 }
-bool ShadowScrollItemUsageCondition(){
-    return GetItemTypeId(GetManipulatedItem()) == FourCC("I01T");
+bool ShadowScrollItemUsageCondition()
+{
+    return GetItemTypeId(GetManipulatedItem()) == 'I01T' ;
 }
-void ShadowScrollItemUsageAction1(){
-    SysItem = CreateItem(FourCC("I01U"), GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()));
-    SysUnit = CreateUnit(GetOwningPlayer(GetTriggerUnit()), FourCC("u000"), GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 270);
+void ShadowScrollItemUsageAction1()
+{
+    SysItem = CreateItem('I01U' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()));
+    SysUnit = CreateUnit(GetOwningPlayer(GetTriggerUnit()), 'u000' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 270);
     UnitAddItem(SysUnit, SysItem);
     UnitUseItemTarget(SysUnit, SysItem, GetTriggerUnit());
 }
-bool RedTabletUsageCondition(){
-    return GetItemTypeId(GetManipulatedItem()) == FourCC("I01S");
+bool RedTabletUsageCondition()
+{
+    return GetItemTypeId(GetManipulatedItem()) == 'I01S' ;
 }
-void RedTabletUsageAction(){
-    SysItem = CreateItem(FourCC("I00M"), GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()));
-    SysUnit = CreateUnit(GetOwningPlayer(GetTriggerUnit()), FourCC("u000"), GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 270);
+void RedTabletUsageAction()
+{
+    SysItem = CreateItem('I00M' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()));
+    SysUnit = CreateUnit(GetOwningPlayer(GetTriggerUnit()), 'u000' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 270);
     UnitAddItem(SysUnit, SysItem);
     UnitUseItemTarget(SysUnit, SysItem, GetTriggerUnit());
 }
-bool KunaiOfBouldersCondition(){
-    return GetSpellAbilityId() == FourCC("A00V");
+bool KunaiOfBouldersCondition()
+{
+    return GetSpellAbilityId() == 'A00V' ;
 }
-void KunaiOfBouldersAction(){
-int i = 0;
-    while (true) {
+void KunaiOfBouldersAction()
+{
+    int i = 0;
+    while (true)
+    {
         if (i > 9) break;
-        GlobalUnit = CreateUnit(GetOwningPlayer(GetTriggerUnit()), FourCC("n002"), GetSpellTargetX() + GetRandomReal( - 125, 125), GetSpellTargetY() + GetRandomReal( - 125, 125), GetRandomReal(0, 360));
-        UnitRemoveAbility(GlobalUnit, FourCC("Aatk"));
-        UnitRemoveAbility(GlobalUnit, FourCC("Amov"));
+        GlobalUnit = CreateUnit(GetOwningPlayer(GetTriggerUnit()), 'n002' , GetSpellTargetX() + GetRandomReal( - 125, 125), GetSpellTargetY() + GetRandomReal( - 125, 125), GetRandomReal(0, 360));
+        UnitRemoveAbility(GlobalUnit, 'Aatk' );
+        UnitRemoveAbility(GlobalUnit, 'Amov' );
         i = i + 1;
     }
 }
-void TopLeftSpawnNewBossAction(){
+void TopLeftSpawnNewBossAction()
+{
     GroupAddUnit( GR_LeftSide, CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), BossIDArray[LeftBosses], - 2200.f, 2800.f, 270));
     DestroyTimer(GetExpiredTimer());
 }
-void TopRightSpawnNewBossAction(){
+void TopRightSpawnNewBossAction()
+{
     GroupAddUnit( GR_RightSide, CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), BossIDArray[RightBosses], 2200.f, 2800.f, 270));
     DestroyTimer(GetExpiredTimer());
 }
-bool KilledBossesCountCondition(){
+bool KilledBossesCountCondition()
+{
     return IsUnitInGroup(GetDyingUnit(), GR_LeftSide ) || IsUnitInGroup(GetDyingUnit(), GR_RightSide);
 }
-void KilledBossesCountAction(){
-player WhichPlayer = GetOwningPlayer(GetKillingUnit());
-int ID = GetPlayerId(WhichPlayer);
-int UnitID = GetUnitTypeId(GetDyingUnit());
+void KilledBossesCountAction()
+{
+    player WhichPlayer = GetOwningPlayer(GetKillingUnit());
+    int ID = GetPlayerId(WhichPlayer);
+    int UnitID = GetUnitTypeId(GetDyingUnit());
     BossesKilledIntegerArray[ID] = BossesKilledIntegerArray[ID] + 1;
     DisplayTextToPlayer(WhichPlayer, 0, 0, "|cFFFFCC00Bosses Killed:|r |c00ff8040" + I2S(BossesKilledIntegerArray[ID]) + "|r");
     SetPlayerState(WhichPlayer, PLAYER_STATE_RESOURCE_LUMBER, GetPlayerState(WhichPlayer, PLAYER_STATE_RESOURCE_LUMBER) + 1);
-    if (BossesKilledIntegerArray[ID] == 8){
+    if (BossesKilledIntegerArray[ID] == 8)
+    {
         DisplayTextToPlayer(GetLocalPlayer(), 0, 0, PlayerColoredNameArray[ID] + "|r has earnt enough kills for -T command");
         GlobalPlayerArray1[ID] = WhichPlayer;
     }
-    if (IsUnitInGroup(GetDyingUnit(), GR_LeftSide )){
+    if (IsUnitInGroup(GetDyingUnit(), GR_LeftSide ))
+    {
         LeftBosses = LeftBosses + 1;
         TimerStart(CreateTimer(), 10.f, false, @TopLeftSpawnNewBossAction);
     }
-    if (IsUnitInGroup(GetDyingUnit(), GR_RightSide)){
+    if (IsUnitInGroup(GetDyingUnit(), GR_RightSide))
+    {
         RightBosses = RightBosses + 1;
         TimerStart(CreateTimer(), 10.f, false, @TopRightSpawnNewBossAction);
     }
 }
-void CreepSpawn3Action(){
-player p = Player(PLAYER_NEUTRAL_AGGRESSIVE);
-int i = 0;
+void CreepSpawn3Action()
+{
+    player p = Player(PLAYER_NEUTRAL_AGGRESSIVE);
+    int i = 0;
     if ( B_IsCreepSpawn )
     {
-        while (true) {
+        while (true)
+        {
             if (i == 4) break;
-            if (i < 2){
-                CreateUnit(p, FourCC("h003"), - 1888.f, - 160.f, 270);
-                CreateUnit(p, FourCC("h004"), - 1888.f, - 864.f, 270);
-                CreateUnit(p, FourCC("h007"), - 1184.f, - 864.f, 270);
-                CreateUnit(p, FourCC("h015"), 384.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h003"), 1888.f, - 160.f, 270);
-                CreateUnit(p, FourCC("h007"), 1184.f, - 864.f, 270);
-                CreateUnit(p, FourCC("h004"), 1888.f, - 896.f, 270);
+            if (i < 2)
+            {
+                CreateUnit(p, 'h003' , - 1888.f, - 160.f, 270);
+                CreateUnit(p, 'h004' , - 1888.f, - 864.f, 270);
+                CreateUnit(p, 'h007' , - 1184.f, - 864.f, 270);
+                CreateUnit(p, 'h015' , 384.f, - 896.f, 270);
+                CreateUnit(p, 'h003' , 1888.f, - 160.f, 270);
+                CreateUnit(p, 'h007' , 1184.f, - 864.f, 270);
+                CreateUnit(p, 'h004' , 1888.f, - 896.f, 270);
             }
-            if (i < 3){
-                CreateUnit(p, FourCC("h009"), - 1888.f, - 160.f, 270);
-                CreateUnit(p, FourCC("h016"), - 1888.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h001"), - 1184.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h016"), - 384.f, - 160.f, 270);
-                CreateUnit(p, FourCC("h001"), 384.f, - 160.f, 270);
-                CreateUnit(p, FourCC("h009"), - 384.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h009"), 1888.f, - 160.f, 270);
-                CreateUnit(p, FourCC("h001"), 1184.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h016"), 1888.f, - 896.f, 270);
+            if (i < 3)
+            {
+                CreateUnit(p, 'h009' , - 1888.f, - 160.f, 270);
+                CreateUnit(p, 'h016' , - 1888.f, - 896.f, 270);
+                CreateUnit(p, 'h001' , - 1184.f, - 896.f, 270);
+                CreateUnit(p, 'h016' , - 384.f, - 160.f, 270);
+                CreateUnit(p, 'h001' , 384.f, - 160.f, 270);
+                CreateUnit(p, 'h009' , - 384.f, - 896.f, 270);
+                CreateUnit(p, 'h009' , 1888.f, - 160.f, 270);
+                CreateUnit(p, 'h001' , 1184.f, - 896.f, 270);
+                CreateUnit(p, 'h016' , 1888.f, - 896.f, 270);
             }
-            CreateUnit(p, FourCC("h015"), - 1184.f, - 160.f, 270);
-            CreateUnit(p, FourCC("h015"), 1184.f, - 160.f, 270);
+            CreateUnit(p, 'h015' , - 1184.f, - 160.f, 270);
+            CreateUnit(p, 'h015' , 1184.f, - 160.f, 270);
             i = i + 1;
         }
     }
 }
-void CreepUpgrade2Action(){
+void CreepUpgrade2Action()
+{
     PauseTimer(CreepSpawnerTimer1);
     TimerStart(CreepSpawnerTimer1, 90.f, true, @CreepSpawn3Action);
 }
-void CreepSpawn2Action(){
-player p = Player(PLAYER_NEUTRAL_AGGRESSIVE);
-int i = 0;
+void CreepSpawn2Action()
+{
+    player p = Player(PLAYER_NEUTRAL_AGGRESSIVE);
+    int i = 0;
     if ( B_IsCreepSpawn )
     {
-        CreateUnit(p, FourCC("h009"), - 1888.f, - 160.f, 270);
-        CreateUnit(p, FourCC("h016"), - 1888.f, - 896.f, 270);
-        CreateUnit(p, FourCC("h001"), - 1184.f, - 896.f, 270);
-        CreateUnit(p, FourCC("h009"), 1888.f, - 160.f, 270);
-        CreateUnit(p, FourCC("h001"), 1184.f, - 896.f, 270);
-        CreateUnit(p, FourCC("h016"), 1888.f, - 896.f, 270);
-        while (true) {
+        CreateUnit(p, 'h009' , - 1888.f, - 160.f, 270);
+        CreateUnit(p, 'h016' , - 1888.f, - 896.f, 270);
+        CreateUnit(p, 'h001' , - 1184.f, - 896.f, 270);
+        CreateUnit(p, 'h009' , 1888.f, - 160.f, 270);
+        CreateUnit(p, 'h001' , 1184.f, - 896.f, 270);
+        CreateUnit(p, 'h016' , 1888.f, - 896.f, 270);
+        while (true)
+        {
             if (i == 6) break;
-            if (i < 5){
-                CreateUnit(p, FourCC("h008"), - 1888.f, - 160.f, 270);
-                CreateUnit(p, FourCC("h002"), - 1888.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h000"), - 1184.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h002"), - 384.f, - 160.f, 270);
-                CreateUnit(p, FourCC("h000"), 384.f, - 160.f, 270);
-                CreateUnit(p, FourCC("h014"), 384.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h008"), - 384.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h008"), 1888.f, - 160.f, 270);
-                CreateUnit(p, FourCC("h000"), 1184.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h002"), 1888.f, - 896.f, 270);
+            if (i < 5)
+            {
+                CreateUnit(p, 'h008' , - 1888.f, - 160.f, 270);
+                CreateUnit(p, 'h002' , - 1888.f, - 896.f, 270);
+                CreateUnit(p, 'h000' , - 1184.f, - 896.f, 270);
+                CreateUnit(p, 'h002' , - 384.f, - 160.f, 270);
+                CreateUnit(p, 'h000' , 384.f, - 160.f, 270);
+                CreateUnit(p, 'h014' , 384.f, - 896.f, 270);
+                CreateUnit(p, 'h008' , - 384.f, - 896.f, 270);
+                CreateUnit(p, 'h008' , 1888.f, - 160.f, 270);
+                CreateUnit(p, 'h000' , 1184.f, - 896.f, 270);
+                CreateUnit(p, 'h002' , 1888.f, - 896.f, 270);
             }
-            CreateUnit(p, FourCC("h014"), - 1184.f, - 160.f, 270);
-            CreateUnit(p, FourCC("h014"), 1184.f, - 160.f, 270);
+            CreateUnit(p, 'h014' , - 1184.f, - 160.f, 270);
+            CreateUnit(p, 'h014' , 1184.f, - 160.f, 270);
             i = i + 1;
         }
     }
 }
-void CreepUpgrade1Action(){
+void CreepUpgrade1Action()
+{
     PauseTimer(CreepSpawnerTimer1);
     TimerStart(CreepUpgradeTimer1, 600.f, false, @CreepUpgrade2Action);
     TimerStart(CreepSpawnerTimer1, 60.f, true, @CreepSpawn2Action);
 }
-void CreepSpawn1Action(){
-player p = Player(PLAYER_NEUTRAL_AGGRESSIVE);
-int i = 0;
+void CreepSpawn1Action()
+{
+    player p = Player(PLAYER_NEUTRAL_AGGRESSIVE);
+    int i = 0;
     if ( B_IsCreepSpawn )
     {
-        while (true) {
+        while (true)
+        {
             if (i == 4) break;
-            if (i < 2){
-                CreateUnit(p, FourCC("h011"), - 1888.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h011"), - 384.f, - 896.f, 270);
-                CreateUnit(p, FourCC("h011"), 1888.f, - 896.f, 270);
+            if (i < 2)
+            {
+                CreateUnit(p, 'h011' , - 1888.f, - 896.f, 270);
+                CreateUnit(p, 'h011' , - 384.f, - 896.f, 270);
+                CreateUnit(p, 'h011' , 1888.f, - 896.f, 270);
             }
-            CreateUnit(p, FourCC("h010"), 384.f, - 896.f, 270);
-            CreateUnit(p, FourCC("h010"), 1184.f, - 896.f, 270);
-            CreateUnit(p, FourCC("h010"), - 1184.f, - 896.f, 270);
-            CreateUnit(p, FourCC("h012"), - 1184.f, - 160.f, 270);
-            CreateUnit(p, FourCC("h012"), 1888.f, - 160.f, 270);
-            CreateUnit(p, FourCC("h012"), 384.f, - 160.f, 270);
-            CreateUnit(p, FourCC("h013"), - 1888.f, - 160.f, 270);
-            CreateUnit(p, FourCC("h013"), - 384.f, - 160.f, 270);
-            CreateUnit(p, FourCC("h013"), 1184.f, - 160.f, 270);
+            CreateUnit(p, 'h010' , 384.f, - 896.f, 270);
+            CreateUnit(p, 'h010' , 1184.f, - 896.f, 270);
+            CreateUnit(p, 'h010' , - 1184.f, - 896.f, 270);
+            CreateUnit(p, 'h012' , - 1184.f, - 160.f, 270);
+            CreateUnit(p, 'h012' , 1888.f, - 160.f, 270);
+            CreateUnit(p, 'h012' , 384.f, - 160.f, 270);
+            CreateUnit(p, 'h013' , - 1888.f, - 160.f, 270);
+            CreateUnit(p, 'h013' , - 384.f, - 160.f, 270);
+            CreateUnit(p, 'h013' , 1184.f, - 160.f, 270);
             i = i + 1;
         }
     }
 }
-void UnitCreationAction(){
+void UnitCreationAction()
+{
     TimerStart(CreepUpgradeTimer1, 300.f, false, @CreepUpgrade1Action);
     TimerStart(CreepSpawnerTimer1, 30.f, true, @CreepSpawn1Action);
 }
-bool UnitCreationWithCircleCond(){
+bool UnitCreationWithCircleCond()
+{
     return IsUnitType(GetEnteringUnit(), UNIT_TYPE_HERO);
 }
-void UnitCreationOnTopLeftAction(){
-int i = 0;
-    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h022")) <= 160){
+void UnitCreationOnTopLeftAction()
+{
+    int i = 0;
+    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h022' ) <= 160)
+    {
         DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00CBFF75NPC Spawned");
-        while (true) {
+        while (true)
+        {
             if (i > 9) break;
-            CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h022"), GetRandomReal( - 5632.f, - 3136.f), GetRandomReal(1088.f, 3136.f), GetRandomReal(0, 360));
+            CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h022' , GetRandomReal( - 5632.f, - 3136.f), GetRandomReal(1088.f, 3136.f), GetRandomReal(0, 360));
             i = i + 1;
         }
     }
-    else {
+    else
+    {
         DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00ff0000Maximum amount of units was reached!");
     }
 }
-void UnitCreationOnBottomRightAction(){
-int i = 0;
-    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h020")) <= 30 || CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h023")) <= 30){
+void UnitCreationOnBottomRightAction()
+{
+    int i = 0;
+    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h020' ) <= 30 || CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h023' ) <= 30)
+    {
         DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00CBFF75NPC Spawned");
-        while (true) {
+        while (true)
+        {
             if (i > 1) break;
-            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h020")) <= 30){
-                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h020"), GetRandomReal(3200.f, 5664.f), GetRandomReal(1120.f, 3168.f), GetRandomReal(0, 360));
+            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h020' ) <= 30)
+            {
+                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h020' , GetRandomReal(3200.f, 5664.f), GetRandomReal(1120.f, 3168.f), GetRandomReal(0, 360));
             }
-            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h023")) <= 30){
-                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h023"), GetRandomReal(3200.f, 5664.f), GetRandomReal(1120.f, 3168.f), GetRandomReal(0, 360));
+            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h023' ) <= 30)
+            {
+                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h023' , GetRandomReal(3200.f, 5664.f), GetRandomReal(1120.f, 3168.f), GetRandomReal(0, 360));
             }
             i = i + 1;
         }
     }
-    else {
+    else
+    {
         DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00ff0000Maximum amount of units was reached!");
     }
 }
-void UnitCreationOnTopRightAction(){
-int i = 0;
-    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h017")) <= 160){
+void UnitCreationOnTopRightAction()
+{
+    int i = 0;
+    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h017' ) <= 160)
+    {
         DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00CBFF75NPC Spawned");
-        while (true) {
+        while (true)
+        {
             if (i > 9) break;
-            CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h017"), GetRandomReal(3072.f, 5632.f), GetRandomReal( - 4160.f, - 2208.f), GetRandomReal(0, 360));
+            CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h017' , GetRandomReal(3072.f, 5632.f), GetRandomReal( - 4160.f, - 2208.f), GetRandomReal(0, 360));
             i = i + 1;
         }
     }
-    else {
+    else
+    {
         DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00ff0000Maximum amount of units was reached!");
     }
 }
-void UnitCreationOnBottomLeftAction(){
-int i = 0;
-    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h018")) <= 30 || CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h021")) <= 30){
+void UnitCreationOnBottomLeftAction()
+{
+    int i = 0;
+    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h018' ) <= 30 || CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h021' ) <= 30)
+    {
         DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00CBFF75NPC Spawned");
-        while (true) {
+        while (true)
+        {
             if (i > 1) break;
-            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h018")) <= 30){
-                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h018"), GetRandomReal( - 5632.f, - 3008.f), GetRandomReal( - 4160.f, - 2176.f), GetRandomReal(0, 360));
+            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h018' ) <= 30)
+            {
+                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h018' , GetRandomReal( - 5632.f, - 3008.f), GetRandomReal( - 4160.f, - 2176.f), GetRandomReal(0, 360));
             }
-            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h021")) <= 30){
-                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("h021"), GetRandomReal( - 5632.f, - 3008.f), GetRandomReal( - 4160.f, - 2176.f), GetRandomReal(0, 360));
+            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h021' ) <= 30)
+            {
+                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h021' , GetRandomReal( - 5632.f, - 3008.f), GetRandomReal( - 4160.f, - 2176.f), GetRandomReal(0, 360));
             }
             i = i + 1;
         }
     }
-    else {
+    else
+    {
         DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00ff0000Maximum amount of units was reached!");
     }
 }
-void HeroLevelUpCheck(){
-int index = 1;
-int LocalStat = 0;
-unit LocUnit = GetLevelingUnit();
-int LocalLevel = GetHeroLevel(LocUnit);
-player LocPlayer = GetOwningPlayer(LocUnit);
+void HeroLevelUpCheck()
+{
+    int index = 1;
+    int LocalStat = 0;
+    unit LocUnit = GetLevelingUnit();
+    int LocalLevel = GetHeroLevel(LocUnit);
+    player LocPlayer = GetOwningPlayer(LocUnit);
     DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\LevelUp.mdl", LocUnit, "origin"));
-    if (GetPlayerController(LocPlayer) == MAP_CONTROL_COMPUTER){
-        if (GetAIDifficulty(LocPlayer) == AI_DIFFICULTY_NEWBIE){
+    if (GetPlayerController(LocPlayer) == MAP_CONTROL_COMPUTER)
+    {
+        if (GetAIDifficulty(LocPlayer) == AI_DIFFICULTY_NEWBIE)
+        {
             LocalStat = 2;
         }
-        else if (GetAIDifficulty(LocPlayer) == AI_DIFFICULTY_NORMAL){
+        else if (GetAIDifficulty(LocPlayer) == AI_DIFFICULTY_NORMAL)
+        {
             LocalStat = 3;
         }
-        else if (GetAIDifficulty(LocPlayer) == AI_DIFFICULTY_INSANE){
-                LocalStat = 5;
-            }
-        if (LocalLevel >= 5 && LocalLevel < 10){
+        else if (GetAIDifficulty(LocPlayer) == AI_DIFFICULTY_INSANE)
+        {
+            LocalStat = 5;
+        }
+        if (LocalLevel >= 5 && LocalLevel < 10)
+        {
             LocalStat = LocalStat * 2;
         }
-        else if (LocalLevel >= 10 && LocalLevel < 15){
+        else if (LocalLevel >= 10 && LocalLevel < 15)
+        {
             LocalStat = LocalStat * 3;
         }
-        else if (LocalLevel >= 15){
-                LocalStat = LocalStat * 5;
-            }
+        else if (LocalLevel >= 15)
+        {
+            LocalStat = LocalStat * 5;
+        }
         SetPlayerState(LocPlayer, PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(LocPlayer, PLAYER_STATE_RESOURCE_GOLD) + 50 * LocalStat);
         SetHeroStr(LocUnit, GetHeroStr(LocUnit, false) + LocalStat, true);
         SetHeroAgi(LocUnit, GetHeroAgi(LocUnit, false) + LocalStat, true);
         SetHeroInt(LocUnit, GetHeroInt(LocUnit, false) + LocalStat, true);
-        if (LocalLevel == 5){
-            UnitAddItemById(LocUnit, FourCC("I03U"));
+        if (LocalLevel == 5)
+        {
+            UnitAddItemById(LocUnit, 'I03U' );
         }
-        else if (LocalLevel == 8){
-            UnitAddItemById(LocUnit, FourCC("I03X"));
+        else if (LocalLevel == 8)
+        {
+            UnitAddItemById(LocUnit, 'I03X' );
         }
-        else if (LocalLevel == 10){
-                UnitAddItemById(LocUnit, FourCC("I03Z"));
+        else if (LocalLevel == 10)
+        {
+            UnitAddItemById(LocUnit, 'I03Z' );
+        }
+        else if (LocalLevel == 13)
+        {
+            UnitAddItemById(LocUnit, 'I00H' );
+        }
+        else if (LocalLevel == 15)
+        {
+            while (true)
+            {
+                if (HeroIDArray[index] == GetUnitTypeId(LocUnit)) break;
+                index = index + 1;
             }
-            else if (LocalLevel == 13){
-                    UnitAddItemById(LocUnit, FourCC("I00H"));
-                }
-                else if (LocalLevel == 15){
-                        while (true) {
-                            if (HeroIDArray[index] == GetUnitTypeId(LocUnit)) break;
-                            index = index + 1;
-                        }
-                        UnitAddItemById(LocUnit, HeroItemIDArray[index]);
-                    }
-                    else if (LocalLevel == 20){
-                            UnitAddItemById(LocUnit, FourCC("I03V"));
-                        }
-                        else if (LocalLevel == 21){
-                                UnitAddItemById(LocUnit, FourCC("I03Z"));
-                            }
-                            else if (LocalLevel == 25){
-                                    UnitAddItemById(LocUnit, FourCC("I00X"));
-                                }
-                                else if (LocalLevel == 27){
-                                        UnitAddItemById(LocUnit, FourCC("I00T"));
-                                    }
+            UnitAddItemById(LocUnit, HeroItemIDArray[index]);
+        }
+        else if (LocalLevel == 20)
+        {
+            UnitAddItemById(LocUnit, 'I03V' );
+        }
+        else if (LocalLevel == 21)
+        {
+            UnitAddItemById(LocUnit, 'I03Z' );
+        }
+        else if (LocalLevel == 25)
+        {
+            UnitAddItemById(LocUnit, 'I00X' );
+        }
+        else if (LocalLevel == 27)
+        {
+            UnitAddItemById(LocUnit, 'I00T' );
+        }
     }
-    else {
-        if (GetUnitLevel(LocUnit) >= 50){
+    else
+    {
+        if (GetUnitLevel(LocUnit) >= 50)
+        {
             SetHeroStr(LocUnit, GetHeroStr(LocUnit, false) + 3, true);
             SetHeroAgi(LocUnit, GetHeroAgi(LocUnit, false) + 3, true);
             SetHeroInt(LocUnit, GetHeroInt(LocUnit, false) + 3, true);
@@ -2193,508 +2461,628 @@ player LocPlayer = GetOwningPlayer(LocUnit);
         }
     }
 }
-void PressEscToSaveLocationActivationAction(){
-int ID = GetPlayerId(GetTriggerPlayer());
-    if (ESCLocationSaveBooleanArray[ID] == false){
+void PressEscToSaveLocationActivationAction()
+{
+    int ID = GetPlayerId(GetTriggerPlayer());
+    if (ESCLocationSaveBooleanArray[ID] == false)
+    {
         ESCLocationSaveBooleanArray[ID] = true;
         DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "Push ESC to save current position function is: |c0000ffffActivated|r");
     }
-    else {
+    else
+    {
         ESCLocationSaveBooleanArray[ID] = false;
         DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "Push ESC to save current position function is: |c00ff0000Deactivated|r");
     }
 }
-void SaveLocationAction(){
-int ID = GetPlayerId(GetTriggerPlayer());
+void SaveLocationAction()
+{
+    int ID = GetPlayerId(GetTriggerPlayer());
     DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffCurrent location was saved!");
     RemoveLocation(TeleportationLocationArray[ID]);
     TeleportationLocationArray[ID] = GetUnitLoc(MUnitArray[ID]);
 }
-void ESCToSaveAction(){
-int ID = GetPlayerId(GetTriggerPlayer());
-    if (ESCLocationSaveBooleanArray[ID] == true){
+void ESCToSaveAction()
+{
+    int ID = GetPlayerId(GetTriggerPlayer());
+    if (ESCLocationSaveBooleanArray[ID] == true)
+    {
         DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffCurrent location was saved!");
         RemoveLocation(TeleportationLocationArray[ID]);
         TeleportationLocationArray[ID] = GetUnitLoc(MUnitArray[ID]);
     }
 }
-bool AntiTeleportationStoneCondition(){
-    return GetSpellAbilityId() == FourCC("A01W");
+bool AntiTeleportationStoneCondition()
+{
+    return GetSpellAbilityId() == 'A01W' ;
 }
-void AntiTeleportationStoneAction(){
-    if (GetUnitTypeId(GetSpellTargetUnit()) == FourCC("H02M")){
-        UnitRemoveAbility(GetSpellTargetUnit(), FourCC("B003"));
+void AntiTeleportationStoneAction()
+{
+    if (GetUnitTypeId(GetSpellTargetUnit()) == 'H02M' )
+    {
+        UnitRemoveAbility(GetSpellTargetUnit(), 'B003' );
         DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffInvalid Target!");
     }
 }
-bool ScrollOfTeleportationCondition(){
-    return GetItemTypeId(GetManipulatedItem()) == FourCC("I003");
+bool ScrollOfTeleportationCondition()
+{
+    return GetItemTypeId(GetManipulatedItem()) == 'I003' ;
 }
-void ScrollOfTeleportationAction(){
-    if (GetUnitAbilityLevel(GetTriggerUnit(), FourCC("B003")) > 0 || GetUnitAbilityLevel(GetTriggerUnit(), FourCC("B005")) > 0){
+void ScrollOfTeleportationAction()
+{
+    if (GetUnitAbilityLevel(GetTriggerUnit(), 'B003' ) > 0 || GetUnitAbilityLevel(GetTriggerUnit(), 'B005' ) > 0)
+    {
         DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffUnable to teleport!");
     }
-    else {
+    else
+    {
         DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffYou have been teleported to saved position");
         DestroyEffect(AddSpecialEffect("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit())));
         SetUnitPositionLoc(GetTriggerUnit(), TeleportationLocationArray[GetPlayerId(GetTriggerPlayer())]);
         DestroyEffect(AddSpecialEffect("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit())));
-        if (GetLocalPlayer() == GetOwningPlayer(GetTriggerUnit())){
+        if (GetLocalPlayer() == GetOwningPlayer(GetTriggerUnit()))
+        {
             PanCameraToTimed(GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
         }
     }
 }
-bool TeleportationCommandCondition(){
+bool TeleportationCommandCondition()
+{
     return GetTriggerPlayer() == GlobalPlayerArray1[GetPlayerId(GetTriggerPlayer())];
 }
-void CheckTeleCooldown(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = LoadInteger(GameHashTable, hid, 0);
-    if (TeleportationIDIntegerArray[ID] > 0){
+void CheckTeleCooldown()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = LoadInteger(GameHashTable, hid, 0);
+    if (TeleportationIDIntegerArray[ID] > 0)
+    {
         TeleportationIDIntegerArray[ID] = TeleportationIDIntegerArray[ID] - 1;
     }
-    else {
+    else
+    {
         PauseTimer(GetExpiredTimer());
         FlushChildHashtable(GameHashTable, hid);
         DestroyTimer(GetExpiredTimer());
     }
 }
-void TeleportationCommandAction(){
-timer SystemsLocalTimer = CreateTimer();
-int hid = GetHandleId(SystemsLocalTimer);
-int ID = GetPlayerId(GetTriggerPlayer());
-    if (GetUnitAbilityLevel(MUnitArray[ID], FourCC("B00A")) > 0 || GetUnitAbilityLevel(MUnitArray[ID], FourCC("B005")) > 0 || IsUnitPaused(MUnitArray[ID]) == true){
+void TeleportationCommandAction()
+{
+    timer SystemsLocalTimer = CreateTimer();
+    int hid = GetHandleId(SystemsLocalTimer);
+    int ID = GetPlayerId(GetTriggerPlayer());
+    if (GetUnitAbilityLevel(MUnitArray[ID], 'B00A' ) > 0 || GetUnitAbilityLevel(MUnitArray[ID], 'B005' ) > 0 || IsUnitPaused(MUnitArray[ID]) == true)
+    {
         DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffUnable to teleport!");
     }
-    else {
-        if (TeleportationIDIntegerArray[ID] == 0){
+    else
+    {
+        if (TeleportationIDIntegerArray[ID] == 0)
+        {
             SaveInteger(GameHashTable, hid, 0, ID);
             TeleportationIDIntegerArray[ID] = 30;
             DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffYou have been teleported to saved position");
             DestroyEffect(AddSpecialEffect("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(MUnitArray[ID]), GetUnitY(MUnitArray[ID])));
             SetUnitPositionLoc(MUnitArray[ID], TeleportationLocationArray[ID]);
             DestroyEffect(AddSpecialEffect("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(MUnitArray[ID]), GetUnitY(MUnitArray[ID])));
-            if (GetLocalPlayer() == GetOwningPlayer(MUnitArray[ID])){
+            if (GetLocalPlayer() == GetOwningPlayer(MUnitArray[ID]))
+            {
                 PanCameraToTimed(GetUnitX(MUnitArray[ID]), GetUnitY(MUnitArray[ID]), 0);
             }
             TimerStart(SystemsLocalTimer, 1, true, @CheckTeleCooldown);
         }
-        else {
+        else
+        {
             DestroyTimer(SystemsLocalTimer);
             DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c00ffff00Teleportation Cooldown: " + I2S(TeleportationIDIntegerArray[ID]) + " seconds|r|c00ff0000!|r");
         }
     }
 }
-void DisplayHealthByTextAction(){
-int ID = GetPlayerId(GetTriggerPlayer());
-    if (HealthDisplayBooleanArray[ID] == false){
+void DisplayHealthByTextAction()
+{
+    int ID = GetPlayerId(GetTriggerPlayer());
+    if (HealthDisplayBooleanArray[ID] == false)
+    {
         HealthDisplayBooleanArray[ID] = true;
         DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "Health display by text is: |c0000ffffOn|r");
     }
-    else {
+    else
+    {
         HealthDisplayBooleanArray[ID] = false;
         DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "Health display by text is: |c00ff0000Off|r");
     }
 }
-void HealthDisplayReaderAction(){
-unit u = GetTriggerUnit();
-int MaxHP = R2I(GetUnitMaxLife(u));
-    if (HealthDisplayBooleanArray[GetPlayerId(GetTriggerPlayer())] && MaxHP >= 10000 && GetOwningPlayer(u) != Player(PLAYER_NEUTRAL_PASSIVE) && GetUnitTypeId(u) != FourCC("n000")){
-        if (IsUnitType(u, UNIT_TYPE_HERO)){
+void HealthDisplayReaderAction()
+{
+    unit u = GetTriggerUnit();
+    int MaxHP = R2I(GetUnitMaxLife(u));
+    if (HealthDisplayBooleanArray[GetPlayerId(GetTriggerPlayer())] && MaxHP >= 10000 && GetOwningPlayer(u) != Player(PLAYER_NEUTRAL_PASSIVE) && GetUnitTypeId(u) != 'n000' )
+    {
+        if (IsUnitType(u, UNIT_TYPE_HERO))
+        {
             DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "|c0000ffff" + GetHeroProperName(u) + "|r has: |cFFFFCC00[" + I2S(MaxHP) + "]|r |c0000ffffHP|r");
         }
-        else {
+        else
+        {
             DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "|c0000ffff" + GetUnitName(u) + "|r has: |cFFFFCC00[" + I2S(MaxHP) + "]|r |c0000ffffHP|r");
         }
     }
 }
-void PersonalItemAction1(){
-int i = 0;
-unit Hero = GetTriggerUnit();
-player LocalPlayer = GetOwningPlayer(Hero);
-int ID = GetPlayerId(LocalPlayer);
-    while (true) {
+void PersonalItemAction1()
+{
+    int i = 0;
+    unit Hero = GetTriggerUnit();
+    player LocalPlayer = GetOwningPlayer(Hero);
+    int ID = GetPlayerId(LocalPlayer);
+    while (true)
+    {
         if (HeroIDArray[i] == GetUnitTypeId(Hero)) break;
         i = i + 1;
     }
-    if (GetItemTypeId(GetManipulatedItem()) == FourCC("I02R")){
+    if (GetItemTypeId(GetManipulatedItem()) == 'I02R' )
+    {
         RemoveItem(GetManipulatedItem());
-        if (GetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD) >= 10000){
-            if (CountItemsOfTypeFromUnitRW(Hero, HeroItemIDArray[i]) < 1){
+        if (GetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD) >= 10000)
+        {
+            if (CountItemsOfTypeFromUnitRW(Hero, HeroItemIDArray[i]) < 1)
+            {
                 UnitAddItemById(Hero, HeroItemIDArray[i]);
                 SetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD) - 10000);
-                if (CountItemsOfTypeFromUnitRW(DummyUnitDamageArr[ID], HeroItemIDArray[i]) < 1){
+                if (CountItemsOfTypeFromUnitRW(DummyUnitDamageArr[ID], HeroItemIDArray[i]) < 1)
+                {
                     UnitAddItemById(DummyUnitDamageArr[ID], HeroItemIDArray[i]);
                 }
             }
         }
     }
-    if (CountItemsOfTypeFromUnitRW(Hero, HeroItemIDArray[i]) > 1){
+    if (CountItemsOfTypeFromUnitRW(Hero, HeroItemIDArray[i]) > 1)
+    {
         RemoveItem(GetManipulatedItem());
         SetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD) + 10000);
     }
 }
-void ItemOwnerSettingAction(){
-    if (GetItemPlayer(GetManipulatedItem()) == Player(15)){
+void ItemOwnerSettingAction()
+{
+    if (GetItemPlayer(GetManipulatedItem()) == Player(15))
+    {
         SetItemPlayer(GetManipulatedItem(), GetOwningPlayer(GetTriggerUnit()), false);
     }
-    else if (GetItemPlayer(GetManipulatedItem()) != GetOwningPlayer(GetTriggerUnit())){
+    else if (GetItemPlayer(GetManipulatedItem()) != GetOwningPlayer(GetTriggerUnit()))
+    {
         UnitRemoveItem(GetTriggerUnit(), GetManipulatedItem());
         DisplayTextToPlayer(GetOwningPlayer(GetTriggerUnit()), 0, 0, "|c00ffff00That is not your Item!|r");
     }
 }
-void ItemCombinationAction(){
-unit hero = GetTriggerUnit();
-    if (GetItemTypeId(GetManipulatedItem()) == FourCC("I03U")){
-        if (CountItemsOfTypeFromUnitRW(hero, FourCC("I03U")) > 1){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03U")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03U")));
-            UnitAddItemById(hero, FourCC("I00Y"));
+void ItemCombinationAction()
+{
+    unit hero = GetTriggerUnit();
+    if (GetItemTypeId(GetManipulatedItem()) == 'I03U' )
+    {
+        if (CountItemsOfTypeFromUnitRW(hero, 'I03U' ) > 1)
+        {
+            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03U' ));
+            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03U' ));
+            UnitAddItemById(hero, 'I00Y' );
         }
     }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I03X")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I03Z")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I03U")) > 0){
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03U")));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03Z")));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03X")));
-        UnitAddItemById(hero, FourCC("I00X"));
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I03X' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03Z' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03U' ) > 0)
+    {
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03U' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03Z' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03X' ));
+        UnitAddItemById(hero, 'I00X' );
     }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I03V")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I03Z")) > 0){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03V")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03Z")));
-            UnitAddItemById(hero, FourCC("I00R"));
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I03V' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03Z' ) > 0)
+    {
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03V' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03Z' ));
+        UnitAddItemById(hero, 'I00R' );
+    }
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I03X' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03Y' ) > 0)
+    {
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03Y' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03X' ));
+        UnitAddItemById(hero, 'I00S' );
+    }
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I03Y' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03V' ) > 0)
+    {
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03Y' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03V' ));
+        UnitAddItemById(hero, 'I00Z' );
+    }
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I03X' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03W' ) > 0)
+    {
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03X' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03W' ));
+        UnitAddItemById(hero, 'I00U' );
+    }
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I00Q' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I00K' ) > 0)
+    {
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00Q' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00K' ));
+        UnitAddItemById(hero, 'I00R' );
+    }
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I00Q' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I00N' ) > 0)
+    {
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00Q' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00N' ));
+        UnitAddItemById(hero, 'I00S' );
+    }
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I00O' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I00I' ) > 0)
+    {
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00O' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00I' ));
+        UnitAddItemById(hero, 'I00U' );
+    }
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I00N' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I00K' ) > 0)
+    {
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00N' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00K' ));
+        UnitAddItemById(hero, 'I00Z' );
+    }
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I02Q' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I00J' ) > 0 && GetPlayerState(GetOwningPlayer(hero), PLAYER_STATE_RESOURCE_GOLD) >= 3800)
+    {
+        SetPlayerState(GetOwningPlayer(hero), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(GetOwningPlayer(hero), PLAYER_STATE_RESOURCE_GOLD) - 3800);
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I02Q' ));
+        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00J' ));
+        UnitAddItemById(hero, 'I00T' );
+    }
+    else if (CountItemsOfTypeFromUnitRW(hero, 'I01K' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I01S' ) > 0)
+    {
+        if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01S' )) == 1 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01K' )) == 1)
+        {
+            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01S' ));
+            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01K' ));
+            UnitAddItemById(hero, 'I01T' );
         }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I03X")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I03Y")) > 0){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03Y")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03X")));
-            UnitAddItemById(hero, FourCC("I00S"));
+        else if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01S' )) == 2 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01K' )) == 1)
+        {
+            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01S' ));
+            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01K' ));
+            UnitAddItemById(hero, 'I01T' );
+            UnitAddItemById(hero, 'I01S' );
         }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I03Y")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I03V")) > 0){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03Y")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03V")));
-            UnitAddItemById(hero, FourCC("I00Z"));
+        else if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01S' )) == 1 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01K' )) == 2)
+        {
+            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01S' ));
+            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01K' ));
+            UnitAddItemById(hero, 'I01T' );
+            UnitAddItemById(hero, 'I01K' );
         }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I03X")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I03W")) > 0){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03X")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I03W")));
-            UnitAddItemById(hero, FourCC("I00U"));
-        }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I00Q")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I00K")) > 0){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I00Q")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I00K")));
-            UnitAddItemById(hero, FourCC("I00R"));
-        }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I00Q")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I00N")) > 0){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I00Q")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I00N")));
-            UnitAddItemById(hero, FourCC("I00S"));
-        }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I00O")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I00I")) > 0){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I00O")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I00I")));
-            UnitAddItemById(hero, FourCC("I00U"));
-        }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I00N")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I00K")) > 0){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I00N")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I00K")));
-            UnitAddItemById(hero, FourCC("I00Z"));
-        }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I02Q")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I00J")) > 0 && GetPlayerState(GetOwningPlayer(hero), PLAYER_STATE_RESOURCE_GOLD) >= 3800){
-            SetPlayerState(GetOwningPlayer(hero), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(GetOwningPlayer(hero), PLAYER_STATE_RESOURCE_GOLD) - 3800);
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I02Q")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I00J")));
-            UnitAddItemById(hero, FourCC("I00T"));
-        }
-    else if (CountItemsOfTypeFromUnitRW(hero, FourCC("I01K")) > 0 && CountItemsOfTypeFromUnitRW(hero, FourCC("I01S")) > 0){
-        if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, FourCC("I01S"))) == 1 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, FourCC("I01K"))) == 1){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I01S")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I01K")));
-            UnitAddItemById(hero, FourCC("I01T"));
-        }
-        else if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, FourCC("I01S"))) == 2 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, FourCC("I01K"))) == 1){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I01S")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I01K")));
-            UnitAddItemById(hero, FourCC("I01T"));
-            UnitAddItemById(hero, FourCC("I01S"));
-        }
-        else if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, FourCC("I01S"))) == 1 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, FourCC("I01K"))) == 2){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I01S")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I01K")));
-            UnitAddItemById(hero, FourCC("I01T"));
-            UnitAddItemById(hero, FourCC("I01K"));
-        }
-        else if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, FourCC("I01S"))) == 2 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, FourCC("I01K"))) == 2){
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I01S")));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, FourCC("I01K")));
-            UnitAddItemById(hero, FourCC("I01T"));
-            UnitAddItemById(hero, FourCC("I01T"));
+        else if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01S' )) == 2 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01K' )) == 2)
+        {
+            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01S' ));
+            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01K' ));
+            UnitAddItemById(hero, 'I01T' );
+            UnitAddItemById(hero, 'I01T' );
         }
     }
 }
-bool StrTomeUsageCondition(){
-    return GetItemTypeId(GetManipulatedItem()) == FourCC("I04E");
+bool StrTomeUsageCondition()
+{
+    return GetItemTypeId(GetManipulatedItem()) == 'I04E';
 }
-void StrTomeAction(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocID = LoadInteger(GameHashTable, hid, 1);
-unit LocUnit = LoadUnitHandle(GameHashTable, hid, iCaster);
-    if (GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) >= 1000){
+void StrTomeAction()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocID = LoadInteger(GameHashTable, hid, 1);
+    unit LocUnit = LoadUnitHandle(GameHashTable, hid, iCaster);
+    if (GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) >= 1000)
+    {
         SetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) - 1000);
         SetHeroStr(LocUnit, GetHeroStr(LocUnit, false) + 10, true);
     }
-    else {
+    else
+    {
         PauseTimer(GetExpiredTimer());
         FlushChildHashtable(GameHashTable, hid);
         DestroyTimer(GetExpiredTimer());
     }
 }
-void StrTomeUsageAction(){
-timer ItemsLocalTimer1 = CreateTimer();
-int hid = GetHandleId(ItemsLocalTimer1);
+void StrTomeUsageAction()
+{
+    timer ItemsLocalTimer1 = CreateTimer();
+    int hid = GetHandleId(ItemsLocalTimer1);
     SaveInteger(GameHashTable, hid, 1, GetPlayerId(GetTriggerPlayer()));
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     TimerStart(ItemsLocalTimer1, .01f, true, @StrTomeAction);
 }
-bool AgiTomeUsageCondition(){
-    return GetItemTypeId(GetManipulatedItem()) == FourCC("I04D");
+bool AgiTomeUsageCondition()
+{
+    return GetItemTypeId(GetManipulatedItem()) == 'I04D';
 }
-void AgiTomeAction(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocID = LoadInteger(GameHashTable, hid, 2);
-unit LocUnit = LoadUnitHandle(GameHashTable, hid, iCaster);
-    if (GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) >= 1000){
+void AgiTomeAction()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocID = LoadInteger(GameHashTable, hid, 2);
+    unit LocUnit = LoadUnitHandle(GameHashTable, hid, iCaster);
+    if (GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) >= 1000)
+    {
         SetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) - 1000);
         SetHeroAgi(LocUnit, GetHeroAgi(LocUnit, false) + 10, true);
     }
-    else {
+    else
+    {
         PauseTimer(GetExpiredTimer());
         FlushChildHashtable(GameHashTable, hid);
         DestroyTimer(GetExpiredTimer());
     }
 }
-void AgiTomeUsageAction(){
-timer ItemsLocalTimer1 = CreateTimer();
-int hid = GetHandleId(ItemsLocalTimer1);
+void AgiTomeUsageAction()
+{
+    timer ItemsLocalTimer1 = CreateTimer();
+    int hid = GetHandleId(ItemsLocalTimer1);
     SaveInteger(GameHashTable, hid, 2, GetPlayerId(GetTriggerPlayer()));
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     TimerStart(ItemsLocalTimer1, .01f, true, @AgiTomeAction);
 }
-bool IntTomeUsageCondition(){
-    return GetItemTypeId(GetManipulatedItem()) == FourCC("I00C");
+bool IntTomeUsageCondition()
+{
+    return GetItemTypeId(GetManipulatedItem()) == 'I00C';
 }
-void IntTomeAction(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocID = LoadInteger(GameHashTable, hid, 3);
-unit LocUnit = LoadUnitHandle(GameHashTable, hid, iCaster);
-    if (GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) >= 1000){
+void IntTomeAction()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocID = LoadInteger(GameHashTable, hid, 3);
+    unit LocUnit = LoadUnitHandle(GameHashTable, hid, iCaster);
+    if (GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) >= 1000)
+    {
         SetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) - 1000);
         SetHeroInt(LocUnit, GetHeroInt(LocUnit, false) + 10, true);
     }
-    else {
+    else
+    {
         PauseTimer(GetExpiredTimer());
         FlushChildHashtable(GameHashTable, hid);
         DestroyTimer(GetExpiredTimer());
     }
 }
-void IntTomeUsageAction(){
-timer ItemsLocalTimer1 = CreateTimer();
-int hid = GetHandleId(ItemsLocalTimer1);
+void IntTomeUsageAction()
+{
+    timer ItemsLocalTimer1 = CreateTimer();
+    int hid = GetHandleId(ItemsLocalTimer1);
     SaveInteger(GameHashTable, hid, 3, GetPlayerId(GetTriggerPlayer()));
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     TimerStart(ItemsLocalTimer1, .01f, true, @IntTomeAction);
 }
-void MapItemRemovalAction(){
-float ItemX = GetItemX(GetManipulatedItem());
-float ItemY = GetItemY(GetManipulatedItem());
+void MapItemRemovalAction()
+{
+    float ItemX = GetItemX(GetManipulatedItem());
+    float ItemY = GetItemY(GetManipulatedItem());
     if (GetRectMinX( worldBounds ) <= ItemX && ItemX <= GetRectMaxX( worldBounds ) && GetRectMinY( worldBounds ) <= ItemY && ItemY <= GetRectMaxY( worldBounds ))
     {
-        if (GetWidgetLife(GetManipulatedItem()) <= 0){
+        if (GetWidgetLife(GetManipulatedItem()) <= 0)
+        {
             RemoveItem(GetManipulatedItem());
         }
     }
 }
-void HeroAbilityUnlockAction(){
-player OwningPlayer = GetOwningPlayer(GetLevelingUnit());
-int Level = GetUnitLevel(GetLevelingUnit());
-    if (Level >= 2){
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A04C"), true);
+void HeroAbilityUnlockAction()
+{
+    player OwningPlayer = GetOwningPlayer(GetLevelingUnit());
+    int Level = GetUnitLevel(GetLevelingUnit());
+    if (Level >= 2)
+    {
+        SetPlayerAbilityAvailable(OwningPlayer, 'A04C', true);
     }
-    if (Level >= 3){
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A02N"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A02V"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03M"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03D"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A039"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A04H"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A032"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03U"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A040"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A01Y"), true);
+    if (Level >= 3)
+    {
+        SetPlayerAbilityAvailable(OwningPlayer, 'A02N', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A02V', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03M', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03D', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A039', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A04H', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A032', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03U', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A040', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A01Y', true);
     }
-    if (Level >= 4){
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A04B"), true);
+    if (Level >= 4)
+    {
+        SetPlayerAbilityAvailable(OwningPlayer, 'A04B', true);
     }
-    if (Level >= 5){
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A049"), true);
+    if (Level >= 5)
+    {
+        SetPlayerAbilityAvailable(OwningPlayer, 'A049', true);
     }
-    if (Level >= 6){
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03N"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A04I"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03S"), true);
+    if (Level >= 6)
+    {
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03N', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A04I', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03S', true);
     }
-    if (Level >= 8){
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A041"), true);
+    if (Level >= 8)
+    {
+        SetPlayerAbilityAvailable(OwningPlayer, 'A041', true);
     }
-    if (Level >= 10){
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A02O"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A02W"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03O"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03G"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03A"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A04J"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A034"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03V"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A042"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A026"), true);
+    if (Level >= 10)
+    {
+        SetPlayerAbilityAvailable(OwningPlayer, 'A02O', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A02W', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03O', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03G', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03A', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A04J', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A034', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03V', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A042', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A026', true);
     }
-    if (Level >= 15){
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A02Q"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A02Y"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03P"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03H"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03B"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A036"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03W"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A04D"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A043"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A027"), true);
+    if (Level >= 15)
+    {
+        SetPlayerAbilityAvailable(OwningPlayer, 'A02Q', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A02Y', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03P', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03H', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03B', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A036', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03W', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A04D', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A043', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A027', true);
     }
-    if (Level >= 20){
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A02R"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A02Z"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03I"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03C"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A04K"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A037"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A03X"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A04E"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A044"), true);
-        SetPlayerAbilityAvailable(OwningPlayer, FourCC("A02A"), true);
+    if (Level >= 20)
+    {
+        SetPlayerAbilityAvailable(OwningPlayer, 'A02R', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A02Z', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03I', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03C', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A04K', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A037', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A03X', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A04E', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A044', true);
+        SetPlayerAbilityAvailable(OwningPlayer, 'A02A', true);
     }
 }
-bool DummyUnitRemovalCondition(){
-    return GetUnitTypeId(GetEnteringUnit()) == FourCC("hdes");
+bool DummyUnitRemovalCondition()
+{
+    return GetUnitTypeId(GetEnteringUnit()) == 'hdes';
 }
-void DummyUnitRemovalAction(){
+void DummyUnitRemovalAction()
+{
     RemoveUnit(GetEnteringUnit());
 }
-void DisplayYourSavedPositionAction(){
-int ID = GetPlayerId(GetTriggerPlayer());
+void DisplayYourSavedPositionAction()
+{
+    int ID = GetPlayerId(GetTriggerPlayer());
     DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffDisplaying the saved position");
-    if (GetLocalPlayer() == GetTriggerPlayer()){
+    if (GetLocalPlayer() == GetTriggerPlayer())
+    {
         PingMinimapEx(GetLocationX(TeleportationLocationArray[ID]), GetLocationY(TeleportationLocationArray[ID]), 5, 0, 100, 0, false);
     }
 }
-void DisplayYourTeammatesSavedPositionAction(){
+void DisplayYourTeammatesSavedPositionAction()
+{
     DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffDisplaying the saved position");
-    if (GetPlayerTeam(GetTriggerPlayer()) == 0){
-        if (GetPlayerSlotState(Player(0)) == PLAYER_SLOT_STATE_PLAYING){
-            if (GetLocalPlayer() == GetTriggerPlayer()){
+    if (GetPlayerTeam(GetTriggerPlayer()) == 0)
+    {
+        if (GetPlayerSlotState(Player(0)) == PLAYER_SLOT_STATE_PLAYING)
+        {
+            if (GetLocalPlayer() == GetTriggerPlayer())
+            {
                 PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(0))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(0))]), 5, 100, 0, 0, false);
             }
         }
-        if (GetPlayerSlotState(Player(1)) == PLAYER_SLOT_STATE_PLAYING){
-            if (GetLocalPlayer() == GetTriggerPlayer()){
+        if (GetPlayerSlotState(Player(1)) == PLAYER_SLOT_STATE_PLAYING)
+        {
+            if (GetLocalPlayer() == GetTriggerPlayer())
+            {
                 PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(1))]), GetLocationY(TeleportationLocationArray[(GetPlayerId(Player(1)))]), 5, 0, 0, 100, false);
             }
         }
-        if (GetPlayerSlotState(Player(2)) == PLAYER_SLOT_STATE_PLAYING){
-            if (GetLocalPlayer() == GetTriggerPlayer()){
+        if (GetPlayerSlotState(Player(2)) == PLAYER_SLOT_STATE_PLAYING)
+        {
+            if (GetLocalPlayer() == GetTriggerPlayer())
+            {
                 PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(2))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(2))]), 5, 0, 100, 100, false);
             }
         }
-        if (GetPlayerSlotState(Player(3)) == PLAYER_SLOT_STATE_PLAYING){
-            if (GetLocalPlayer() == GetTriggerPlayer()){
+        if (GetPlayerSlotState(Player(3)) == PLAYER_SLOT_STATE_PLAYING)
+        {
+            if (GetLocalPlayer() == GetTriggerPlayer())
+            {
                 PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(3))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(3))]), 5, 43, 14, 51, false);
             }
         }
     }
-    else {
-        if (GetPlayerSlotState(Player(4)) == PLAYER_SLOT_STATE_PLAYING){
-            if (GetLocalPlayer() == GetTriggerPlayer()){
+    else
+    {
+        if (GetPlayerSlotState(Player(4)) == PLAYER_SLOT_STATE_PLAYING)
+        {
+            if (GetLocalPlayer() == GetTriggerPlayer())
+            {
                 PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(4))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(4))]), 5, 100, 100, 0, false);
             }
         }
-        if (GetPlayerSlotState(Player(5)) == PLAYER_SLOT_STATE_PLAYING){
-            if (GetLocalPlayer() == GetTriggerPlayer()){
+        if (GetPlayerSlotState(Player(5)) == PLAYER_SLOT_STATE_PLAYING)
+        {
+            if (GetLocalPlayer() == GetTriggerPlayer())
+            {
                 PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(5))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(5))]), 5, 83, 37, 10, false);
             }
         }
-        if (GetPlayerSlotState(Player(6)) == PLAYER_SLOT_STATE_PLAYING){
-            if (GetLocalPlayer() == GetTriggerPlayer()){
+        if (GetPlayerSlotState(Player(6)) == PLAYER_SLOT_STATE_PLAYING)
+        {
+            if (GetLocalPlayer() == GetTriggerPlayer())
+            {
                 PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(6))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(6))]), 5, 0, 100, 0, false);
             }
         }
-        if (GetPlayerSlotState(Player(7)) == PLAYER_SLOT_STATE_PLAYING){
-            if (GetLocalPlayer() == GetTriggerPlayer()){
+        if (GetPlayerSlotState(Player(7)) == PLAYER_SLOT_STATE_PLAYING)
+        {
+            if (GetLocalPlayer() == GetTriggerPlayer())
+            {
                 PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(7))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(7))]), 5, 100, 50, 50, false);
             }
         }
     }
 }
-bool KawarimiUseCondition(){
-    return GetItemTypeId(GetManipulatedItem()) == FourCC("I00V");
+bool KawarimiUseCondition()
+{
+    return GetItemTypeId(GetManipulatedItem()) == 'I00V' ;
 }
-void KawarimiUseAction(){
-int ID = GetPlayerId(GetOwningPlayer(GetTriggerUnit()));
-unit KawarimiUnit = CreateUnit(Player(ID), FourCC("n000"), GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 270);
+void KawarimiUseAction()
+{
+    int ID = GetPlayerId(GetOwningPlayer(GetTriggerUnit()));
+    unit KawarimiUnit = CreateUnit(Player(ID), 'n000' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 270);
     KawarimiTriggerUnitArray[ID] = GetTriggerUnit();
     SetUnitInvulnerable(KawarimiTriggerUnitArray[ID], true);
     PauseUnit(KawarimiTriggerUnitArray[ID], true);
     ShowUnit(KawarimiTriggerUnitArray[ID], false);
-    UnitApplyTimedLife(KawarimiUnit, FourCC("BOmi"), 3);
+    UnitApplyTimedLife(KawarimiUnit, 'BOmi' , 3);
     DestroyEffect(AddSpecialEffect("Abilities\\Spells\\Human\\Polymorph\\PolyMorphTarget.mdl", GetUnitX(KawarimiUnit), GetUnitY(KawarimiUnit)));
 }
-bool KawarimiBreakCondition(){
-    return GetUnitTypeId(GetDyingUnit()) == FourCC("n000");
+bool KawarimiBreakCondition()
+{
+    return GetUnitTypeId(GetDyingUnit()) == 'n000' ;
 }
-void KawarimiBreakAction(){
-int ID = GetPlayerId(GetOwningPlayer(GetDyingUnit()));
+void KawarimiBreakAction()
+{
+    int ID = GetPlayerId(GetOwningPlayer(GetDyingUnit()));
     SetUnitInvulnerable(KawarimiTriggerUnitArray[ID], false);
     ShowUnit(KawarimiTriggerUnitArray[ID], true);
     PauseUnit(KawarimiTriggerUnitArray[ID], false);
-    CreateNUnitsAtLocACF(1, FourCC("n001"), GetOwningPlayer(KawarimiTriggerUnitArray[ID]), GetUnitLoc(KawarimiTriggerUnitArray[ID]), 270);
-    UnitApplyTimedLife(GlobalUnit, FourCC("BOmi"), 1);
+    CreateNUnitsAtLocACF(1, 'n001' , GetOwningPlayer(KawarimiTriggerUnitArray[ID]), GetUnitLoc(KawarimiTriggerUnitArray[ID]), 270);
+    UnitApplyTimedLife(GlobalUnit, 'BOmi' , 1);
     IssueImmediateOrder(GlobalUnit, "stomp");
     DestroyEffect(AddSpecialEffect("Abilities\\Spells\\Human\\ThunderClap\\ThunderClapCaster.mdl", GetUnitX(GlobalUnit), GetUnitY(GlobalUnit)));
-    if (GetLocalPlayer() == Player(ID)){
+    if (GetLocalPlayer() == Player(ID))
+    {
         ClearSelection();
         SelectUnit(KawarimiTriggerUnitArray[ID], true);
     }
 }
-void EnableNotificationAction(){
+void EnableNotificationAction()
+{
     DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "|c0000FF00Notifications have been enabled!");
     NotificationEnabledIntArray[GetPlayerId(GetTriggerPlayer())] = 1;
 }
-void DisableNotificationAction(){
+void DisableNotificationAction()
+{
     DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "|c00ff0000Notifications have been disabled!");
     NotificationEnabledIntArray[GetPlayerId(GetTriggerPlayer())] = 0;
 }
-void ClearMessagesAction(){
-    if (GetLocalPlayer() == GetTriggerPlayer()){
+void ClearMessagesAction()
+{
+    if (GetLocalPlayer() == GetTriggerPlayer())
+    {
         ClearTextMessages();
     }
 }
-void ClearAllData(int hid){
+void ClearAllData(int hid)
+{
     PauseTimer(GetExpiredTimer());
-    if (IsUnitPaused(LoadUnitHandle(GameHashTable, hid, iCaster))){
+    if (IsUnitPaused(LoadUnitHandle(GameHashTable, hid, iCaster)))
+    {
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
         IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
     }
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
+    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
     SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 0, 2000);
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A04U"));
+    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
     SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 0, 2000);
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A04U"));
+    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
     SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
     ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), true);
@@ -2712,77 +3100,97 @@ void ClearAllData(int hid){
     FlushChildHashtable(GameHashTable, hid);
     DestroyTimer(GetExpiredTimer());
 }
-bool StopSpell(int hid, int LocType){
-    if (LocType == 0){
-        if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0){
+bool StopSpell(int hid, int LocType)
+{
+    if (LocType == 0)
+    {
+        if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0)
+        {
             ClearAllData(hid);
             return true;
         }
     }
-    else {
-        if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0){
+    else
+    {
+        if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0)
+        {
             ClearAllData(hid);
             return true;
         }
     }
     return false;
 }
-void ReinforceResetT(int hid){
+void ReinforceResetT(int hid)
+{
     StopSound(ReinforceSounds[5], false, false);
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A04K"));
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A04K"));
+    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04K' );
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04K' );
     KillUnit(LoadUnitHandle(GameHashTable, hid, iTarget));
     ClearAllData(hid);
 }
-bool CloakOfFlamesDamage(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 30 + 10 * GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster));
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0 && IsUnitInvisible(GetFilterUnit(), Player(ID))){
+bool CloakOfFlamesDamage()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 30 + 10 * GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster));
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0 && IsUnitInvisible(GetFilterUnit(), Player(ID)))
+    {
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
         DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Other\\ImmolationRed\\ImmolationRedDamage.mdl", GetFilterUnit(), "chest"));
     }
     return true;
 }
-void CloakOfFlamesAction(){
-int hid = GetHandleId(GetExpiredTimer());
-    if (UnitHasItemById(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("I00P"))){
+void CloakOfFlamesAction()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    if (UnitHasItemById(LoadUnitHandle(GameHashTable, hid, iCaster), 'I00P' ))
+    {
         GroupEnumUnitsInRange(GroupEnum, GetUnitX(LoadUnitHandle(GameHashTable, hid, iCaster)), GetUnitY(LoadUnitHandle(GameHashTable, hid, iCaster)), 300, Filter(@CloakOfFlamesDamage));
     }
-    else {
+    else
+    {
         PauseTimer(GetExpiredTimer());
         FlushChildHashtable(GameHashTable, hid);
         DestroyTimer(GetExpiredTimer());
     }
 }
-void CloakOfFlamesPickUp(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (CountItemsOfTypeFromUnitRW(GetTriggerUnit(), FourCC("I00P")) == 1){
+void CloakOfFlamesPickUp()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (CountItemsOfTypeFromUnitRW(GetTriggerUnit(), 'I00P' ) == 1)
+    {
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         TimerStart(tmr, 1, true, @CloakOfFlamesAction);
     }
-    else {
+    else
+    {
         DestroyTimer(tmr);
     }
 }
-bool NanayaShikiSpellDFunction1(){
-    return GetSpellAbilityId() == FourCC("A02P");
+bool NanayaShikiSpellDFunction1()
+{
+    return GetSpellAbilityId() == 'A02P' ;
 }
-void NanayaShikiSpellDFunction2(){
+void NanayaShikiSpellDFunction2()
+{
     PlaySoundWithVolumeACF(NanayaShikiSounds[5], 90, 0);
 }
-bool NanayaShikiSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A02M");
+bool NanayaShikiSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A02M' ;
 }
-bool NanayaShikiSpellQFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool NanayaShikiSpellQFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
         LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 109), LoadLocationHandle(GameHashTable, hid, 103)), 200, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
         DestroyEffect(AddSpecialEffect("GeneralEffects\\BloodEffect1.mdx", GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit())));
-        if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("B001")) > 0){
+        if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' ) > 0)
+        {
             LocDamage = LocDamage * 1.5f;
             StunUnitACF(GetFilterUnit(), 1);
         }
@@ -2791,27 +3199,32 @@ float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
     }
     return true;
 }
-void NanayaShikiSpellQFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void NanayaShikiSpellQFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 30){
+        if (LocTime == 30)
+        {
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .1f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, FourCC("u00A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 3, 3, 3);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@NanayaShikiSpellQFunction2));
-            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("B001"));
+            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' );
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw six");
             ClearAllData(hid);
         }
     }
 }
-void NanayaShikiSpellQFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void NanayaShikiSpellQFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
@@ -2826,54 +3239,66 @@ int hid = GetHandleId(tmr);
         DestroyTimer(tmr);
     }
 }
-bool NanayaShikiSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A02N");
+bool NanayaShikiSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A02N' ;
 }
-bool NanayaShikiSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-int LocCount = LoadInteger(GameHashTable, hid, 110);
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 5 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.033f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool NanayaShikiSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    int LocCount = LoadInteger(GameHashTable, hid, 110);
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 5 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.033f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         IssueImmediateOrder(GetFilterUnit(), "stop");
-        if (LocCount == 5 || LocCount == 15 || LocCount == 25){
+        if (LocCount == 5 || LocCount == 15 || LocCount == 25)
+        {
             DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
         }
-        if (LocCount == 29){
+        if (LocCount == 29)
+        {
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", GetFilterUnit(), "chest"));
         }
-        if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("B001")) > 0){
+        if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' ) > 0)
+        {
             LocDamage = LocDamage * 1.5f;
         }
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
     }
     return true;
 }
-void NanayaShikiSpellWFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-    if (StopSpell(hid, 0) == false){
+void NanayaShikiSpellWFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 110, LoadInteger(GameHashTable, hid, 110) + 1);
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 350, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-        GlobalUnit = CreateUnitAtLoc(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("u00P"), LoadLocationHandle(GameHashTable, hid, 102), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)) + GetRandomReal( - 45, 45));
+        GlobalUnit = CreateUnitAtLoc(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00P' , LoadLocationHandle(GameHashTable, hid, 102), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)) + GetRandomReal( - 45, 45));
         SetUnitScale(GlobalUnit, 2, 2, 2);
         SetUnitVertexColor(GlobalUnit, 255, 100, 255, 255);
         GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 350, Filter(@NanayaShikiSpellWFunction2));
-        if (LoadInteger(GameHashTable, hid, 110) >= 30){
-            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("B001"));
+        if (LoadInteger(GameHashTable, hid, 110) >= 30)
+        {
+            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' );
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "stand");
             ClearAllData(hid);
         }
-        else {
+        else
+        {
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
     }
 }
-void NanayaShikiSpellWFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void NanayaShikiSpellWFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         PlaySoundWithVolumeACF(NanayaShikiSounds[1], 100, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
@@ -2887,27 +3312,34 @@ int hid = GetHandleId(tmr);
         DestroyTimer(tmr);
     }
 }
-bool NanayaShikiSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A02O");
+bool NanayaShikiSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A02O' ;
 }
-bool NanayaShikiSpellEFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool NanayaShikiSpellEFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
     }
     return true;
 }
-void NanayaShikiSpellEFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+void NanayaShikiSpellEFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-    if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("B001")) > 0){
-        if (StopSpell(hid, 0) == false && LocTime < 125){
-            if (LocTime == 25){
+    if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' ) > 0)
+    {
+        if (StopSpell(hid, 0) == false && LocTime < 125)
+        {
+            if (LocTime == 25)
+            {
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
                 SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 150, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
@@ -2920,37 +3352,40 @@ float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
             }
-            if (LocTime == 50){
+            if (LocTime == 50)
+            {
                 PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
                 PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell slam one");
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
-                CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 SetUnitScaleAndTime(GlobalUnit, 2.5f, .7f);
-                CreateNUnitsAtLocACF(1, FourCC("u00G"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(1, 'u00G' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-                CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 SetUnitScale(GlobalUnit, 2, 2, 2);
-                while (true) {
+                while (true)
+                {
                     if (i > 5) break;
-                    CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                     SetUnitScale(GlobalUnit, 2, 2, 2);
                     i = i + 1;
                 }
                 DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A04U"));
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A04U"), false);
+                UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
+                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A04U' , false);
                 SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 800, 4000);
                 LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 300, .4f, .01f, false, false, "origin", "");
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             }
-            if (LocTime == 75){
-                UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A04U"));
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A04U"), false);
+            if (LocTime == 75)
+            {
+                UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
+                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A04U' , false);
                 SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 600, 4000);
                 PlaySoundWithVolumeACF(NanayaShikiSounds[3], 100, 0);
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -2965,16 +3400,17 @@ float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
             }
         }
-        if (LocTime == 125){
+        if (LocTime == 125)
+        {
             LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
             PlaySoundWithVolumeACF(NanayaShikiSounds[2], 100, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
             SetUnitFlyHeight(GlobalUnit, 800, 99999);
-            CreateNUnitsAtLocACF(1, FourCC("u00G"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 180);
+            CreateNUnitsAtLocACF(1, 'u00G' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 180);
             SetUnitScaleAndTime(GlobalUnit, 2.5f, 2.f);
             SetUnitFlyHeight(GlobalUnit, 800, 99999);
             SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 0, 2000);
@@ -2983,27 +3419,32 @@ float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 150){
+        if (LocTime == 150)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            CreateNUnitsAtLocACF(1, FourCC("u00D"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+            CreateNUnitsAtLocACF(1, 'u00D' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
             SetUnitScale(GlobalUnit, 3, 3, 3);
             i = 1;
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw two");
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 500, Filter(@NanayaShikiSpellEFunction2));
-            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("B001"));
+            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' );
             ClearAllData(hid);
         }
     }
-    else {
-        if (StopSpell(hid, 0) == false){
-            if (LocTime == 50){
+    else
+    {
+        if (StopSpell(hid, 0) == false)
+        {
+            if (LocTime == 50)
+            {
                 DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
@@ -3011,9 +3452,9 @@ float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
                 SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 300, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
                 SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
                 SetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                CreateNUnitsAtLocACF(1, FourCC("u00A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 45);
+                CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 45);
                 SetUnitScale(GlobalUnit, 2, 2, 2);
-                CreateNUnitsAtLocACF(1, FourCC("u00A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 45);
+                CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 45);
                 SetUnitScale(GlobalUnit, 2, 2, 2);
                 PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw six");
@@ -3025,44 +3466,50 @@ float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
         }
     }
 }
-void NanayaShikiSpellEFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void NanayaShikiSpellEFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(NanayaShikiSounds[4], 90, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell slam one");
     TimerStart(tmr, .01f, true, @NanayaShikiSpellEFunction3);
 }
-bool NanayaShikiSpellRFunction1(){
-    return GetSpellAbilityId() == FourCC("A02Q");
+bool NanayaShikiSpellRFunction1()
+{
+    return GetSpellAbilityId() == 'A02Q' ;
 }
-void NanayaShikiSpellRFunction2(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-float LocDamage = 4000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 0) == false){
+void NanayaShikiSpellRFunction2()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    float LocDamage = 4000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 25){
+        if (LocTime == 25)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 2.5f, .7f);
-            CreateNUnitsAtLocACF(1, FourCC("u00L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScale(GlobalUnit, 2, 2, 2);
                 i = i + 1;
             }
@@ -3072,31 +3519,34 @@ float LocDamage = 4000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 125){
+        if (LocTime == 125)
+        {
             PlaySoundWithVolumeACF(NanayaShikiSounds[7], 100, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 2.5f, .7f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw five");
             DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 200, 1, .015f, 400);
             i = 1;
-            while (true) {
+            while (true)
+            {
                 if (i > 15) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00K"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(1, 'u00K' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 DisplaceUnitWithArgs(GlobalUnit, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 200, 1 + .1f * I2R(i), .02f, 400);
-                UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 1);
+                UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1);
                 SetUnitAnimation(GlobalUnit, "spell throw five");
                 SetUnitVertexColor(GlobalUnit, 255, 255, 255, (255 - (15 * i)));
                 i = i + 1;
             }
         }
-        if (LocTime == 225){
+        if (LocTime == 225)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[2], 80, 0);
             PlaySoundWithVolumeACF(NanayaShikiSounds[6], 100, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -3107,20 +3557,22 @@ float LocDamage = 4000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
             SetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 250, .8f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(3, FourCC("u00J"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
+            CreateNUnitsAtLocACF(3, 'u00J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
             i = 1;
-            while (true) {
+            while (true)
+            {
                 if (i > 8) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
             i = 1;
-            while (true) {
+            while (true)
+            {
                 if (i > 4) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), ((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) + Pow( - 1, I2R(i)) * 30));
+                CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), ((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) + Pow( - 1, I2R(i)) * 30));
                 SetUnitScaleAndTime(GlobalUnit, 3.f, .5f);
                 i = i + 1;
             }
@@ -3130,21 +3582,23 @@ float LocDamage = 4000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
-        if (LocTime == 305){
+        if (LocTime == 305)
+        {
             ClearAllData(hid);
         }
     }
 }
-void NanayaShikiSpellRFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void NanayaShikiSpellRFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(NanayaShikiSounds[8], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A02P"));
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A02P"));
+    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A02P' );
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A02P' );
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 200, .25f, .015f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
@@ -3154,26 +3608,32 @@ int hid = GetHandleId(tmr);
     SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
     TimerStart(tmr, .01f, true, @NanayaShikiSpellRFunction2);
 }
-bool NanayaShikiSpellTFunction1(){
-    return GetSpellAbilityId() == FourCC("A02R");
+bool NanayaShikiSpellTFunction1()
+{
+    return GetSpellAbilityId() == 'A02R' ;
 }
-void NanayaShikiSpellTFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 6000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 400 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-    if (StopSpell(hid, 0) == false){
-        if (IsCounted == true){
+void NanayaShikiSpellTFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 6000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 400 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
+    if (StopSpell(hid, 0) == false)
+    {
+        if (IsCounted == true)
+        {
             SaveInteger(GameHashTable, hid, 0, LocTime + 1);
         }
-        if (LocTime == 50){
+        if (LocTime == 50)
+        {
             PlaySoundWithVolumeACF(NanayaShikiSounds[9], 100, 0);
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), .25f);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell one alternate");
         }
-        if (LocTime == 90){
+        if (LocTime == 90)
+        {
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 0);
-            CreateNUnitsAtLocACF(1, FourCC("u00N"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00N' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
             SetUnitPathing(GlobalUnit, false);
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
@@ -3182,27 +3642,29 @@ bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             SaveBoolean(GameHashTable, hid, 10, false);
         }
-        if (IsCounted == false){
+        if (IsCounted == false)
+        {
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
             SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107)) * .1f, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 103))));
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 109));
             SetUnitPathing(LoadUnitHandle(GameHashTable, hid, 106), false);
             SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, 106), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 109))) <= 75){
+            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 109))) <= 75)
+            {
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
                 SaveLocationHandle(GameHashTable, hid, 114, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 150, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
                 RemoveUnit(LoadUnitHandle(GameHashTable, hid, 106));
                 SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-                UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A04U"));
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A04U"), false);
+                UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
+                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A04U' , false);
                 SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 200, 99999);
                 SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel three");
                 SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103));
-                CreateNUnitsAtLocACF(1, FourCC("u00M"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 114), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), .8f);
+                CreateNUnitsAtLocACF(1, 'u00M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 114), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                UnitApplyTimedLife(GlobalUnit, 'BTLF' , .8f);
                 SetUnitAnimation(GlobalUnit, "spell slam three");
                 SetUnitVertexColor(GlobalUnit, 255, 255, 255, 180);
                 DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl", LoadLocationHandle(GameHashTable, hid, 102)));
@@ -3217,18 +3679,19 @@ bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
         }
-        if (LocTime == 130){
+        if (LocTime == 130)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 0, 99999);
-            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A04U"));
+            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 114), LoadLocationHandle(GameHashTable, hid, 103)), 300, .4f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(3, FourCC("u00J"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            CreateNUnitsAtLocACF(1, FourCC("u00A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 45);
+            CreateNUnitsAtLocACF(3, 'u00J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
+            CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 45);
             SetUnitScale(GlobalUnit, 3, 3, 3);
-            CreateNUnitsAtLocACF(1, FourCC("u00A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 3, 3, 3);
-            CreateNUnitsAtLocACF(1, FourCC("u00A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 45);
+            CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 45);
             SetUnitScale(GlobalUnit, 3, 3, 3);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
             DestroyEffect(AddSpecialEffectLoc("GeneralSounds\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
@@ -3237,7 +3700,8 @@ bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 114));
         }
-        if (LocTime == 170){
+        if (LocTime == 170)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
@@ -3249,16 +3713,17 @@ bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
         }
     }
 }
-void NanayaShikiSpellTFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void NanayaShikiSpellTFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveBoolean(GameHashTable, hid, 10, true);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A02P"));
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A02P"));
+    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A02P' );
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A02P' );
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
@@ -3311,19 +3776,24 @@ void HeroInit1()
     TriggerAddCondition(t, Condition(@NanayaShikiSpellTFunction1));
     TriggerAddAction(t, @NanayaShikiSpellTFunction3);
 }
-bool ToonoShikiSpellDFunction1(){
-    return GetSpellAbilityId() == FourCC("A02X");
+bool ToonoShikiSpellDFunction1()
+{
+    return GetSpellAbilityId() == 'A02X' ;
 }
-void ToonoShikiSpellDFunction6(){
+void ToonoShikiSpellDFunction6()
+{
     PlaySoundWithVolumeACF(ToonoShikiSounds[0], 100, 0);
 }
-bool ToonoShikiSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A02U");
+bool ToonoShikiSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A02U' ;
 }
-bool ToonoShikiSpellQFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ToonoShikiSpellQFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
         LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 109), LoadLocationHandle(GameHashTable, hid, 103)), 200, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
         DestroyEffect(AddSpecialEffect("GeneralEffects\\BloodEffect1.mdx", GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit())));
@@ -3332,15 +3802,18 @@ float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
     }
     return true;
 }
-void ToonoShikiSpellQFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void ToonoShikiSpellQFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 30){
+        if (LocTime == 30)
+        {
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .1f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, FourCC("u02O"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 3, 3, 3);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@ToonoShikiSpellQFunction2));
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell four");
@@ -3348,10 +3821,12 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void ToonoShikiSpellQFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void ToonoShikiSpellQFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
@@ -3366,50 +3841,61 @@ int hid = GetHandleId(tmr);
         DestroyTimer(tmr);
     }
 }
-bool ToonoShikiSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A02V");
+bool ToonoShikiSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A02V' ;
 }
-bool ToonoShikiSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-int LocCount = LoadInteger(GameHashTable, hid, 110);
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 5 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.033f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ToonoShikiSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    int LocCount = LoadInteger(GameHashTable, hid, 110);
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 5 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.033f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         IssueImmediateOrder(GetFilterUnit(), "stop");
-        if (LocCount == 5 || LocCount == 15 || LocCount == 25){
+        if (LocCount == 5 || LocCount == 15 || LocCount == 25)
+        {
             DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
         }
-        if (LocCount == 29){
+        if (LocCount == 29)
+        {
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", GetFilterUnit(), "chest"));
         }
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
     }
     return true;
 }
-void ToonoShikiSpellWFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-    if (StopSpell(hid, 0) == false){
+void ToonoShikiSpellWFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 110, LoadInteger(GameHashTable, hid, 110) + 1);
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 350, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-        GlobalUnit = CreateUnitAtLoc(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("u00P"), LoadLocationHandle(GameHashTable, hid, 102), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)) + GetRandomReal( - 45, 45));
+        GlobalUnit = CreateUnitAtLoc(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00P' , LoadLocationHandle(GameHashTable, hid, 102), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)) + GetRandomReal( - 45, 45));
         SetUnitScale(GlobalUnit, 2, 2, 2);
         SetUnitVertexColor(GlobalUnit, 200, 200, 255, 255);
         GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 350, Filter(@ToonoShikiSpellWFunction2));
-        if (LoadInteger(GameHashTable, hid, 110) >= 30){
+        if (LoadInteger(GameHashTable, hid, 110) >= 30)
+        {
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "stand");
             ClearAllData(hid);
         }
-        else {
+        else
+        {
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
     }
 }
-void ToonoShikiSpellWFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void ToonoShikiSpellWFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         PlaySoundWithVolumeACF(ToonoShikiSounds[1], 100, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
@@ -3423,16 +3909,20 @@ int hid = GetHandleId(tmr);
         DestroyTimer(tmr);
     }
 }
-bool ToonoShikiSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A02W");
+bool ToonoShikiSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A02W' ;
 }
-void ToonoShikiSpellEFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-float LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 1) == false){
+void ToonoShikiSpellEFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    float LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (StopSpell(hid, 1) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20){
+        if (LocTime == 20)
+        {
             PlaySoundWithVolumeACF(ToonoShikiSounds[2], 100, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
@@ -3440,7 +3930,8 @@ float LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 70){
+        if (LocTime == 70)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[2], 60, 0);
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -3449,34 +3940,36 @@ float LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)) - 180, 300, .25f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
             StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
             DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            CreateNUnitsAtLocACF(1, FourCC("u02O"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), (((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) + 45)));
+            CreateNUnitsAtLocACF(1, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), (((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) + 45)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
-            CreateNUnitsAtLocACF(1, FourCC("u02O"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), (((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) - 45)));
+            CreateNUnitsAtLocACF(1, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), (((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) - 45)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 90){
+        if (LocTime == 90)
+        {
             ClearAllData(hid);
         }
     }
 }
-void ToonoShikiSpellEFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ToonoShikiSpellEFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(ToonoShikiSounds[3], 100, 0);
     SaveInteger(GameHashTable, hid, 0, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
     SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2.5f);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel three");
-    GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("u00E"), GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
+    GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00E' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
     SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
     LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 50, .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
     DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl", LoadLocationHandle(GameHashTable, hid, 102)));
@@ -3484,27 +3977,33 @@ int hid = GetHandleId(tmr);
     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
     TimerStart(tmr, .01f, true, @ToonoShikiSpellEFunction2);
 }
-bool ToonoShikiSpellRFunction1(){
-    return GetSpellAbilityId() == FourCC("A02Y");
+bool ToonoShikiSpellRFunction1()
+{
+    return GetSpellAbilityId() == 'A02Y' ;
 }
-bool ToonoShikiSpellRFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 40 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ToonoShikiSpellRFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 40 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
     }
     return true;
 }
-void ToonoShikiSpellRFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 0;
-int LocTime = LoadInteger(GameHashTable, hid, 0);
+void ToonoShikiSpellRFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 0;
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
     SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-    if (StopSpell(hid, 0) == false && LocTime < 160){
-        if (LocTime == 20){
+    if (StopSpell(hid, 0) == false && LocTime < 160)
+    {
+        if (LocTime == 20)
+        {
             LocDamage = 325 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 32.5f + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.20f;
             PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
@@ -3512,16 +4011,17 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.25f, 1.5f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.25f, .7f);
-            CreateNUnitsAtLocACF(1, FourCC("u00L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.5f, 2.f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            while (true) {
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScale(GlobalUnit, 1.5f, 1.5f, 1.5f);
                 i = i + 1;
             }
@@ -3531,7 +4031,8 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 40){
+        if (LocTime == 40)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel three");
@@ -3540,35 +4041,38 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 60){
+        if (LocTime == 60)
+        {
             PlaySoundWithVolumeACF(ToonoShikiSounds[5], 100, 0);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel one");
         }
-        if (LocTime == 110){
+        if (LocTime == 110)
+        {
             LocDamage = 750 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 60 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.25f;
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 3);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.25f, 1.5f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.5f, .7f);
-            CreateNUnitsAtLocACF(1, FourCC("u00G"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00G' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.5f, 2.f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             i = 1;
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScale(GlobalUnit, 1.5f, 1.5f, 1.5f);
                 i = i + 1;
             }
             DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A04U"));
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A04U"), false);
+            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
+            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A04U' , false);
             SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 800, 2000);
-            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A04U"));
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A04U"), false);
+            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
+            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A04U' , false);
             SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 800, 2000);
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, .4f, .01f, false, false, "origin", "");
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, .4f, .01f, false, false, "origin", "");
@@ -3576,21 +4080,22 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
     }
-    if (LocTime == 160){
+    if (LocTime == 160)
+    {
         LocDamage = 750 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 60 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.25f;
         PlaySoundWithVolumeACF(ToonoShikiSounds[6], 100, 0);
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
         SetUnitScaleAndTime(GlobalUnit, 1.25f, 1.5f);
         SetUnitFlyHeight(GlobalUnit, 900, 99999);
-        CreateNUnitsAtLocACF(1, FourCC("u00G"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 180);
+        CreateNUnitsAtLocACF(1, 'u00G' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 180);
         SetUnitScaleAndTime(GlobalUnit, 1.5f, 2.f);
         SetUnitFlyHeight(GlobalUnit, 900, 99999);
         SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 0, 3000);
-        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A04U"));
+        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
         SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 0, 3000);
-        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A04U"));
+        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
         LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)), 200, .25f, .01f, false, false, "origin", "");
         LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, .25f, .01f, false, false, "origin", "");
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
@@ -3598,17 +4103,19 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
         RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
     }
-    if (LocTime == 200){
+    if (LocTime == 200)
+    {
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        CreateNUnitsAtLocACF(1, FourCC("u00R"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
+        CreateNUnitsAtLocACF(1, 'u00R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
         SetUnitScale(GlobalUnit, 2, 2, 2);
         i = 1;
-        while (true) {
+        while (true)
+        {
             if (i > 8) break;
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
             SetUnitScaleAndTime(GlobalUnit, 1.5f, GetRandomReal(.5f, 2));
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
             SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
             i = i + 1;
         }
@@ -3616,15 +4123,16 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         ClearAllData(hid);
     }
 }
-void ToonoShikiSpellRFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ToonoShikiSpellRFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveInteger(GameHashTable, hid, 0, 0);
     PlaySoundWithVolumeACF(ToonoShikiSounds[4], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 250, .1f, .015f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
@@ -3633,17 +4141,21 @@ int hid = GetHandleId(tmr);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel five");
     TimerStart(tmr, .01f, true, @ToonoShikiSpellRFunction3);
 }
-bool ToonoShikiSpellTFunction1(){
-    return GetSpellAbilityId() == FourCC("A02Z");
+bool ToonoShikiSpellTFunction1()
+{
+    return GetSpellAbilityId() == 'A02Z' ;
 }
-void ToonoShikiSpellTFunction2(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-float LocDamage = 3000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 1) == false){
+void ToonoShikiSpellTFunction2()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    float LocDamage = 3000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (StopSpell(hid, 1) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 90){
+        if (LocTime == 90)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[2], 80, 0);
             PlaySoundWithVolumeACF(ToonoShikiSounds[7], 100, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -3652,19 +4164,21 @@ float LocDamage = 3000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
             SetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 250, .4f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(3, FourCC("u00J"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            while (true) {
+            CreateNUnitsAtLocACF(3, 'u00J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
+            while (true)
+            {
                 if (i > 8) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 1.5f, GetRandomReal(.5f, 2));
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 1.5f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
             i = 1;
-            while (true) {
+            while (true)
+            {
                 if (i > 17) break;
-                CreateNUnitsAtLocACF(1, FourCC("u02O"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 DisplaceUnitWithArgs(GlobalUnit, GetUnitFacing(GlobalUnit), GetRandomReal(200, 800), .1f, .01f, 0);
                 SetUnitScaleAndTime(GlobalUnit, 2.f, .5f);
                 i = i + 1;
@@ -3676,25 +4190,27 @@ float LocDamage = 3000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
             SaveReal(GameHashTable, hid, 110, 0);
         }
-        if (LocTime == 130){
+        if (LocTime == 130)
+        {
             ClearAllData(hid);
         }
     }
 }
-void ToonoShikiSpellTFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ToonoShikiSpellTFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveInteger(GameHashTable, hid, 0, 0);
     PlaySoundWithVolumeACF(ToonoShikiSounds[3], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell one");
-    GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("u00E"), GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
+    GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00E' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
     SetUnitTimeScale(GlobalUnit, 1.5f);
-    GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("u00E"), GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
+    GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00E' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
     SetUnitScale(GlobalUnit, 1.5f, 1.5f, 1.5f);
     TimerStart(tmr, .01f, true, @ToonoShikiSpellTFunction2);
 }
@@ -3745,19 +4261,24 @@ void HeroInit2()
     TriggerAddAction(t, @ToonoShikiSpellTFunction3);
 }
 
-bool RyougiShikiSpellDFunction1(){
-    return GetSpellAbilityId() == FourCC("A035");
+bool RyougiShikiSpellDFunction1()
+{
+    return GetSpellAbilityId() == 'A035' ;
 }
-void RyougiShikiSpellDFunction6(){
+void RyougiShikiSpellDFunction6()
+{
     PlaySoundWithVolumeACF(RyougiShikiSounds[0], 60, 0);
 }
-bool RyougiShikiSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A033");
+bool RyougiShikiSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A033' ;
 }
-bool RyougiShikiSpellQFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 240 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 80 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool RyougiShikiSpellQFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 240 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 80 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
         SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(GetFilterUnit()));
@@ -3767,26 +4288,30 @@ float LocDamage = 240 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
     }
     return true;
 }
-void RyougiShikiSpellQFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void RyougiShikiSpellQFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20){
+        if (LocTime == 20)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[0], 50, 0);
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 200, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(5, FourCC("u00T"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
+            CreateNUnitsAtLocACF(5, 'u00T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 300, Filter(@RyougiShikiSpellQFunction2));
             ClearAllData(hid);
         }
     }
 }
-void RyougiShikiSpellQFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void RyougiShikiSpellQFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(RyougiShikiSounds[2], 80, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
@@ -3794,13 +4319,16 @@ int hid = GetHandleId(tmr);
     SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.5f);
     TimerStart(tmr, .01f, true, @RyougiShikiSpellQFunction3);
 }
-bool RyougiShikiSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A032");
+bool RyougiShikiSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A032' ;
 }
-bool RyougiShikiSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool RyougiShikiSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
         LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 109)), 150, .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
@@ -3809,50 +4337,59 @@ float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
     }
     return true;
 }
-void RyougiShikiSpellWFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void RyougiShikiSpellWFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 40){
+        if (LocTime == 40)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[0], 50, 0);
-            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A033"));
-            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A033"));
+            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A033' );
+            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A033' );
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 200, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(5, FourCC("u00T"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
+            CreateNUnitsAtLocACF(5, 'u00T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@RyougiShikiSpellWFunction2));
             ClearAllData(hid);
         }
     }
 }
-void RyougiShikiSpellWFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void RyougiShikiSpellWFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         PlaySoundWithVolumeACF(RyougiShikiSounds[1], 100, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
         LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .4f, .01f, false, true, "origin", "");
         SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
         SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Channel Slam");
         TimerStart(tmr, .01f, true, @RyougiShikiSpellWFunction3);
     }
-    else {
+    else
+    {
         IssueImmediateOrder(GetTriggerUnit(), "stop");
         DestroyTimer(tmr);
     }
 }
-bool RyougiShikiSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A034");
+bool RyougiShikiSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A034' ;
 }
-bool RyougiShikiSpellEFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool RyougiShikiSpellEFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
         DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
@@ -3860,25 +4397,30 @@ float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75
     }
     return true;
 }
-void RyougiShikiSpellEFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void RyougiShikiSpellEFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 50){
+        if (LocTime == 50)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[0], 50, 0);
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            CreateNUnitsAtLocACF(1, FourCC("u02O"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 3, 3, 3);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 600, Filter(@RyougiShikiSpellEFunction2));
             ClearAllData(hid);
         }
     }
 }
-void RyougiShikiSpellEFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void RyougiShikiSpellEFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         PlaySoundWithVolumeACF(RyougiShikiSounds[3], 100, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -3889,70 +4431,82 @@ int hid = GetHandleId(tmr);
         LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .4f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
         TimerStart(tmr, .01f, true, @RyougiShikiSpellEFunction3);
     }
-    else {
+    else
+    {
         IssueImmediateOrder(GetTriggerUnit(), "stop");
         DestroyTimer(tmr);
     }
 }
-bool RyougiShikiSpellRFunction1(){
-    return GetSpellAbilityId() == FourCC("A036");
+bool RyougiShikiSpellRFunction1()
+{
+    return GetSpellAbilityId() == 'A036' ;
 }
-void RyougiShikiSpellRFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * .50f;
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false){
+void RyougiShikiSpellRFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * .50f;
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 1) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 25){
+        if (LocTime == 25)
+        {
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 100, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel five");
             DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-            CreateNUnitsAtLocACF(5, FourCC("u00U"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(5, 'u00U' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             SetUnitScale(GlobalUnit, 4, 4, 4);
         }
-        if (LocTime == 75){
+        if (LocTime == 75)
+        {
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell slam one");
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
-        if (LocTime == 135){
+        if (LocTime == 135)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[0], 50, 0);
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
             StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            CreateNUnitsAtLocACF(3, FourCC("u00J"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
+            CreateNUnitsAtLocACF(3, 'u00J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
             ClearAllData(hid);
         }
     }
 }
-void RyougiShikiSpellRFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void RyougiShikiSpellRFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveInteger(GameHashTable, hid, 0, 0);
     PlaySoundWithVolumeACF(RyougiShikiSounds[6], 80, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     TimerStart(tmr, .01f, true, @RyougiShikiSpellRFunction2);
 }
-bool RyougiShikiSpellTFunction1(){
-    return GetSpellAbilityId() == FourCC("A037");
+bool RyougiShikiSpellTFunction1()
+{
+    return GetSpellAbilityId() == 'A037' ;
 }
-void RyougiShikiSpellTFunction5(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-int LocCount = LoadInteger(GameHashTable, hid, 1);
-float LocDamage = 1500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 150 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
-    if (StopSpell(hid, 1) == false){
-        if (LoadBoolean(GameHashTable, hid, 10) == false){
+void RyougiShikiSpellTFunction5()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    int LocCount = LoadInteger(GameHashTable, hid, 1);
+    float LocDamage = 1500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 150 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
+    if (StopSpell(hid, 1) == false)
+    {
+        if (LoadBoolean(GameHashTable, hid, 10) == false)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 40, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
@@ -3960,16 +4514,17 @@ float LocDamage = 1500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
             SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
             DestroyEffect(AddSpecialEffectLoc("Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl", LoadLocationHandle(GameHashTable, hid, 102)));
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 600){
+            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 600)
+            {
                 DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                CreateNUnitsAtLocACF(2, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(2, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 SetUnitScale(GlobalUnit, 1.75f, 1.75f, 1.75f);
                 PlaySoundWithVolumeACF(RyougiShikiSounds[4], 100, 0);
                 SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 250, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
                 LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 109)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 109)), .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel four");
                 SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 109), 0);
-                CreateNUnitsAtLocACF(3, FourCC("u02O"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(3, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
                 StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), .5f);
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
@@ -3979,21 +4534,26 @@ float LocDamage = 1500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
-        else {
-            if (LoadInteger(GameHashTable, hid, 2) < 31){
+        else
+        {
+            if (LoadInteger(GameHashTable, hid, 2) < 31)
+            {
                 SaveInteger(GameHashTable, hid, 1, LocCount + 1);
-                if (LocCount == 25){
+                if (LocCount == 25)
+                {
                     SaveInteger(GameHashTable, hid, 1, 1);
                 }
                 SaveInteger(GameHashTable, hid, 2, LoadInteger(GameHashTable, hid, 2) + 1);
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                CreateNUnitsAtLocACF(3, FourCC("u02O"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 9 * (LoadInteger(GameHashTable, hid, 2)));
+                CreateNUnitsAtLocACF(3, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 9 * (LoadInteger(GameHashTable, hid, 2)));
                 PlaySoundWithVolumeACF(RyougiShikiSounds[5], 100, 0);
             }
-            else {
+            else
+            {
                 SaveInteger(GameHashTable, hid, 0, LocTime + 1);
             }
-            if (LoadInteger(GameHashTable, hid, 2) == 30){
+            if (LoadInteger(GameHashTable, hid, 2) == 30)
+            {
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
                 DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 600, 1.1f, .01f, 250);
@@ -4001,7 +4561,8 @@ float LocDamage = 1500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             }
-            if (LocTime == 60){
+            if (LocTime == 60)
+            {
                 LocDamage = 1500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 150 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
                 PlaySoundWithVolumeACF(GeneralSounds[0], 70, 0);
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -4010,29 +4571,31 @@ float LocDamage = 1500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
                 DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
                 DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
                 DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                CreateNUnitsAtLocACF(3, FourCC("u00J"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                CreateNUnitsAtLocACF(3, FourCC("u02O"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(3, 'u00J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(3, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 SetUnitScale(GlobalUnit, 4, 4, 4);
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             }
-            if (LocTime == 110){
+            if (LocTime == 110)
+            {
                 ClearAllData(hid);
             }
         }
     }
 }
-void RyougiShikiSpellTFunction6(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void RyougiShikiSpellTFunction6()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveBoolean(GameHashTable, hid, 10, false);
     SaveInteger(GameHashTable, hid, 0, 1);
     SaveInteger(GameHashTable, hid, 1, 1);
     SaveInteger(GameHashTable, hid, 2, 1);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel three");
@@ -4083,29 +4646,36 @@ void HeroInit3()
     TriggerAddAction(t, @RyougiShikiSpellTFunction6);
 }
 
-bool SaberAlterSpellDFunction1(){
-    return GetSpellAbilityId() == FourCC("A03S");
+bool SaberAlterSpellDFunction1()
+{
+    return GetSpellAbilityId() == 'A03S' ;
 }
-bool SaberAlterSpellDFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool SaberAlterSpellDFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         DisplaceUnitWithArgs(GetFilterUnit(), AngleBetweenUnits(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit()), 200, .5f, .01f, 400);
     }
     return true;
 }
-void SaberAlterSpellDFunction3(){
-float i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void SaberAlterSpellDFunction3()
+{
+    float i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20){
+        if (LocTime == 20)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u01P"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+                CreateNUnitsAtLocACF(1, 'u01P' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
                 SetUnitScaleAndTime(GlobalUnit, .2f * i, .6f + .1f * i);
                 i = i + 1;
             }
@@ -4114,23 +4684,27 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void SaberAlterSpellDFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void SaberAlterSpellDFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(SaberAlterSounds[0], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Morph");
     TimerStart(tmr, .01f, true, @SaberAlterSpellDFunction3);
 }
-bool SaberAlterSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A03T");
+bool SaberAlterSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A03T' ;
 }
-bool SaberAlterSpellQFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool SaberAlterSpellQFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
         LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 109)), 200, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
         DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
@@ -4140,28 +4714,34 @@ float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
     }
     return true;
 }
-void SaberAlterSpellQFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void SaberAlterSpellQFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 10){
+        if (LocTime == 10)
+        {
             PlaySoundWithVolumeACF(SaberAlterSounds[2], 100, 0);
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .1f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, FourCC("u01Q"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u01Q' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 3, 3, 3);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@SaberAlterSpellQFunction2));
         }
-        if (LocTime == 30){
+        if (LocTime == 30)
+        {
             ClearAllData(hid);
         }
     }
 }
-void SaberAlterSpellQFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void SaberAlterSpellQFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -4178,32 +4758,39 @@ int hid = GetHandleId(tmr);
         DestroyTimer(tmr);
     }
 }
-bool SaberAlterSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A03U");
+bool SaberAlterSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A03U' ;
 }
-bool SaberAlterSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 150 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool SaberAlterSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 150 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
     }
     return true;
 }
-void SaberAlterSpellWFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void SaberAlterSpellWFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 40){
+        if (LocTime == 40)
+        {
             PlaySoundWithVolumeACF(SaberAlterSounds[4], 100, 0);
             PlaySoundWithVolumeACF(SaberAlterSounds[5], 100, 0);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\LightningStrike1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, FourCC("u01T"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            while (true) {
+            CreateNUnitsAtLocACF(1, 'u01T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
+            while (true)
+            {
                 if (i > 4) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 3.f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
@@ -4212,18 +4799,20 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void SaberAlterSpellWFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void SaberAlterSpellWFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         PlaySoundWithVolumeACF(SaberAlterSounds[3], 100, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
         SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Two");
-        CreateNUnitsAtLocACF(1, FourCC("u01T"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-        CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+        CreateNUnitsAtLocACF(1, 'u01T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
         DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
         DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .4f, .01f, 600);
         TimerStart(tmr, .01f, true, @SaberAlterSpellWFunction3);
@@ -4234,13 +4823,16 @@ int hid = GetHandleId(tmr);
         DestroyTimer(tmr);
     }
 }
-bool SaberAlterSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A03V");
+bool SaberAlterSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A03V' ;
 }
-bool SaberAlterSpellEFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false){
+bool SaberAlterSpellEFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false)
+    {
         StunUnitACF(GetFilterUnit(), 1);
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         DisplaceUnitWithArgs(GetFilterUnit(), 0, 0, 1, .01f, 400);
@@ -4248,39 +4840,47 @@ float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75
     }
     return true;
 }
-void SaberAlterSpellEFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void SaberAlterSpellEFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
     }
-    else {
+    else
+    {
         RemoveUnit(LoadUnitHandle(GameHashTable, hid, iTarget));
     }
-    if (LocTime == 60){
+    if (LocTime == 60)
+    {
         PlaySoundWithVolumeACF(SaberAlterSounds[7], 100, 0.5f);
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
         IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
     }
-    if (LocTime > 60){
+    if (LocTime > 60)
+    {
         SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 150);
         SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
         DestroyEffect(AddSpecialEffectLoc("Characters\\SaberAlter\\ShadowBurstBigger.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
         SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iTarget), LoadLocationHandle(GameHashTable, hid, 107));
         GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 300, Filter(@SaberAlterSpellEFunction2));
-        if (LoadReal(GameHashTable, hid, 110) >= 1500.f || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0){
+        if (LoadReal(GameHashTable, hid, 110) >= 1500.f || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0)
+        {
             RemoveUnit(LoadUnitHandle(GameHashTable, hid, iTarget));
             DestroyGroup(LoadGroupHandle(GameHashTable, hid, 111));
             ClearAllData(hid);
         }
-        else {
+        else
+        {
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
     }
 }
-void SaberAlterSpellEFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void SaberAlterSpellEFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(SaberAlterSounds[6], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -4288,50 +4888,61 @@ int hid = GetHandleId(tmr);
     SaveGroupHandle(GameHashTable, hid, 111, CreateGroup());
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Five");
-    CreateNUnitsAtLocACF(1, FourCC("u02H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+    CreateNUnitsAtLocACF(1, 'u02H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
     SaveUnitHandle(GameHashTable, hid, iTarget, GlobalUnit);
     TimerStart(tmr, .01f, true, @SaberAlterSpellEFunction3);
 }
-bool SaberAlterSpellRFunction1(){
-    return GetSpellAbilityId() == FourCC("A03W");
+bool SaberAlterSpellRFunction1()
+{
+    return GetSpellAbilityId() == 'A03W' ;
 }
-bool SaberAlterSpellRLastSlash(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 30 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.25f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool SaberAlterSpellRLastSlash()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 30 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.25f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         DisplaceUnitWithArgs(GetFilterUnit(), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)), 300, .35f, .01f, 0);
         DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", GetFilterUnit(), "origin"));
     }
     return true;
 }
-bool SaberAlterSpellRFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 30 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.25f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool SaberAlterSpellRFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 30 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.25f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         DisplaceUnitWithArgs(GetFilterUnit(), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)), 100, .35f, .01f, 300);
         DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
     }
     return true;
 }
-void SaberAlterSpellRFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void SaberAlterSpellRFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 10 || LocTime == 50 || LocTime == 90){
-            if (LocTime == 50){
+        if (LocTime == 10 || LocTime == 50 || LocTime == 90)
+        {
+            if (LocTime == 50)
+            {
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Six");
             }
-            else {
+            else
+            {
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Three");
             }
             PlaySoundWithVolumeACF(SaberAlterSounds[9], 100, 0.50f);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 50, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(5, FourCC("u01R"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            if (IsTerrainPathable(GetLocationX(LoadLocationHandle(GameHashTable, hid, 103)), GetLocationY(LoadLocationHandle(GameHashTable, hid, 103)), PATHING_TYPE_WALKABILITY) == false){
+            CreateNUnitsAtLocACF(5, 'u01R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
+            if (IsTerrainPathable(GetLocationX(LoadLocationHandle(GameHashTable, hid, 103)), GetLocationY(LoadLocationHandle(GameHashTable, hid, 103)), PATHING_TYPE_WALKABILITY) == false)
+            {
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
                 SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 100, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
                 LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)), 100, .4f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
@@ -4340,17 +4951,20 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 120){
+        if (LocTime == 120)
+        {
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Slam");
         }
-        if (LocTime == 150){
+        if (LocTime == 150)
+        {
             PlaySoundWithVolumeACF(SaberAlterSounds[9], 100, 0.50f);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 50, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            CreateNUnitsAtLocACF(1, FourCC("u01Q"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u01Q' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 3, 3, 3);
-            if (IsTerrainPathable(GetLocationX(LoadLocationHandle(GameHashTable, hid, 103)), GetLocationY(LoadLocationHandle(GameHashTable, hid, 103)), PATHING_TYPE_WALKABILITY) == false){
+            if (IsTerrainPathable(GetLocationX(LoadLocationHandle(GameHashTable, hid, 103)), GetLocationY(LoadLocationHandle(GameHashTable, hid, 103)), PATHING_TYPE_WALKABILITY) == false)
+            {
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
                 SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 300, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
                 LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
@@ -4360,62 +4974,73 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void SaberAlterSpellRFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void SaberAlterSpellRFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(SaberAlterSounds[8], 100, 0);
     PlaySoundWithVolumeACF(SaberAlterSounds[9], 100, 0.50f);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     TimerStart(tmr, .01f, true, @SaberAlterSpellRFunction3);
 }
-bool SaberAlterSpellTFunction1(){
-    return GetSpellAbilityId() == FourCC("A03X");
+bool SaberAlterSpellTFunction1()
+{
+    return GetSpellAbilityId() == 'A03X' ;
 }
-bool SaberAlterSpellTFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false){
+bool SaberAlterSpellTFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false)
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 111), GetFilterUnit());
     }
     return true;
 }
-void SaberAlterSpellTFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void SaberAlterSpellTFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 100){
+        if (LocTime == 100)
+        {
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Channel Two");
             PlaySoundWithVolumeACF(SaberAlterSounds[11], 100, 0);
             PlaySoundWithVolumeACF(SaberAlterSounds[12], 100, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            CreateNUnitsAtLocACF(1, FourCC("u01S"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u01S' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
         }
-        if (LocTime >= 100){
+        if (LocTime >= 100)
+        {
             SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 100);
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
             SaveReal(GameHashTable, hid, 112, (LoadReal(GameHashTable, hid, 112) + 1));
-            if (LoadReal(GameHashTable, hid, 112) >= 4){
-                CreateNUnitsAtLocACF(1, FourCC("u00D"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 360));
+            if (LoadReal(GameHashTable, hid, 112) >= 4)
+            {
+                CreateNUnitsAtLocACF(1, 'u00D' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 360));
                 SetUnitScale(GlobalUnit, 3, 3, 3);
                 SaveReal(GameHashTable, hid, 112, 0);
             }
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 500, Filter(@SaberAlterSpellTFunction2));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-            if (LoadReal(GameHashTable, hid, 110) >= 3000){
+            if (LoadReal(GameHashTable, hid, 110) >= 3000)
+            {
                 DestroyGroup(LoadGroupHandle(GameHashTable, hid, 111));
                 ClearAllData(hid);
             }
         }
     }
 }
-void SaberAlterSpellTFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void SaberAlterSpellTFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveInteger(GameHashTable, hid, 0, 0);
     PlaySoundWithVolumeACF(SaberAlterSounds[10], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
@@ -4425,12 +5050,12 @@ int hid = GetHandleId(tmr);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Channel One");
     DestroyEffect(AddSpecialEffectTarget("Characters\\SaberAlter\\ShadowBurst.mdx", LoadUnitHandle(GameHashTable, hid, iCaster), "weapon"));
-    CreateNUnitsAtLocACF(5, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-    UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 2);
+    CreateNUnitsAtLocACF(5, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
     SetUnitScale(GlobalUnit, 2, 2, 2);
-    CreateNUnitsAtLocACF(2, FourCC("u01T"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+    CreateNUnitsAtLocACF(2, 'u01T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
     SetUnitTimeScale(GlobalUnit, .5f);
-    UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 2);
+    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
     TimerStart(tmr, .01f, true, @SaberAlterSpellTFunction3);
 }
@@ -4484,14 +5109,17 @@ void HeroInit4()
     TriggerAddAction(t, @SaberAlterSpellTFunction4);
 }
 
-bool SaberNeroSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A038");
+bool SaberNeroSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A038' ;
 }
-bool SaberNeroSpellQFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool SaberNeroSpellQFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
         LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 109)), 200, .3f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
@@ -4500,50 +5128,60 @@ float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
     }
     return true;
 }
-void SaberNeroSpellQFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void SaberNeroSpellQFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 50){
+        if (LocTime == 50)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 200, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(2, FourCC("u00X"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
+            CreateNUnitsAtLocACF(2, 'u00X' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@SaberNeroSpellQFunction2));
         }
-        if (LocTime == 60){
+        if (LocTime == 60)
+        {
             ClearAllData(hid);
         }
     }
 }
-void SaberNeroSpellQFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void SaberNeroSpellQFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         PlaySoundWithVolumeACF(SaberNeroSounds[0], 100, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
         LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .5f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
         SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell two");
         SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.5f);
         TimerStart(tmr, .01f, true, @SaberNeroSpellQFunction3);
     }
-    else {
+    else
+    {
         IssueImmediateOrder(GetTriggerUnit(), "stop");
         DestroyTimer(tmr);
     }
 }
-bool SaberNeroSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A039");
+bool SaberNeroSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A039' ;
 }
-bool SaberNeroSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool SaberNeroSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         StunUnitACF(GetFilterUnit(), 1);
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         SaveLocationHandle(GameHashTable, hid, 113, GetUnitLoc(GetFilterUnit()));
@@ -4552,20 +5190,24 @@ float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
     }
     return true;
 }
-void SaberNeroSpellWFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void SaberNeroSpellWFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 40){
+        if (LocTime == 40)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\LightningStrike1.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            CreateNUnitsAtLocACF(1, FourCC("u00R"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 270);
+            CreateNUnitsAtLocACF(1, 'u00R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 270);
             SetUnitScale(GlobalUnit, 4, 4, 4);
-            while (true) {
+            while (true)
+            {
                 if (i > 8) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 3.f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
@@ -4574,57 +5216,66 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void SaberNeroSpellWFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void SaberNeroSpellWFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(SaberNeroSounds[1], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack slam");
     TimerStart(tmr, .01f, true, @SaberNeroSpellWFunction3);
 }
-bool SaberNeroSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A03A");
+bool SaberNeroSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A03A' ;
 }
-bool SaberNeroSpellEFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool SaberNeroSpellEFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
     }
     return true;
 }
-void SaberNeroSpellEFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 10;
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false){
+void SaberNeroSpellEFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 10;
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 1) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 35 || LocTime == 70 || LocTime == 105 || LocTime == 140){
+        if (LocTime == 35 || LocTime == 70 || LocTime == 105 || LocTime == 140)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
             SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            CreateNUnitsAtLocACF(1, FourCC("u019"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+            CreateNUnitsAtLocACF(1, 'u019' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\RedAftershock.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
             DestroyEffect(AddSpecialEffectTarget("Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 170){
+        if (LocTime == 170)
+        {
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 200, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(1, FourCC("u00Y"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            CreateNUnitsAtLocACF(1, FourCC("u00Z"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            CreateNUnitsAtLocACF(1, FourCC("u010"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            while (true) {
+            CreateNUnitsAtLocACF(1, 'u00Y' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
+            CreateNUnitsAtLocACF(1, 'u00Z' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+            CreateNUnitsAtLocACF(1, 'u010' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+            while (true)
+            {
                 if (i > 8) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 3.f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
@@ -4633,14 +5284,15 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void SaberNeroSpellEFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void SaberNeroSpellEFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(SaberNeroSounds[2], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
@@ -4650,38 +5302,48 @@ int hid = GetHandleId(tmr);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Three");
     TimerStart(tmr, .01f, true, @SaberNeroSpellEFunction3);
 }
-bool SaberNeroSpellRFunction1(){
-    return GetSpellAbilityId() == FourCC("A03B");
+bool SaberNeroSpellRFunction1()
+{
+    return GetSpellAbilityId() == 'A03B' ;
 }
-bool SaberNeroSpellRUnitDrag1(){
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster)))){
+bool SaberNeroSpellRUnitDrag1()
+{
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster))))
+    {
         SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 107));
     }
     return true;
 }
-bool SaberNeroSpellRUnitDrag2(){
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster)))){
+bool SaberNeroSpellRUnitDrag2()
+{
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster))))
+    {
         SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 109));
     }
     return true;
 }
-bool SaberNeroSpellRFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 2000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 125 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool SaberNeroSpellRFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 2000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 125 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 2);
         DisplaceUnitWithArgs(GetFilterUnit(), AngleBetweenUnits(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit()), 1000, 1, .01f, 1000);
     }
     return true;
 }
-void SaberNeroSpellRFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void SaberNeroSpellRFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime < 80){
+        if (LocTime < 80)
+        {
             SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) - 10);
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), LoadReal(GameHashTable, hid, 110), LoadReal(GameHashTable, hid, 110)));
             SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), LoadReal(GameHashTable, hid, 110), LoadReal(GameHashTable, hid, 110) + 180));
@@ -4692,50 +5354,55 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
         }
-        if (LocTime == 80){
+        if (LocTime == 80)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel one");
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) / 3, 1, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
         }
-        if (LocTime == 130){
+        if (LocTime == 130)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .6f), .6f, .01f, 600);
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack slam");
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-            CreateNUnitsAtLocACF(1, FourCC("u01B"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
         }
-        if (LocTime == 185){
-            CreateNUnitsAtLocACF(1, FourCC("u00R"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
+        if (LocTime == 185)
+        {
+            CreateNUnitsAtLocACF(1, 'u00R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
             SetUnitScale(GlobalUnit, 6, 6, 6);
-            while (true) {
+            while (true)
+            {
                 if (i > 8) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 5.f, .6f);
                 i = i + 1;
             }
             i = 1;
-            while (true) {
+            while (true)
+            {
                 if (i > 12) break;
                 SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 200, 30 * I2R(i)));
-                CreateNUnitsAtLocACF(1, FourCC("u01A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), 0);
-                UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 1);
+                CreateNUnitsAtLocACF(1, 'u01A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), 0);
+                UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1);
                 SetUnitAnimation(GlobalUnit, "birth");
                 SetUnitVertexColor(GlobalUnit, 255, 100, 0, 255);
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
                 SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 400, 30 * I2R(i)));
-                CreateNUnitsAtLocACF(1, FourCC("u01A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), 0);
-                UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 1);
+                CreateNUnitsAtLocACF(1, 'u01A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), 0);
+                UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1);
                 SetUnitAnimation(GlobalUnit, "birth");
                 SetUnitVertexColor(GlobalUnit, 255, 100, 0, 255);
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
                 SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 600, 30 * I2R(i)));
-                CreateNUnitsAtLocACF(1, FourCC("u01A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), 0);
-                UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 1);
+                CreateNUnitsAtLocACF(1, 'u01A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), 0);
+                UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1);
                 SetUnitAnimation(GlobalUnit, "birth");
                 SetUnitVertexColor(GlobalUnit, 255, 100, 0, 255);
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
@@ -4746,9 +5413,10 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void SaberNeroSpellRFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void SaberNeroSpellRFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(SaberNeroSounds[3], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
@@ -4757,17 +5425,21 @@ int hid = GetHandleId(tmr);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell One");
     TimerStart(tmr, .01f, true, @SaberNeroSpellRFunction3);
 }
-bool SaberNeroSpellTFunction1(){
-    return GetSpellAbilityId() == FourCC("A03C");
+bool SaberNeroSpellTFunction1()
+{
+    return GetSpellAbilityId() == 'A03C' ;
 }
-void SaberNeroSpellTFunction2(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 20;
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false){
-        if (IsCounted == false){
+void SaberNeroSpellTFunction2()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 20;
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 1) == false)
+    {
+        if (IsCounted == false)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
@@ -4777,7 +5449,8 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Fly Slam");
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\RedAftershock.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 250){
+            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 250)
+            {
                 PlaySoundWithVolumeACF(SaberNeroSounds[4], 100, 0);
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Three");
                 SaveBoolean(GameHashTable, hid, 10, true);
@@ -4786,30 +5459,34 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
-        else {
+        else
+        {
             SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-            if (LocTime == 30 || LocTime == 60 || LocTime == 90 || LocTime == 120){
+            if (LocTime == 30 || LocTime == 60 || LocTime == 90 || LocTime == 120)
+            {
                 SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
                 PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
                 DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
                 SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-                CreateNUnitsAtLocACF(1, FourCC("u019"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u019' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
                 DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\RedAftershock.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
                 DestroyEffect(AddSpecialEffectTarget("Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
                 RemoveLocation(LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 102));
                 RemoveLocation(LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 103));
             }
-            if (LocTime == 170){
+            if (LocTime == 170)
+            {
                 SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
                 DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\LightningStrike1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                while (true) {
+                while (true)
+                {
                     if (i > 8) break;
-                    CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                     SetUnitScaleAndTime(GlobalUnit, 3.f, GetRandomReal(.5f, 2));
                     i = i + 1;
                 }
@@ -4819,39 +5496,43 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             }
-            if (LocTime == 250){
+            if (LocTime == 250)
+            {
                 PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell One");
                 PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
                 i = 1;
-                while (true) {
+                while (true)
+                {
                     if (i > 10) break;
-                    CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
+                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
                     SetUnitScaleAndTime(GlobalUnit, 3.f, 1.5f);
                     i = i + 1;
                 }
-                CreateNUnitsAtLocACF(3, FourCC("u00X"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                CreateNUnitsAtLocACF(1, FourCC("u01B"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(3, 'u00X' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
+                CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
                 LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 500, 1, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             }
-            if (LocTime == 330){
+            if (LocTime == 330)
+            {
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
                 PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack Slam");
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 SetUnitScaleAndTime(GlobalUnit, 2.f, .8f);
-                CreateNUnitsAtLocACF(1, FourCC("u01B"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+                CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
                 i = 1;
-                while (true) {
+                while (true)
+                {
                     if (i > 5) break;
-                    CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
+                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
                     SetUnitScaleAndTime(GlobalUnit, 2.f, .8f);
                     i = i + 1;
                 }
@@ -4859,25 +5540,28 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             }
-            if (LocTime == 410){
+            if (LocTime == 410)
+            {
                 LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 180 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
                 PlaySoundWithVolumeACF(GeneralSounds[2], 80, 0);
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                CreateNUnitsAtLocACF(1, FourCC("u00R"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
+                CreateNUnitsAtLocACF(1, 'u00R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
                 SetUnitScale(GlobalUnit, 4, 4, 4);
                 i = 1;
-                while (true) {
+                while (true)
+                {
                     if (i > 10) break;
-                    CreateNUnitsAtLocACF(1, FourCC("u01C"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 36.f * I2R(i));
+                    CreateNUnitsAtLocACF(1, 'u01C' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 36.f * I2R(i));
                     SetUnitScaleAndTime(GlobalUnit, .5f * I2R(i), 1.5f - .1f * I2R(i));
                     SetUnitVertexColor(GlobalUnit, 255, 100, 0, 255);
                     i = i + 1;
                 }
                 i = 1;
-                while (true) {
+                while (true)
+                {
                     if (i > 10) break;
-                    CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                     SetUnitScaleAndTime(GlobalUnit, 3.f, 1.5f);
                     i = i + 1;
                 }
@@ -4890,14 +5574,15 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void SaberNeroSpellTFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void SaberNeroSpellTFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveBoolean(GameHashTable, hid, 10, false);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.5f);
     SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
@@ -4939,56 +5624,68 @@ void HeroInit5()
     TriggerAddCondition(t, Condition(@SaberNeroSpellTFunction1));
     TriggerAddAction(t, @SaberNeroSpellTFunction3);
 }
-bool KuchikiByakuyaSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A03E");
+bool KuchikiByakuyaSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A03E' ;
 }
-bool KuchikiByakuyaSpellQFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false){
+bool KuchikiByakuyaSpellQFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false)
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 111), GetFilterUnit());
     }
     return true;
 }
-void KuchikiByakuyaSpellQFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-float LocDistance = LoadReal(GameHashTable, hid, 30);
-float LocFacing = LoadReal(GameHashTable, hid, 31);
-    if (StopSpell(hid, 0) == false){
+void KuchikiByakuyaSpellQFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    float LocDistance = LoadReal(GameHashTable, hid, 30);
+    float LocFacing = LoadReal(GameHashTable, hid, 31);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 25){
+        if (LocTime == 25)
+        {
             PlaySoundWithVolumeACF(KuchikiByakuyaSounds[1], 90, 0);
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
             IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
         }
-        if (LocTime > 25){
-            if (IsUnitType(LoadUnitHandle(GameHashTable, hid, 106), UNIT_TYPE_DEAD) != true){
+        if (LocTime > 25)
+        {
+            if (IsUnitType(LoadUnitHandle(GameHashTable, hid, 106), UNIT_TYPE_DEAD) != true)
+            {
                 SaveLocationHandle(GameHashTable, hid, 115, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
                 SaveLocationHandle(GameHashTable, hid, 116, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 115), 20, LocFacing));
                 SaveReal(GameHashTable, hid, 30, LocDistance - 25);
                 SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 116));
                 GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 115), 250, Filter(@KuchikiByakuyaSpellQFunction2));
-                if (LocDistance <= 25){
+                if (LocDistance <= 25)
+                {
                     KillUnit(LoadUnitHandle(GameHashTable, hid, 106));
                 }
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 115));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 116));
             }
-            else {
+            else
+            {
                 DestroyGroup(LoadGroupHandle(GameHashTable, hid, 111));
                 ClearAllData(hid);
             }
         }
     }
-    else {
+    else
+    {
         DestroyGroup(LoadGroupHandle(GameHashTable, hid, 111));
     }
 }
-void KuchikiByakuyaSpellQFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void KuchikiByakuyaSpellQFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(KuchikiByakuyaSounds[2], 90, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -4997,7 +5694,7 @@ int hid = GetHandleId(tmr);
     SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 150, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
     SaveReal(GameHashTable, hid, 30, 1250);
     SaveReal(GameHashTable, hid, 31, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-    CreateNUnitsAtLocACF(1, FourCC("u01E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 103)));
+    CreateNUnitsAtLocACF(1, 'u01E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 103)));
     SetUnitPathing(LoadUnitHandle(GameHashTable, hid, 106), false);
     SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
@@ -5006,41 +5703,48 @@ int hid = GetHandleId(tmr);
     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
     TimerStart(tmr, .01f, true, @KuchikiByakuyaSpellQFunction3);
 }
-bool KuchikiByakuyaSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A03D");
+bool KuchikiByakuyaSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A03D' ;
 }
-void KuchikiByakuyaSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-float LocDamage = 245 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 65 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 0) == false){
+void KuchikiByakuyaSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    float LocDamage = 245 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 65 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 5 || LocTime == 10 || LocTime == 15 || LocTime == 20 || LocTime == 25 || LocTime == 30 || LocTime == 35 || LocTime == 40){
+        if (LocTime == 5 || LocTime == 10 || LocTime == 15 || LocTime == 20 || LocTime == 25 || LocTime == 30 || LocTime == 35 || LocTime == 40)
+        {
             SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 100, 45 * (LocTime / 5)));
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iTarget), LoadLocationHandle(GameHashTable, hid, 102));
-            CreateNUnitsAtLocACF(1, FourCC("u01D"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)));
-            UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), .9f - I2R(LocTime * 2) / 100);
+            CreateNUnitsAtLocACF(1, 'u01D' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)));
+            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .9f - I2R(LocTime * 2) / 100);
             SetUnitScale(GlobalUnit, 3, 3, 3);
             SetUnitFlyHeight(GlobalUnit, 200, 20000);
         }
-        if (LocTime == 50){
+        if (LocTime == 50)
+        {
             DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
             StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            CreateNUnitsAtLocACF(1, FourCC("u01E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+            CreateNUnitsAtLocACF(1, 'u01E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
             SetUnitPathing(GlobalUnit, false);
-            UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), .5f);
+            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "origin"));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Deadspirit Asuna.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
         }
-        if (LocTime == 80){
+        if (LocTime == 80)
+        {
             ClearAllData(hid);
         }
     }
 }
-void KuchikiByakuyaSpellWFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void KuchikiByakuyaSpellWFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(KuchikiByakuyaSounds[3], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
@@ -5051,27 +5755,32 @@ int hid = GetHandleId(tmr);
     IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
     TimerStart(tmr, .01f, true, @KuchikiByakuyaSpellWFunction2);
 }
-bool KuchikiByakuyaSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A03G");
+bool KuchikiByakuyaSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A03G' ;
 }
-bool KuchikiByakuyaSpellEFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 3 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.05f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool KuchikiByakuyaSpellEFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 3 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.05f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
-        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), FourCC("u02T"), GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit()), 0);
+        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u02T' , GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit()), 0);
         UnitShareVision(GetFilterUnit(), Player(PLAYER_NEUTRAL_PASSIVE), true);
         IssueTargetOrder(GlobalUnit, "slow", GetFilterUnit());
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
     }
     return true;
 }
-bool KuchikiByakuyaSpellEFunctionFinalDamage1(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 40 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool KuchikiByakuyaSpellEFunctionFinalDamage1()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 40 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
         StunUnitACF(GetFilterUnit(), 1);
         SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(GetFilterUnit()));
@@ -5081,29 +5790,34 @@ float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 40
     }
     return true;
 }
-void KuchikiByakuyaSpellEFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void KuchikiByakuyaSpellEFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20 || LocTime == 40 || LocTime == 60 || LocTime == 80 || LocTime == 100 || LocTime == 120 || LocTime == 140 || LocTime == 160 || LocTime == 180 || LocTime == 200){
+        if (LocTime == 20 || LocTime == 40 || LocTime == 60 || LocTime == 80 || LocTime == 100 || LocTime == 120 || LocTime == 140 || LocTime == 160 || LocTime == 180 || LocTime == 200)
+        {
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 450, Filter(@KuchikiByakuyaSpellEFunction2));
         }
-        if (LocTime == 200){
-            CreateNUnitsAtLocACF(1, FourCC("u01H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+        if (LocTime == 200)
+        {
+            CreateNUnitsAtLocACF(1, 'u01H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
             SetUnitScaleAndTime(GlobalUnit, 2.f, .8f);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, FourCC("u01I"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), .5f);
+            CreateNUnitsAtLocACF(1, 'u01I' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 450, Filter(@KuchikiByakuyaSpellEFunctionFinalDamage1));
             ClearAllData(hid);
         }
     }
 }
-void KuchikiByakuyaSpellEFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void KuchikiByakuyaSpellEFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(KuchikiByakuyaSounds[4], 90, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
@@ -5112,110 +5826,123 @@ int hid = GetHandleId(tmr);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
     IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    CreateNUnitsAtLocACF(1, FourCC("u01J"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
-    UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 2);
-    CreateNUnitsAtLocACF(1, FourCC("u01J"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
-    UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 2);
-    CreateNUnitsAtLocACF(1, FourCC("u01J"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
-    UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 2);
-    CreateNUnitsAtLocACF(1, FourCC("u01J"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
-    UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 2);
-    CreateNUnitsAtLocACF(1, FourCC("u01J"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
-    UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 2);
+    CreateNUnitsAtLocACF(1, 'u01J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
+    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
+    CreateNUnitsAtLocACF(1, 'u01J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
+    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
+    CreateNUnitsAtLocACF(1, 'u01J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
+    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
+    CreateNUnitsAtLocACF(1, 'u01J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
+    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
+    CreateNUnitsAtLocACF(1, 'u01J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
+    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
     TimerStart(tmr, .01f, true, @KuchikiByakuyaSpellEFunction3);
 }
-bool KuchikiByakuyaSpellRFunction1(){
-    return GetSpellAbilityId() == FourCC("A03H");
+bool KuchikiByakuyaSpellRFunction1()
+{
+    return GetSpellAbilityId() == 'A03H' ;
 }
-void KuchikiByakuyaSpellRKillDummy(){
+void KuchikiByakuyaSpellRKillDummy()
+{
     KillUnit(GetEnumUnit());
 }
-void KuchikiByakuyaSpellRCreateSFX(){
-int hid = GetHandleId(GetExpiredTimer());
+void KuchikiByakuyaSpellRCreateSFX()
+{
+    int hid = GetHandleId(GetExpiredTimer());
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     SaveLocationHandle(GameHashTable, hid, 117, GetUnitLoc(GetEnumUnit()));
-    CreateNUnitsAtLocACF(1, FourCC("u01I"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 117), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
-    UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 1.5f);
+    CreateNUnitsAtLocACF(1, 'u01I' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 117), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
+    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1.5f);
     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 117));
 }
-void KuchikiByakuyaSpellRTransparency(){
+void KuchikiByakuyaSpellRTransparency()
+{
     SetUnitVertexColor(GetEnumUnit(), 255, 255, 255, 255 - R2I(LoadReal(GameHashTable, GetHandleId(GetExpiredTimer()), 118)));
 }
-void KuchikiByakuyaSpellRFunction2(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 4 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.02f;
-float LocCount = LoadReal(GameHashTable, hid, 1);
-    if (StopSpell(hid, 0) == false){
-        if (IsCounted == true){
+void KuchikiByakuyaSpellRFunction2()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 4 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.02f;
+    float LocCount = LoadReal(GameHashTable, hid, 1);
+    if (StopSpell(hid, 0) == false)
+    {
+        if (IsCounted == true)
+        {
             SaveInteger(GameHashTable, hid, 0, LocTime + 1);
         }
-        else {
+        else
+        {
             SaveReal(GameHashTable, hid, 118, LoadReal(GameHashTable, hid, 118) + 7);
             ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @KuchikiByakuyaSpellRTransparency);
-            if (LoadReal(GameHashTable, hid, 118) >= 255){
+            if (LoadReal(GameHashTable, hid, 118) >= 255)
+            {
                 SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
                 ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @KuchikiByakuyaSpellRKillDummy);
-                CreateNUnitsAtLocACF(1, FourCC("u01L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+                CreateNUnitsAtLocACF(1, 'u01L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
                 SetUnitTimeScale(GlobalUnit, 3);
                 SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
                 SaveBoolean(GameHashTable, hid, 10, true);
             }
         }
-        if (LocTime == 30){
+        if (LocTime == 30)
+        {
             PlaySoundWithVolumeACF(KuchikiByakuyaSounds[6], 100, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            CreateNUnitsAtLocACF(1, FourCC("u02S"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+            CreateNUnitsAtLocACF(1, 'u02S' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
             SetUnitAnimation(GlobalUnit, "Morph Alternate");
             SetUnitTimeScale(GlobalUnit, .75f);
-            UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 1.5f);
+            UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1.5f);
             SaveReal(GameHashTable, hid, 110, 0);
         }
-        if (LocTime == 130){
+        if (LocTime == 130)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 500, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90));
             SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 500, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 90));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            CreateNUnitsAtLocACF(1, FourCC("u01M"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
+            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
             GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
             DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 107)));
-            CreateNUnitsAtLocACF(1, FourCC("u01M"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
+            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
             GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
             DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 109)));
         }
-        if (LocTime == 140 || LocTime == 150 || LocTime == 160 || LocTime == 170){
+        if (LocTime == 140 || LocTime == 150 || LocTime == 160 || LocTime == 170)
+        {
             SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SaveLocationHandle(GameHashTable, hid, 115, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), 300 * LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
             SaveLocationHandle(GameHashTable, hid, 116, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 109), 300 * LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
             SaveLocationHandle(GameHashTable, hid, 120, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), 300 * LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
             SaveLocationHandle(GameHashTable, hid, 121, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 109), 300 * LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
-            CreateNUnitsAtLocACF(1, FourCC("u01M"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 115), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
+            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 115), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
             GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 115)));
             DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 115)));
-            CreateNUnitsAtLocACF(1, FourCC("u01M"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 116), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
+            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 116), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
             GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 116)));
             DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 116)));
-            CreateNUnitsAtLocACF(1, FourCC("u01M"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 120), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
+            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 120), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
             GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 120)));
             DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 120)));
-            CreateNUnitsAtLocACF(1, FourCC("u01M"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 121), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
+            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 121), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
             GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 121)));
             DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 121)));
-            if (LocTime == 170){
+            if (LocTime == 170)
+            {
                 PlaySoundWithVolumeACF(KuchikiByakuyaSounds[5], 100, 0);
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell two");
                 ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @KuchikiByakuyaSpellRCreateSFX);
@@ -5230,22 +5957,26 @@ float LocCount = LoadReal(GameHashTable, hid, 1);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 120));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 121));
         }
-        if (LocTime == 250){
+        if (LocTime == 250)
+        {
             PlaySoundWithVolumeACF(KuchikiByakuyaSounds[4], 100, 0);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster), "spell channel one");
             SetUnitFacing(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 106), GetUnitFacing(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 106)) + 1.5f);
         }
-        if (LocTime >= 250 && LocTime <= 400){
+        if (LocTime >= 250 && LocTime <= 400)
+        {
             SaveReal(GameHashTable, hid, 1, LocCount + 1);
-            if (LocCount == 2){
+            if (LocCount == 2)
+            {
                 SaveReal(GameHashTable, hid, 1, 0);
                 DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
                 SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                while (true) {
+                while (true)
+                {
                     if (i > 4) break;
                     SaveLocationHandle(GameHashTable, hid, 122, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 1600, GetRandomReal(0, 360)));
-                    CreateNUnitsAtLocACF(1, FourCC("u01K"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 122), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 122), LoadLocationHandle(GameHashTable, hid, 103)));
-                    UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), .5f);
+                    CreateNUnitsAtLocACF(1, 'u01K' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 122), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 122), LoadLocationHandle(GameHashTable, hid, 103)));
+                    UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
                     SetUnitFlyHeight(GlobalUnit, 250, 99999);
                     SetUnitScale(GlobalUnit, 3, 3, 3);
                     DisplaceUnitWithArgs(GlobalUnit, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 122), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 122), LoadLocationHandle(GameHashTable, hid, 103)) - 50, .4f, .01f, 0);
@@ -5254,7 +5985,8 @@ float LocCount = LoadReal(GameHashTable, hid, 1);
                 }
             }
         }
-        if (LocTime == 400){
+        if (LocTime == 400)
+        {
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
             PlaySoundWithVolumeACF(KuchikiByakuyaSounds[2], 100, 0);
             DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
@@ -5263,14 +5995,16 @@ float LocCount = LoadReal(GameHashTable, hid, 1);
             ClearAllData(hid);
         }
     }
-    else {
+    else
+    {
         ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @KuchikiByakuyaSpellRKillDummy);
         DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
     }
 }
-void KuchikiByakuyaSpellRFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void KuchikiByakuyaSpellRFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveBoolean(GameHashTable, hid, 10, true);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
@@ -5280,29 +6014,34 @@ int hid = GetHandleId(tmr);
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     TimerStart(tmr, .01f, true, @KuchikiByakuyaSpellRFunction2);
 }
-bool KuchikiByakuyaSpellTFunction1(){
-    return GetSpellAbilityId() == FourCC("A03I");
+bool KuchikiByakuyaSpellTFunction1()
+{
+    return GetSpellAbilityId() == 'A03I' ;
 }
-void KuchikiByakuyaSpellTFunction2(){
-float i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-float LocDamage = 3000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 1) == false){
+void KuchikiByakuyaSpellTFunction2()
+{
+    float i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    float LocDamage = 3000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (StopSpell(hid, 1) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 40){
+        if (LocTime == 40)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
-            CreateNUnitsAtLocACF(1, FourCC("u01B"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
             StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
@@ -5310,53 +6049,59 @@ float LocDamage = 3000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 80){
+        if (LocTime == 80)
+        {
             PlaySoundWithVolumeACF(KuchikiByakuyaSounds[8], 100, 0);
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell three");
         }
-        if (LocTime == 120){
+        if (LocTime == 120)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell four");
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 2.f, .8f);
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 400), .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 170){
+        if (LocTime == 170)
+        {
             PlaySoundWithVolumeACF(KuchikiByakuyaSounds[7], 100, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell one");
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 2.f, .8f);
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 180){
+        if (LocTime == 180)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            CreateNUnitsAtLocACF(2, FourCC("u00U"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(2, 'u00U' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 4, 4, 4);
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            CreateNUnitsAtLocACF(1, FourCC("u01I"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), .5f);
+            CreateNUnitsAtLocACF(1, 'u01I' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 400, .6f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 250){
+        if (LocTime == 250)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[0], 60, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             i = 1;
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u01H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+                CreateNUnitsAtLocACF(1, 'u01H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
                 SetUnitScaleAndTime(GlobalUnit, .5f * i, .3f + i);
                 i = i + 1;
             }
@@ -5365,22 +6110,23 @@ float LocDamage = 3000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "origin"));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, FourCC("u01I"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), .5f);
+            CreateNUnitsAtLocACF(1, 'u01I' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
             StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
             DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
             ClearAllData(hid);
         }
     }
 }
-void KuchikiByakuyaSpellTFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void KuchikiByakuyaSpellTFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(KuchikiByakuyaSounds[9], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack Alternate One");
@@ -5401,7 +6147,7 @@ void HeroInit6()
     KuchikiByakuyaSounds[7] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellTSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
     KuchikiByakuyaSounds[8] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellTSound2.mp3", false, false, false, 10, 10, "DefaultEAXON");
     KuchikiByakuyaSounds[9] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellTSound3.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    
+
     t = CreateTrigger();
     TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
     TriggerAddCondition(t, Condition(@KuchikiByakuyaSpellWFunction1));
@@ -5428,30 +6174,37 @@ void HeroInit6()
     TriggerAddAction(t, @KuchikiByakuyaSpellTFunction3);
 }
 
-bool AkameSpellDFunction1(){
-    return GetSpellAbilityId() == FourCC("A03K") || GetSpellAbilityId() == FourCC("A052");
+bool AkameSpellDFunction1()
+{
+    return GetSpellAbilityId() == 'A03K'  || GetSpellAbilityId() == 'A052' ;
 }
-void AkameSpellDFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void AkameSpellDFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20){
+        if (LocTime == 20)
+        {
             DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadReal(GameHashTable, hid, 0), .2f, .01f, 0);
         }
-        if (LocTime == 30){
+        if (LocTime == 30)
+        {
             ClearAllData(hid);
         }
     }
 }
-void AkameSpellDFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-float LocDistance = - 400;
-    if (GetSpellAbilityId() == FourCC("A052")){
+void AkameSpellDFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    float LocDistance = - 400;
+    if (GetSpellAbilityId() == 'A052' )
+    {
         LocDistance = - 350;
-        SetPlayerAbilityAvailable(GetOwningPlayer(GetTriggerUnit()), FourCC("A03L"), true);
-        SetPlayerAbilityAvailable(GetOwningPlayer(GetTriggerUnit()), FourCC("A052"), false);
+        SetPlayerAbilityAvailable(GetOwningPlayer(GetTriggerUnit()), 'A03L' , true);
+        SetPlayerAbilityAvailable(GetOwningPlayer(GetTriggerUnit()), 'A052' , false);
     }
     PlaySoundWithVolumeACF(AkameSounds[0], 80, 0);
     SetUnitTimeScale(GetTriggerUnit(), 2);
@@ -5463,62 +6216,73 @@ float LocDistance = - 400;
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     TimerStart(tmr, .01f, true, @AkameSpellDFunction2);
 }
-bool AkameSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A03L");
+bool AkameSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A03L' ;
 }
-bool AkameSpellQFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool AkameSpellQFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DestroyEffect(AddSpecialEffect("GeneralEffects\\BloodEffect1.mdx", GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit())));
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
     }
     return true;
 }
-void AkameSpellQFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void AkameSpellQFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20){
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A03L"), false);
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A052"), true);
+        if (LocTime == 20)
+        {
+            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03L' , false);
+            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A052' , true);
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
             PlaySoundWithVolumeACF(AkameSounds[1], 60, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 200, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(3, FourCC("u02P"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 30);
+            CreateNUnitsAtLocACF(3, 'u02P' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 30);
             SetUnitScaleAndTime(GlobalUnit, 1.5f, .8f);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@AkameSpellQFunction2));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
         }
-        if (LocTime == 220){
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A03L"), true);
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A052"), false);
+        if (LocTime == 220)
+        {
+            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03L' , true);
+            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A052' , false);
             ClearAllData(hid);
         }
     }
 }
-void AkameSpellQFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void AkameSpellQFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Four");
     TimerStart(tmr, .01f, true, @AkameSpellQFunction3);
 }
-bool AkameSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A03M");
+bool AkameSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A03M' ;
 }
-void AkameSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 200 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 1) == false){
+void AkameSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 200 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (StopSpell(hid, 1) == false)
+    {
         SaveInteger(GameHashTable, hid, 110, LoadInteger(GameHashTable, hid, 110) - 10);
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
@@ -5526,31 +6290,34 @@ float LocDamage = 200 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
         SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
         SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
         SetUnitVertexColor(LoadUnitHandle(GameHashTable, hid, iCaster), 255, 255, 255, LoadInteger(GameHashTable, hid, 110));
-        if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 150){
+        if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 150)
+        {
             PlaySoundWithVolumeACF(AkameSounds[2], 90, 0);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(5, FourCC("u00T"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(5, 'u00T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
             DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack");
             ClearAllData(hid);
         }
-        else {
+        else
+        {
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
     }
 }
-void AkameSpellWFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void AkameSpellWFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Channel");
@@ -5559,14 +6326,17 @@ int hid = GetHandleId(tmr);
     DestroyEffect(AddSpecialEffect("GeneralEffects\\BlackBlink.mdx", GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit())));
     TimerStart(tmr, .01f, true, @AkameSpellWFunction2);
 }
-bool AkameSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A03N");
+bool AkameSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A03N' ;
 }
-bool AkameSpellEFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 300 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool AkameSpellEFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 300 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
         LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 109), LoadLocationHandle(GameHashTable, hid, 103)), 200, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
         DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
@@ -5575,25 +6345,30 @@ float LocDamage = 300 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
     }
     return true;
 }
-void AkameSpellEFunction4(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void AkameSpellEFunction4()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 30){
+        if (LocTime == 30)
+        {
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .1f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, FourCC("u02P"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u02P' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 3, 3, 3);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 450, Filter(@AkameSpellEFunction3));
             ClearAllData(hid);
         }
     }
 }
-void AkameSpellEFunction5(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void AkameSpellEFunction5()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
@@ -5602,44 +6377,52 @@ int hid = GetHandleId(tmr);
         PlaySoundWithVolumeACF(AkameSounds[3], 100, 0);
         TimerStart(tmr, .01f, true, @AkameSpellEFunction4);
     }
-    else {
+    else
+    {
         IssueImmediateOrder(GetTriggerUnit(), "stop");
         DestroyTimer(tmr);
     }
 }
-bool AkameSpellRFunction1(){
-    return GetSpellAbilityId() == FourCC("A03O");
+bool AkameSpellRFunction1()
+{
+    return GetSpellAbilityId() == 'A03O' ;
 }
-void AkameSpellRFunction10(){
-float LocDamage;
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-int LocCount = LoadInteger(GameHashTable, hid, 1);
-bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-    if (StopSpell(hid, 1) == false){
-        if (IsCounted == true){
+void AkameSpellRFunction10()
+{
+    float LocDamage;
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    int LocCount = LoadInteger(GameHashTable, hid, 1);
+    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
+    if (StopSpell(hid, 1) == false)
+    {
+        if (IsCounted == true)
+        {
             SaveInteger(GameHashTable, hid, 0, LocTime + 1);
         }
-        else {
+        else
+        {
             SaveInteger(GameHashTable, hid, 1, LocCount + 1);
         }
-        if (LocTime == 40){
+        if (LocTime == 40)
+        {
             LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 30;
             PlaySoundWithVolumeACF(AkameSounds[0], 80, 0);
             PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
-            CreateNUnitsAtLocACF(1, FourCC("u01B"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
@@ -5650,7 +6433,8 @@ bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 140){
+        if (LocTime == 140)
+        {
             SaveBoolean(GameHashTable, hid, 10, false);
             PlaySoundWithVolumeACF(AkameSounds[5], 80, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -5658,15 +6442,19 @@ bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
             ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
         }
-        if (IsCounted == false){
-            if (LocCount == 2){
+        if (IsCounted == false)
+        {
+            if (LocCount == 2)
+            {
                 SaveInteger(GameHashTable, hid, 1, 1);
                 SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
-                if (LoadReal(GameHashTable, hid, 110) < 20){
+                if (LoadReal(GameHashTable, hid, 110) < 20)
+                {
                     LocDamage = 25 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster));
                     DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
                     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                    if (LoadReal(GameHashTable, hid, 110) < 16){
+                    if (LoadReal(GameHashTable, hid, 110) < 16)
+                    {
                         DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
                         SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 150, LoadReal(GameHashTable, hid, 110) * 24));
                     }
@@ -5674,13 +6462,15 @@ bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
                     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
                     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
                 }
-                else {
+                else
+                {
                     SaveBoolean(GameHashTable, hid, 10, true);
                     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
                     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
                     SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 500, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
                     ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                    if (GetLocalPlayer() == GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))){
+                    if (GetLocalPlayer() == GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))
+                    {
                         ClearSelection();
                         SelectUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
                     }
@@ -5697,22 +6487,25 @@ bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
                 }
             }
         }
-        if (LocTime == 190){
+        if (LocTime == 190)
+        {
             PlaySoundWithVolumeACF(AkameSounds[2], 90, 0);
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
         }
-        if (LocTime == 210){
+        if (LocTime == 210)
+        {
             PlaySoundWithVolumeACF(AkameSounds[4], 90, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 500, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 200, .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(3, FourCC("u02P"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(3, 'u02P' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 4, 4, 4);
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "origin"));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 260){
+        if (LocTime == 260)
+        {
             LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
@@ -5725,14 +6518,15 @@ bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
         }
     }
 }
-void AkameSpellRFunction11(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void AkameSpellRFunction11()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveBoolean(GameHashTable, hid, 10, true);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 150, .6f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
@@ -5741,32 +6535,37 @@ int hid = GetHandleId(tmr);
     SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
     TimerStart(tmr, .01f, true, @AkameSpellRFunction10);
 }
-bool AkameSpellTFunction1(){
-    return GetSpellAbilityId() == FourCC("A03P");
+bool AkameSpellTFunction1()
+{
+    return GetSpellAbilityId() == 'A03P' ;
 }
-void AkameSpellTFunction2(){
-float i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-float LocDamage;
-    if (StopSpell(hid, 1) == false){
+void AkameSpellTFunction2()
+{
+    float i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    float LocDamage;
+    if (StopSpell(hid, 1) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 50){
+        if (LocTime == 50)
+        {
             LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50;
             PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
-            CreateNUnitsAtLocACF(1, FourCC("u01B"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 2, 2, 2);
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
@@ -5775,7 +6574,8 @@ float LocDamage;
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 75){
+        if (LocTime == 75)
+        {
             PlaySoundWithVolumeACF(AkameSounds[6], 80, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
@@ -5783,14 +6583,16 @@ float LocDamage;
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 155){
+        if (LocTime == 155)
+        {
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.75f);
             PlaySoundWithVolumeACF(AkameSounds[1], 80, 0);
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 205){
+        if (LocTime == 205)
+        {
             LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             PlaySoundWithVolumeACF(GeneralSounds[0], 60, 0);
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
@@ -5801,13 +6603,14 @@ float LocDamage;
         }
     }
 }
-void AkameSpellTFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void AkameSpellTFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 150, .6f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
@@ -5839,7 +6642,7 @@ void HeroInit7()
     TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
     TriggerAddCondition(t, Condition(@AkameSpellQFunction1));
     TriggerAddAction(t, @AkameSpellQFunction4);
-    
+
     t = CreateTrigger();
     TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
     TriggerAddCondition(t, Condition(@AkameSpellWFunction1));
@@ -5861,51 +6664,59 @@ void HeroInit7()
     TriggerAddAction(t, @AkameSpellTFunction3);
 }
 
-void ResetScathachQ(int hid){
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A040"), true);
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A03Y"), false);
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A03Z"), false);
+void ResetScathachQ(int hid)
+{
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A040' , true);
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Y' , false);
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Z' , false);
 }
-bool ScathachSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A040");
+bool ScathachSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A040' ;
 }
-void ScathachSpellQFunction2(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 100 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0 && GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) > 0){
+void ScathachSpellQFunction2()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 100 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0 && GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) > 0)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20){
-            if (GetUnitLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) >= 5){
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A040"), false);
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A03Y"), true);
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A03Z"), false);
+        if (LocTime == 20)
+        {
+            if (GetUnitLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) >= 5)
+            {
+                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A040' , false);
+                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Y' , true);
+                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Z' , false);
             }
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 250, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
             SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 107)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 107)), .35f, .02f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 2.5f, .7f);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
-        if (LocTime == 55){
+        if (LocTime == 55)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
             IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
             StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
             DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScale(GlobalUnit, 2, 2, 2);
                 i = i + 1;
             }
@@ -5913,61 +6724,70 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
     }
-    if (LocTime == 300 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) <= 0){
+    if (LocTime == 300 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) <= 0)
+    {
         ResetScathachQ(hid);
         ClearAllData(hid);
     }
 }
-void ScathachSpellQFunction3(){
-int i = 1;
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ScathachSpellQFunction3()
+{
+    int i = 1;
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(ScathachSounds[2], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack");
-    while (true) {
+    while (true)
+    {
         if (i > 5) break;
-        CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
+        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
         SetUnitScale(GlobalUnit, 2, 2, 2);
         i = i + 1;
     }
     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
     TimerStart(tmr, .01f, true, @ScathachSpellQFunction2);
 }
-bool ScathachSpellQSecondFunction1(){
-    return GetSpellAbilityId() == FourCC("A03Y");
+bool ScathachSpellQSecondFunction1()
+{
+    return GetSpellAbilityId() == 'A03Y' ;
 }
-void ScathachSpellQSecondFunction2(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 50 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0 && GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) > 0){
+void ScathachSpellQSecondFunction2()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 50 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0 && GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) > 0)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 10){
-            if (GetUnitLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) >= 8){
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A040"), false);
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A03Y"), false);
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A03Z"), true);
+        if (LocTime == 10)
+        {
+            if (GetUnitLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) >= 8)
+            {
+                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A040' , false);
+                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Y' , false);
+                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Z' , true);
             }
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, .25f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 2.5f, 2.5f, 2.5f);
-            CreateNUnitsAtLocACF(1, FourCC("u00L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScale(GlobalUnit, 2, 2, 2);
                 i = i + 1;
             }
@@ -5975,23 +6795,26 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 35){
+        if (LocTime == 35)
+        {
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
             IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
         }
     }
-    if (LocTime == 300 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) <= 0){
+    if (LocTime == 300 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) <= 0)
+    {
         ResetScathachQ(hid);
         ClearAllData(hid);
     }
 }
-void ScathachSpellQSecondFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ScathachSpellQSecondFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     PlaySoundWithVolumeACF(ScathachSounds[1], 100, 0);
@@ -6000,49 +6823,56 @@ int hid = GetHandleId(tmr);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Three");
     TimerStart(tmr, .01f, true, @ScathachSpellQSecondFunction2);
 }
-bool ScathachSpellQThirdFunction1(){
-    return GetSpellAbilityId() == FourCC("A03Z");
+bool ScathachSpellQThirdFunction1()
+{
+    return GetSpellAbilityId() == 'A03Z' ;
 }
-void ScathachSpellQThirdFunction2(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 100 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false){
+void ScathachSpellQThirdFunction2()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 100 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 1) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20){
+        if (LocTime == 20)
+        {
             ResetScathachQ(hid);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack");
             SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
         }
-        if (LocTime == 45){
+        if (LocTime == 45)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
             DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScale(GlobalUnit, 2, 2, 2);
                 i = i + 1;
             }
-            CreateNUnitsAtLocACF(1, FourCC("u00L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, 2.5f, 2.5f, 2.5f);
             ClearAllData(hid);
         }
     }
 }
-void ScathachSpellQThirdFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ScathachSpellQThirdFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     PlaySoundWithVolumeACF(ScathachSounds[0], 100, 0);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -6051,39 +6881,46 @@ int hid = GetHandleId(tmr);
     SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Three");
     LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 250), .2f, .02f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-    CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
     TimerStart(tmr, .01f, true, @ScathachSpellQThirdFunction2);
 }
-bool ScathachSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A041");
+bool ScathachSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A041' ;
 }
-bool ScathachSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ScathachSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 2);
     }
     return true;
 }
-void ScathachSpellWFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void ScathachSpellWFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 50){
+        if (LocTime == 50)
+        {
             PlaySoundWithVolumeACF(ScathachSounds[2], 100, 0);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@ScathachSpellWFunction2));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\LightningStrike1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\SlamEffect.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
             DestroyEffect(LoadEffectHandle(GameHashTable, hid, 108));
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
@@ -6091,60 +6928,72 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void ScathachSpellWFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void ScathachSpellWFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         PlaySoundWithVolumeACF(ScathachSounds[3], 100, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
         SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Throw");
-        CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), (((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) + 0)));
+        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), (((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) + 0)));
         DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .5f, .01f, 600);
         DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
         SaveEffectHandle(GameHashTable, hid, 108, AddSpecialEffectTarget("Abilities\\Weapons\\PhoenixMissile\\Phoenix_Missile.mdl", LoadUnitHandle(GameHashTable, hid, iCaster), "weapon"));
         TimerStart(tmr, .01f, true, @ScathachSpellWFunction3);
     }
-    else {
+    else
+    {
         IssueImmediateOrder(GetTriggerUnit(), "stop");
         DestroyTimer(tmr);
     }
 }
-void ScathachSpellEFunctionRemoveUnits(){
+void ScathachSpellEFunctionRemoveUnits()
+{
     KillUnit(GetEnumUnit());
 }
-bool ScathachSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A042");
+bool ScathachSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A042' ;
 }
-void ScathachSpellEFunctionDisplaceDummy(){
-int hid = GetHandleId(GetExpiredTimer());
+void ScathachSpellEFunctionDisplaceDummy()
+{
+    int hid = GetHandleId(GetExpiredTimer());
     SaveLocationHandle(GameHashTable, hid, 123, GetUnitLoc(GetEnumUnit()));
     SaveLocationHandle(GameHashTable, hid, 124, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 123), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
     SetUnitPositionLoc(GetEnumUnit(), LoadLocationHandle(GameHashTable, hid, 124));
     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 123));
     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 124));
 }
-bool ScathachSpellEFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ScathachSpellEFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
     }
     return true;
 }
-void ScathachSpellEFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0){
-        if (IsCounted == true){
+void ScathachSpellEFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0)
+    {
+        if (IsCounted == true)
+        {
             SaveInteger(GameHashTable, hid, 0, LocTime + 1);
         }
-        else {
+        else
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
@@ -6154,7 +7003,8 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
             ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @ScathachSpellEFunctionDisplaceDummy);
             SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 150){
+            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 150)
+            {
                 ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @ScathachSpellEFunctionRemoveUnits);
                 PlaySoundWithVolumeACF(ScathachSounds[5], 100, 0);
                 PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
@@ -6162,45 +7012,50 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
                 DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
                 SaveBoolean(GameHashTable, hid, 10, true);
             }
-            else {
+            else
+            {
                 RemoveLocation(LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 102));
                 RemoveLocation(LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 103));
                 RemoveLocation(LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 107));
             }
         }
-        if (LocTime == 45){
+        if (LocTime == 45)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 500, .4f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 2.f, 3.f);
                 i = i + 1;
             }
-            CreateNUnitsAtLocACF(1, FourCC("u00L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 3.f, 2.f);
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.5f, 2.5f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, FourCC("u01Y"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u01Y' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell four");
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 85){
+        if (LocTime == 85)
+        {
             PlaySoundWithVolumeACF(ScathachSounds[6], 100, 0);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
             IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
             SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            CreateNUnitsAtLocACF(1, FourCC("u01Z"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u01Z' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime >= 85){
+        if (LocTime >= 85)
+        {
             SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
             SaveLocationHandle(GameHashTable, hid, 115, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SaveLocationHandle(GameHashTable, hid, 116, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 109), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 109), LoadLocationHandle(GameHashTable, hid, 115))));
@@ -6208,58 +7063,64 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 116));
             SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 115), 0);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 115), LoadLocationHandle(GameHashTable, hid, 116))) <= 100){
+            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 115), LoadLocationHandle(GameHashTable, hid, 116))) <= 100)
+            {
                 KillUnit(LoadUnitHandle(GameHashTable, hid, 106));
                 GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 109), 600, Filter(@ScathachSpellEFunction2));
                 i = 1;
-                while (true) {
+                while (true)
+                {
                     if (i > 10) break;
                     SaveLocationHandle(GameHashTable, hid, 125, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
-                    CreateNUnitsAtLocACF(1, FourCC("u01Y"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 125), 36 * i);
+                    CreateNUnitsAtLocACF(1, 'u01Y' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 125), 36 * i);
                     RemoveLocation(LoadLocationHandle(GameHashTable, hid, 125));
                     i = i + 1;
                 }
                 DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
                 ClearAllData(hid);
             }
-            else {
+            else
+            {
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 115));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 116));
             }
         }
     }
-    else {
+    else
+    {
         ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @ScathachSpellEFunctionRemoveUnits);
         DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
         ClearAllData(hid);
     }
 }
-void ScathachSpellEFunction4(){
-float i = 1;
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ScathachSpellEFunction4()
+{
+    float i = 1;
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveBoolean(GameHashTable, hid, 10, false);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
     SaveGroupHandle(GameHashTable, hid, 119, CreateGroup());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Channel");
-    while (true) {
+    while (true)
+    {
         if (i > 10) break;
         SaveLocationHandle(GameHashTable, hid, 123, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
         SaveLocationHandle(GameHashTable, hid, 124, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 123), 80.f * i, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 123), LoadLocationHandle(GameHashTable, hid, 103)) - 160));
-        CreateNUnitsAtLocACF(1, FourCC("u020"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 124), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 123), LoadLocationHandle(GameHashTable, hid, 103)));
+        CreateNUnitsAtLocACF(1, 'u020' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 124), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 123), LoadLocationHandle(GameHashTable, hid, 103)));
         GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
         RemoveLocation(LoadLocationHandle(GameHashTable, hid, 123));
         RemoveLocation(LoadLocationHandle(GameHashTable, hid, 124));
         SaveLocationHandle(GameHashTable, hid, 123, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 124, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 123), 80.f * i, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 123), LoadLocationHandle(GameHashTable, hid, 103)) + 160));
-        CreateNUnitsAtLocACF(1, FourCC("u020"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 124), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 123), LoadLocationHandle(GameHashTable, hid, 103)));
+        CreateNUnitsAtLocACF(1, 'u020' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 124), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 123), LoadLocationHandle(GameHashTable, hid, 103)));
         GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
         RemoveLocation(LoadLocationHandle(GameHashTable, hid, 123));
         RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
@@ -6268,38 +7129,44 @@ int hid = GetHandleId(tmr);
     }
     TimerStart(tmr, .01f, true, @ScathachSpellEFunction3);
 }
-bool ScathachSpellRFunction1(){
-    return GetSpellAbilityId() == FourCC("A043");
+bool ScathachSpellRFunction1()
+{
+    return GetSpellAbilityId() == 'A043' ;
 }
-void ScathachSpellRFunction2(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.17f;
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false){
+void ScathachSpellRFunction2()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.17f;
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 1) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 1){
+        if (LocTime == 1)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            while (true) {
+            while (true)
+            {
                 if (i > 3) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 1.25f, 3.f);
                 i = i + 1;
             }
-            CreateNUnitsAtLocACF(1, FourCC("u00L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.5f, 2.f);
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, .5f, 2.5f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Three");
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 25 || LocTime == 50 || LocTime == 75 || LocTime == 100){
+        if (LocTime == 25 || LocTime == 50 || LocTime == 75 || LocTime == 100)
+        {
             SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
@@ -6310,26 +7177,28 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             SetUnitAnimationWithRarity(LoadUnitHandle(GameHashTable, hid, iCaster), "attack", RARITY_RARE);
             DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 50, .25f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            while (true) {
+            while (true)
+            {
                 if (i > 3) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 1.25f, 3.f);
                 i = i + 1;
             }
-            CreateNUnitsAtLocACF(1, FourCC("u00L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, .5f, 2.5f);
-            CreateNUnitsAtLocACF(1, FourCC("u00H"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
-        if (LocTime == 125){
+        if (LocTime == 125)
+        {
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Seven");
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            CreateNUnitsAtLocACF(1, FourCC("u01Y"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u01Y' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
             DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
             LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 50, .25f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
@@ -6337,15 +7206,16 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void ScathachSpellRFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ScathachSpellRFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(ScathachSounds[4], 80, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
     SaveReal(GameHashTable, hid, 110, 0);
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
     LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 150, .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
@@ -6354,32 +7224,40 @@ int hid = GetHandleId(tmr);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack");
     TimerStart(tmr, .01f, true, @ScathachSpellRFunction2);
 }
-bool ScathachSpellTFunction1(){
-    return GetSpellAbilityId() == FourCC("A044");
+bool ScathachSpellTFunction1()
+{
+    return GetSpellAbilityId() == 'A044' ;
 }
-bool ScathachSpellTLinearMovementAction(){
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster)))){
+bool ScathachSpellTLinearMovementAction()
+{
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster))))
+    {
         SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 109));
     }
     return true;
 }
-bool ScathachSpellTAoEDamageAction(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ScathachSpellTAoEDamageAction()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
     }
     return true;
 }
-void ScathachSpellTFunction2(){
-float i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void ScathachSpellTFunction2()
+{
+    float i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime <= 100){
+        if (LocTime <= 100)
+        {
             SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
@@ -6388,13 +7266,15 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             SetUnitScale(LoadUnitHandle(GameHashTable, hid, 106), 1 + LoadReal(GameHashTable, hid, 110) / 50, 1 + LoadReal(GameHashTable, hid, 110) / 50, 1 + LoadReal(GameHashTable, hid, 110) / 50);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
         }
-        if (LocTime == 100){
+        if (LocTime == 100)
+        {
             PlaySoundWithVolumeACF(ScathachSounds[7], 100, 0);
             PauseTimer(LoadTimerHandle(GameHashTable, hid, 105));
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            while (true) {
+            while (true)
+            {
                 if (i > 8) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 1.f + i / 5.f, 1.25f);
                 SetUnitVertexColor(GlobalUnit, 255, 255, 255, 75);
                 i = i + 1;
@@ -6406,7 +7286,8 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             SaveReal(GameHashTable, hid, 110, 0);
         }
-        if (LocTime >= 100){
+        if (LocTime >= 100)
+        {
             SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
             SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 103))));
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 109));
@@ -6414,13 +7295,15 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 103), 0);
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@ScathachSpellTLinearMovementAction));
-            if (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 109)) <= 100){
+            if (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 109)) <= 100)
+            {
                 PlaySoundWithVolumeACF(GeneralSounds[2], 80, 0);
                 GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 450, Filter(@ScathachSpellTAoEDamageAction));
                 i = 1;
-                while (true) {
+                while (true)
+                {
                     if (i > 8) break;
-                    CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                     SetUnitScaleAndTime(GlobalUnit, 1.f + i / 5.f, 1.25f);
                     SetUnitVertexColor(GlobalUnit, 255, 255, 255, 75);
                     i = i + 1;
@@ -6433,16 +7316,17 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void ScathachSpellTFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ScathachSpellTFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(ScathachSounds[0], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Three");
-    CreateNUnitsAtLocACF(1, FourCC("u021"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+    CreateNUnitsAtLocACF(1, 'u021' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
     SetUnitVertexColor(GlobalUnit, 128, 0, 0, 100);
     SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
     TimerStart(tmr, .01f, true, @ScathachSpellTFunction2);
@@ -6497,76 +7381,90 @@ void HeroInit8()
     TriggerAddAction(t, @ScathachSpellTFunction3);
 }
 
-bool AkainuSpellDFunction1(){
-    return GetSpellAbilityId() == FourCC("A049");
+bool AkainuSpellDFunction1()
+{
+    return GetSpellAbilityId() == 'A049' ;
 }
-bool AkainuSpellDFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 12.5f + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.1f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool AkainuSpellDFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 12.5f + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.1f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         DestroyEffect(AddSpecialEffectTarget("Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl", GetFilterUnit(), "chest"));
     }
     return true;
 }
-void AkainuSpellDFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-    if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("B04H")) > 0){
+void AkainuSpellDFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), 'B04H' ) > 0)
+    {
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 300, Filter(@AkainuSpellDFunction2));
         RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
     }
-    else {
+    else
+    {
         ClearAllData(hid);
     }
 }
-void AkainuSpellDFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void AkainuSpellDFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(AkainuSounds[0], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveEffectHandle(GameHashTable, hid, 108, AddSpecialEffectTarget("GeneralEffects\\lavaspray.mdx", LoadUnitHandle(GameHashTable, hid, iCaster), "head"));
     TimerStart(tmr, .5f, true, @AkainuSpellDFunction3);
 }
-bool AkainuSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A04A");
+bool AkainuSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A04A' ;
 }
-bool AkainuSpellQFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 150 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool AkainuSpellQFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 150 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
     }
     return true;
 }
-void AkainuSpellQFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 200 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-    if (StopSpell(hid, 0) == false){
+void AkainuSpellQFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 200 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
+    if (StopSpell(hid, 0) == false)
+    {
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
         SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 20, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
         SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
         SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
         SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
-        if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 100){
+        if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 100)
+        {
             PlaySoundWithVolumeACF(AkainuSounds[4], 90, 0);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell two");
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
             DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            CreateNUnitsAtLocACF(1, FourCC("u025"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
+            CreateNUnitsAtLocACF(1, 'u025' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
             KillUnit(GlobalUnit);
-            CreateNUnitsAtLocACF(1, FourCC("u026"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            while (true) {
+            CreateNUnitsAtLocACF(1, 'u026' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            while (true)
+            {
                 if (i > 3) break;
                 SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 150, 120 * i));
-                CreateNUnitsAtLocACF(1, FourCC("u027"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), 0);
+                CreateNUnitsAtLocACF(1, 'u027' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), 0);
                 KillUnit(GlobalUnit);
-                CreateNUnitsAtLocACF(1, FourCC("u028"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), 120 * i);
+                CreateNUnitsAtLocACF(1, 'u028' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), 120 * i);
                 SetUnitScaleAndTime(GlobalUnit, .5f, 1.5f);
                 KillUnit(GlobalUnit);
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
@@ -6579,54 +7477,63 @@ float LocDamage = 200 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 300, Filter(@AkainuSpellQFunction2));
             ClearAllData(hid);
         }
-        else {
+        else
+        {
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
     }
 }
-void AkainuSpellQFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void AkainuSpellQFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(AkainuSounds[5], 90, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell three");
     TimerStart(tmr, .01f, true, @AkainuSpellQFunction3);
 }
-bool AkainuSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A04C");
+bool AkainuSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A04C' ;
 }
-bool AkainuSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool AkainuSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
     }
     return true;
 }
-void AkainuSpellWFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void AkainuSpellWFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 50){
+        if (LocTime == 50)
+        {
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\LightningStrike1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, FourCC("u00R"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
+            CreateNUnitsAtLocACF(1, 'u00R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
             SetUnitScale(GlobalUnit, 1.5f, 1.5f, 1.5f);
-            while (true) {
+            while (true)
+            {
                 if (i > 4) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.25f);
-                CreateNUnitsAtLocACF(1, FourCC("u028"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 90 * i);
+                CreateNUnitsAtLocACF(1, 'u028' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 90 * i);
                 SetUnitScaleAndTime(GlobalUnit, .5f, 1.5f);
                 KillUnit(GlobalUnit);
                 i = i + 1;
@@ -6636,52 +7543,60 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void AkainuSpellWFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void AkainuSpellWFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         PlaySoundWithVolumeACF(AkainuSounds[3], 90, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
         SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell one");
-        CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
         DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
         DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .5f, .01f, 600);
         TimerStart(tmr, .01f, true, @AkainuSpellWFunction3);
     }
-    else {
+    else
+    {
         IssueImmediateOrder(GetTriggerUnit(), "stop");
         DestroyTimer(tmr);
     }
 }
-bool AkainuSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A04B");
+bool AkainuSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A04B' ;
 }
-void AkainuSpellEFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 0) == false){
+void AkainuSpellEFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20){
+        if (LocTime == 20)
+        {
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
             IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-            CreateNUnitsAtLocACF(1, FourCC("u029"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u029' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
             SetUnitPathing(GlobalUnit, false);
-            CreateNUnitsAtLocACF(1, FourCC("u028"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u028' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScale(GlobalUnit, .5f, .5f, .5f);
             SaveUnitHandle(GameHashTable, hid, 126, GlobalUnit);
             SetUnitPathing(GlobalUnit, false);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime > 20){
+        if (LocTime > 20)
+        {
             SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
             SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), 40, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 103))));
@@ -6692,30 +7607,34 @@ float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
             SetUnitPathing(LoadUnitHandle(GameHashTable, hid, 126), false);
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 126), LoadLocationHandle(GameHashTable, hid, 109));
             DestroyEffect(AddSpecialEffectLoc("Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl", LoadLocationHandle(GameHashTable, hid, 107)));
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 109))) <= 300){
+            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 109))) <= 300)
+            {
                 KillUnit(LoadUnitHandle(GameHashTable, hid, 106));
                 KillUnit(LoadUnitHandle(GameHashTable, hid, 126));
                 DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
                 DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-                CreateNUnitsAtLocACF(1, FourCC("u026"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107)));
-                CreateNUnitsAtLocACF(1, FourCC("u025"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107)) + 90);
+                CreateNUnitsAtLocACF(1, 'u026' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107)));
+                CreateNUnitsAtLocACF(1, 'u025' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107)) + 90);
                 KillUnit(GlobalUnit);
                 DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
             }
-            else {
+            else
+            {
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
             }
         }
-        if (LocTime == 50){
+        if (LocTime == 50)
+        {
             ClearAllData(hid);
         }
     }
 }
-void AkainuSpellEFunction3(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void AkainuSpellEFunction3()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(AkainuSounds[2], 90, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
@@ -6724,44 +7643,52 @@ int hid = GetHandleId(tmr);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack");
     TimerStart(tmr, .01f, true, @AkainuSpellEFunction2);
 }
-bool AkainuSpellRFunction1(){
-    return GetSpellAbilityId() == FourCC("A04D");
+bool AkainuSpellRFunction1()
+{
+    return GetSpellAbilityId() == 'A04D' ;
 }
-bool AkainuSpellRFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false){
+bool AkainuSpellRFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false)
+    {
         StunUnitACF(GetFilterUnit(), 1);
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 111), GetFilterUnit());
     }
     return true;
 }
-void AkainuSpellRFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void AkainuSpellRFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20){
+        if (LocTime == 20)
+        {
             SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 127, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 300, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            CreateNUnitsAtLocACF(1, FourCC("u02A"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 127), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u02A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 127), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 127));
             PlaySoundWithVolumeACF(AkainuSounds[5], 60, 0);
             PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
             IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
         }
-        if (LocTime > 20){
+        if (LocTime > 20)
+        {
             SaveReal(GameHashTable, hid, 110, (LoadReal(GameHashTable, hid, 110) + 100));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            while (true) {
+            while (true)
+            {
                 if (i > 2) break;
                 SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 500), GetRandomReal(0, 360)));
                 DestroyEffect(AddSpecialEffectLoc("abilities\\weapons\\catapult\\catapultmissile.mdl", LoadLocationHandle(GameHashTable, hid, 109)));
-                CreateNUnitsAtLocACF(1, FourCC("u028"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u028' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), GetRandomReal(0, 360));
                 SetUnitScale(GlobalUnit, .5f, .5f, .5f);
                 KillUnit(GlobalUnit);
                 RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
@@ -6769,16 +7696,18 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
             }
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 500, Filter(@AkainuSpellRFunction2));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-            if (LoadReal(GameHashTable, hid, 110) >= 1500){
+            if (LoadReal(GameHashTable, hid, 110) >= 1500)
+            {
                 DestroyGroup(LoadGroupHandle(GameHashTable, hid, 111));
                 ClearAllData(hid);
             }
         }
     }
 }
-void AkainuSpellRFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void AkainuSpellRFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(AkainuSounds[1], 90, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
@@ -6788,63 +7717,75 @@ int hid = GetHandleId(tmr);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack");
     TimerStart(tmr, .01f, true, @AkainuSpellRFunction3);
 }
-bool AkainuSpellTFunction1(){
-    return GetSpellAbilityId() == FourCC("A04E");
+bool AkainuSpellTFunction1()
+{
+    return GetSpellAbilityId() == 'A04E' ;
 }
-bool AkainuSpellTFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.05f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool AkainuSpellTFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.05f;
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
     }
     return true;
 }
-void AkainuSpellTFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-int LocCount = LoadInteger(GameHashTable, hid, 1);
-    if (StopSpell(hid, 0) == false){
+void AkainuSpellTFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    int LocCount = LoadInteger(GameHashTable, hid, 1);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
         SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
         SaveReal(GameHashTable, hid, 118, LoadReal(GameHashTable, hid, 118) + 1);
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        if (LoadReal(GameHashTable, hid, 118) == 1){
+        if (LoadReal(GameHashTable, hid, 118) == 1)
+        {
             SaveReal(GameHashTable, hid, 5, - 90);
         }
-        else {
+        else
+        {
             SaveReal(GameHashTable, hid, 5, 90);
             SaveReal(GameHashTable, hid, 118, 0);
         }
-        if (LoadReal(GameHashTable, hid, 110) < 50){
+        if (LoadReal(GameHashTable, hid, 110) < 50)
+        {
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 70, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + LoadReal(GameHashTable, hid, 5)));
-            CreateNUnitsAtLocACF(1, FourCC("u02C"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u02C' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             ShowUnit(GlobalUnit, false);
             SetUnitScale(GlobalUnit, .5f, .5f, .5f);
             SetUnitAnimation(GlobalUnit, "stand");
-            UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), .5f);
+            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
             SetUnitFlyHeight(GlobalUnit, 4400, 6000);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
-        if (LocTime > 10){
+        if (LocTime > 10)
+        {
             SaveInteger(GameHashTable, hid, 1, LocCount + 1);
             SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 550), GetRandomReal(0, 360)));
-            CreateNUnitsAtLocACF(1, FourCC("u02B"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), GetRandomReal(0, 360));
+            CreateNUnitsAtLocACF(1, 'u02B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), GetRandomReal(0, 360));
             SetUnitScale(GlobalUnit, .65f, .65f, .65f);
-            UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), .35f);
-            if (LocCount > 7){
+            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .35f);
+            if (LocCount > 7)
+            {
                 GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 109), 500, Filter(@AkainuSpellTFunction2));
             }
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
         }
-        if (LoadReal(GameHashTable, hid, 110) == 70){
+        if (LoadReal(GameHashTable, hid, 110) == 70)
+        {
             ClearAllData(hid);
         }
     }
 }
-void AkainuSpellTFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void AkainuSpellTFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(AkainuSounds[6], 90, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
@@ -6894,12 +7835,15 @@ void HeroInit9()
     TriggerAddCondition(t, Condition(@AkainuSpellTFunction1));
     TriggerAddAction(t, @AkainuSpellTFunction4);
 }
-bool ReinforceSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A04G");
+bool ReinforceSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A04G' ;
 }
-bool ReinforceSpellQUnitDisplacement(){
-int hid = GetHandleId(GetExpiredTimer());
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ReinforceSpellQUnitDisplacement()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(GetFilterUnit()));
         SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 10, ((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))) + (60))));
         SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, hid, 107));
@@ -6911,10 +7855,11 @@ int hid = GetHandleId(GetExpiredTimer());
 bool ReinforceSpellQFunction2()
 {
     timer tmr = GetExpiredTimer();
-int hid = GetHandleId( tmr );
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+    int hid = GetHandleId( tmr );
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 2);
         SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(GetFilterUnit()));
@@ -6935,11 +7880,12 @@ void ReinforceSpellQFunction3()
     {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
         GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 400., Filter(@ReinforceSpellQUnitDisplacement));
-        if (LocTime == 100){
+        if (LocTime == 100)
+        {
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 400, Filter(@ReinforceSpellQFunction2));
-            CreateNUnitsAtLocACF(1, FourCC("u00L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 270);
+            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 270);
             SetUnitScaleAndTime(GlobalUnit, 5.f, 2.f);
-            CreateNUnitsAtLocACF(1, FourCC("u02D"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+            CreateNUnitsAtLocACF(1, 'u02D' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
             SetUnitTimeScale(GlobalUnit, .8f);
             ClearAllData(hid);
             DestroyTimer( tmr );
@@ -6955,31 +7901,37 @@ void ReinforceSpellQFunction4()
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveLocationHandle(GameHashTable, hid, 102, GetSpellTargetLoc());
     SaveReal(GameHashTable, hid, 10, 0);
-    CreateNUnitsAtLocACF(1, FourCC("u009"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 270);
-    CreateNUnitsAtLocACF(1, FourCC("u02F"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+    CreateNUnitsAtLocACF(1, 'u009' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 270);
+    CreateNUnitsAtLocACF(1, 'u02F' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
     TimerStart(tmr, .01f, true, @ReinforceSpellQFunction3);
 }
-bool ReinforceSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A04H");
+bool ReinforceSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A04H' ;
 }
-void ReinforceSpellWDummyFacing(){
+void ReinforceSpellWDummyFacing()
+{
     SetUnitFacing1(GetEnumUnit(), LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iTarget), 0);
 }
-void ReinforceSpellWDummyMovement(){
-int hid = GetHandleId(GetExpiredTimer());
+void ReinforceSpellWDummyMovement()
+{
+    int hid = GetHandleId(GetExpiredTimer());
     SetUnitFlyHeight(GetEnumUnit(), 0, 99999);
     SetUnitPositionLoc(GetEnumUnit(), LoadLocationHandle(GameHashTable, hid, 102));
     SetUnitFacing(GetEnumUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 102)));
 }
-void ReinforceSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false){
+void ReinforceSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 1) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
         ForGroup(LoadGroupHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 119), @ReinforceSpellWDummyFacing);
-        if (LocTime == 100){
+        if (LocTime == 100)
+        {
             PauseTimer(LoadTimerHandle(GameHashTable, hid, 105));
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
@@ -6992,133 +7944,157 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void ReinforceSpellWFunction3(){
-float i = 1;
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ReinforceSpellWFunction3()
+{
+    float i = 1;
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(ReinforceSounds[2], 60, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
     SaveGroupHandle(GameHashTable, hid, 119, CreateGroup());
-    while (true) {
+    while (true)
+    {
         if (i > 20) break;
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
         SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(100, 1000), 36 * i));
-        CreateNUnitsAtLocACF(1, FourCC("u02N"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)));
+        CreateNUnitsAtLocACF(1, 'u02N' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)));
         GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
-        CreateNUnitsAtLocACF(1, FourCC("u02G"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)));
+        CreateNUnitsAtLocACF(1, 'u02G' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)));
         RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
         RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
         i = i + 1;
     }
     TimerStart(tmr, .01f, true, @ReinforceSpellWFunction2);
 }
-bool ReinforceSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A04I");
+bool ReinforceSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A04I' ;
 }
-bool ReinforceSpellEFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 60 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
-        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), FourCC("u02T"), GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit()), 0);
+bool ReinforceSpellEFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 60 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
+        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u02T' , GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit()), 0);
         UnitShareVision(GetFilterUnit(), Player(PLAYER_NEUTRAL_PASSIVE), true);
         IssueTargetOrder(GlobalUnit, "slow", GetFilterUnit());
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
     }
     return true;
 }
-void ReinforceSpellEFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void ReinforceSpellEFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 100){
+        if (LocTime == 100)
+        {
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
             DestroyEffect(AddSpecialEffectLoc("Characters\\Reinforce\\ApocalypseStomp.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            CreateNUnitsAtLocACF(1, FourCC("u00Z"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-            GlobalUnit = CreateUnitAtLoc(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("u00E"), LoadLocationHandle(GameHashTable, hid, 102), 0);
+            CreateNUnitsAtLocACF(1, 'u00Z' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+            GlobalUnit = CreateUnitAtLoc(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00E' , LoadLocationHandle(GameHashTable, hid, 102), 0);
             SetUnitScaleAndTime(GlobalUnit, 2.5f, .75f);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 450, Filter(@ReinforceSpellEFunction2));
             ClearAllData(hid);
         }
     }
 }
-void ReinforceSpellEFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ReinforceSpellEFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(ReinforceSounds[3], 60, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveLocationHandle(GameHashTable, hid, 102, GetSpellTargetLoc());
     TimerStart(tmr, .01f, true, @ReinforceSpellEFunction3);
 }
-bool ReinforceSpellRFunction1(){
-    return GetSpellAbilityId() == FourCC("A04J");
+bool ReinforceSpellRFunction1()
+{
+    return GetSpellAbilityId() == 'A04J' ;
 }
-bool ReinforceSpellRFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 150 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ReinforceSpellRFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 150 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
     }
     return true;
 }
-void ReinforceSpellRFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-    if (StopSpell(hid, 1) == false){
+void ReinforceSpellRFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    if (StopSpell(hid, 1) == false)
+    {
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
         SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 20, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
         SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
         SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
         DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-        if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 150){
-            CreateNUnitsAtLocACF(1, FourCC("u00L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+        if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 150)
+        {
+            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitTimeScale(GlobalUnit, 2);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@ReinforceSpellRFunction2));
             ClearAllData(hid);
         }
-        else {
+        else
+        {
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
         }
     }
 }
-void ReinforceSpellRFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ReinforceSpellRFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(ReinforceSounds[0], 60, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "walk");
     TimerStart(tmr, .01f, true, @ReinforceSpellRFunction3);
 }
-bool ReinforceSpellTFunction1(){
-    return GetSpellAbilityId() == FourCC("A04K");
+bool ReinforceSpellTFunction1()
+{
+    return GetSpellAbilityId() == 'A04K' ;
 }
-bool ReinforceSpellTUnitDisplacer1(){
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster)))){
+bool ReinforceSpellTUnitDisplacer1()
+{
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster))))
+    {
         SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 107));
     }
     return true;
 }
-bool ReinforceSpellTUnitDisplacer2(){
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster)))){
+bool ReinforceSpellTUnitDisplacer2()
+{
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster))))
+    {
         SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 109));
     }
     return true;
 }
-bool ReinforceSpellTFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 400 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ReinforceSpellTFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 400 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 104, GetUnitLoc(GetFilterUnit()));
         DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
@@ -7127,17 +8103,21 @@ float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 40
     }
     return true;
 }
-void ReinforceSpellTFunction3(){
-float i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0){
+void ReinforceSpellTFunction3()
+{
+    float i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
+    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0)
+    {
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        if (IsCounted == true){
+        if (IsCounted == true)
+        {
             SaveInteger(GameHashTable, hid, 0, LocTime + 1);
         }
-        else {
+        else
+        {
             SaveReal(GameHashTable, hid, 110, (LoadReal(GameHashTable, hid, 110) - 16));
             SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), LoadReal(GameHashTable, hid, 110), (((LoadReal(GameHashTable, hid, 110))) * (1))));
             SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), LoadReal(GameHashTable, hid, 110), (((((LoadReal(GameHashTable, hid, 110))) * (1))) + (180))));
@@ -7147,56 +8127,64 @@ bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
             DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Undead\\DeathandDecay\\DeathandDecayTarget.mdl", LoadLocationHandle(GameHashTable, hid, 109)));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-            if (LoadReal(GameHashTable, hid, 110) <= 0){
+            if (LoadReal(GameHashTable, hid, 110) <= 0)
+            {
                 SaveBoolean(GameHashTable, hid, 10, true);
                 SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack slam");
             }
         }
-        if (LocTime == 20){
+        if (LocTime == 20)
+        {
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack slam");
-            CreateNUnitsAtLocACF(1, FourCC("u02M"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+            CreateNUnitsAtLocACF(1, 'u02M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
             SaveUnitHandle(GameHashTable, hid, iTarget, GlobalUnit);
             SetUnitAnimation(GlobalUnit, "birth");
         }
-        if (LocTime == 70){
+        if (LocTime == 70)
+        {
             SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
             SaveLocationHandle(GameHashTable, hid, 113, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 130, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel");
-            while (true) {
+            while (true)
+            {
                 if (i > 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u02L"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+                CreateNUnitsAtLocACF(1, 'u02L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
                 SetUnitScaleAndTime(GlobalUnit, i, .05f * i);
-                UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 1.8f);
+                UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1.8f);
                 i = i + 1;
             }
-            CreateNUnitsAtLocACF(1, FourCC("u02E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 113), 0);
+            CreateNUnitsAtLocACF(1, 'u02E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 113), 0);
             SetUnitFlyHeight(GlobalUnit, 30, 99999);
-            UnitApplyTimedLife(GlobalUnit, FourCC("BTLF"), 3.6f);
+            UnitApplyTimedLife(GlobalUnit, 'BTLF' , 3.6f);
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
             RemoveLocation(LoadLocationHandle(GameHashTable, hid, 113));
         }
-        if (LocTime == 230){
+        if (LocTime == 230)
+        {
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell slam");
         }
-        if (LocTime == 250){
-            CreateNUnitsAtLocACF(1, FourCC("u02K"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+        if (LocTime == 250)
+        {
+            CreateNUnitsAtLocACF(1, 'u02K' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
             SetUnitScale(GlobalUnit, 10, 10, 10);
-            CreateNUnitsAtLocACF(1, FourCC("u00Z"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+            CreateNUnitsAtLocACF(1, 'u00Z' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
             SetUnitScale(GlobalUnit, 10, 10, 10);
-            CreateNUnitsAtLocACF(1, FourCC("u010"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+            CreateNUnitsAtLocACF(1, 'u010' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
             SetUnitScale(GlobalUnit, 3.5f, 3.5f, 3.5f);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 900, Filter(@ReinforceSpellTFunction2));
             KillUnit(LoadUnitHandle(GameHashTable, hid, iTarget));
             ClearAllData(hid);
         }
     }
-    else {
+    else
+    {
         ReinforceResetT(hid);
     }
 }
-void ReinforceSpellTFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ReinforceSpellTFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     SaveBoolean(GameHashTable, hid, 10, false);
     PlaySoundWithVolumeACF(ReinforceSounds[5], 80, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
@@ -7243,13 +8231,16 @@ void HeroInit10()
     TriggerAddCondition(t, Condition(@ReinforceSpellTFunction1));
     TriggerAddAction(t, @ReinforceSpellTFunction4);
 }
-bool ArcueidSpellQFunction1(){
-    return GetSpellAbilityId() == FourCC("A01N");
+bool ArcueidSpellQFunction1()
+{
+    return GetSpellAbilityId() == 'A01N' ;
 }
-bool ArcueidSpellQFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 70 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ArcueidSpellQFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 70 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(GetFilterUnit()));
         DisplaceUnitWithArgs(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 107)), - 300, .5f, .01f, 250);
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
@@ -7258,21 +8249,25 @@ float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
     }
     return true;
 }
-void ArcueidSpellQFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void ArcueidSpellQFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20){
+        if (LocTime == 20)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[0], 50, 0);
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 300, Filter(@ArcueidSpellQFunction2));
             ClearAllData(hid);
         }
     }
 }
-void ArcueidSpellQFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ArcueidSpellQFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(ArcueidSounds[0], 100, 0);
     SaveInteger(GameHashTable, hid, 0, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
@@ -7283,13 +8278,16 @@ int hid = GetHandleId(tmr);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell One");
     TimerStart(tmr, .01f, true, @ArcueidSpellQFunction3);
 }
-bool ArcueidSpellWFunction1(){
-    return GetSpellAbilityId() == FourCC("A01Y");
+bool ArcueidSpellWFunction1()
+{
+    return GetSpellAbilityId() == 'A01Y' ;
 }
-bool ArcueidSpellWFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = 350 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 60 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ArcueidSpellWFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = 350 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 60 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         SaveLocationHandle(GameHashTable, hid, 113, GetUnitLoc(GetFilterUnit()));
         LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 113)), 200, .15f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
@@ -7297,32 +8295,39 @@ float LocDamage = 350 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)
     }
     return true;
 }
-void ArcueidSpellWFunction3(){
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-int i = 1;
-    if (StopSpell(hid, 0) == false){
+void ArcueidSpellWFunction3()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    int i = 1;
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 10){
-            while (true) {
+        if (LocTime == 10)
+        {
+            while (true)
+            {
                 if (i == 5) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
                 SetUnitScaleAndTime(GlobalUnit, GetRandomReal(1.5f, 2), 1.5f);
                 SetUnitVertexColor(GlobalUnit, 255, 255, 255, 185);
                 i = i + 1;
             }
         }
-        if (LocTime == 25){
+        if (LocTime == 25)
+        {
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 450, Filter(@ArcueidSpellWFunction2));
         }
-        if (LocTime == 40){
+        if (LocTime == 40)
+        {
             ClearAllData(hid);
         }
     }
 }
-void ArcueidSpellWFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
+void ArcueidSpellWFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
     PlaySoundWithVolumeACF(ArcueidSounds[1], 100, 0);
     SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
@@ -7332,40 +8337,49 @@ int hid = GetHandleId(tmr);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Five");
     TimerStart(tmr, .01f, true, @ArcueidSpellWFunction3);
 }
-bool ArcueidSpellEFunction1(){
-    return GetSpellAbilityId() == FourCC("A026");
+bool ArcueidSpellEFunction1()
+{
+    return GetSpellAbilityId() == 'A026' ;
 }
-bool ArcueidSpellEFunction2(){
-int hid = GetHandleId(GetExpiredTimer());
-float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+bool ArcueidSpellEFunction2()
+{
+    int hid = GetHandleId(GetExpiredTimer());
+    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
     }
     return true;
 }
-void ArcueidSpellEFunction3(){
-int i = 1;
-int hid = GetHandleId(GetExpiredTimer());
-int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false){
+void ArcueidSpellEFunction3()
+{
+    int i = 1;
+    int hid = GetHandleId(GetExpiredTimer());
+    int LocTime = LoadInteger(GameHashTable, hid, 0);
+    if (StopSpell(hid, 0) == false)
+    {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 15){
+        if (LocTime == 15)
+        {
             ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
         }
-        if (LocTime == 25){
+        if (LocTime == 25)
+        {
             PlaySoundWithVolumeACF(GeneralSounds[3], 60, 0);
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103));
             ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            if (GetLocalPlayer() == GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))){
+            if (GetLocalPlayer() == GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))
+            {
                 ClearSelection();
                 SelectUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             }
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@ArcueidSpellEFunction2));
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\SlamEffect.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            while (true) {
+            while (true)
+            {
                 if (i == 3) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
                 SetUnitScaleAndTime(GlobalUnit, GetRandomReal(1.5f, 2.f), 1.5f);
                 SetUnitVertexColor(GlobalUnit, 255, 255, 255, 185);
                 i = i + 1;
@@ -7374,22 +8388,25 @@ int LocTime = LoadInteger(GameHashTable, hid, 0);
         }
     }
 }
-void ArcueidSpellEFunction4(){
-timer tmr = CreateTimer();
-int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+void ArcueidSpellEFunction4()
+{
+    timer tmr = CreateTimer();
+    int hid = GetHandleId(tmr);
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         PlaySoundWithVolumeACF(ArcueidSounds[2], 100, 0);
         SaveInteger(GameHashTable, hid, 0, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
         SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack Two");
         DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
         TimerStart(tmr, .01f, true, @ArcueidSpellEFunction3);
     }
-    else {
+    else
+    {
         IssueImmediateOrder(GetTriggerUnit(), "stop");
         DestroyTimer(tmr);
     }
@@ -7397,14 +8414,15 @@ int hid = GetHandleId(tmr);
 
 bool ArcueidSpellRFunction1()
 {
-    return GetSpellAbilityId() == FourCC("A027");
+    return GetSpellAbilityId() == 'A027' ;
 }
 
 bool ArcueidSpellRFunction2()
 {
     int hid = GetHandleId(GetExpiredTimer());
     float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
         StunUnitACF(GetFilterUnit(), 1);
     }
@@ -7421,23 +8439,26 @@ void ArcueidSpellRFunction3()
     if (StopSpell(hid, 0) == false)
     {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 15){
+        if (LocTime == 15)
+        {
             LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 150 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * .5f;
             PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
             SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
             SetUnitVertexColor(GlobalUnit, 255, 255, 255, 185);
             DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A04U"));
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A04U"), false);
+            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
+            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A04U' , false);
             SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 600, 4000);
         }
-        if (LocTime == 25){
+        if (LocTime == 25)
+        {
             DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
         }
-        if (LocTime == 30){
-            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A04U"));
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("A04U"), false);
+        if (LocTime == 30)
+        {
+            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
+            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A04U' , false);
             SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 700, 4000);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack Two");
         }
@@ -7446,7 +8467,7 @@ void ArcueidSpellRFunction3()
     {
         LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * .5f;
         DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-        CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
+        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
         SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
         SetUnitVertexColor(GlobalUnit, 255, 255, 255, 185);
         SetUnitFlyHeight(GlobalUnit, 800, 99999);
@@ -7460,18 +8481,19 @@ void ArcueidSpellRFunction3()
     if (LocTime == 80)
     {
         SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        CreateNUnitsAtLocACF(1, FourCC("u00D"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
+        CreateNUnitsAtLocACF(1, 'u00D' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
         SetUnitScale(GlobalUnit, 1.5f, 1.5f, 1.5f);
-        while (true) {
+        while (true)
+        {
             if (i == 3) break;
-            CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
             SetUnitScaleAndTime(GlobalUnit, GetRandomReal(1.5f, 2.f), 1.5f);
             SetUnitVertexColor(GlobalUnit, 255, 255, 255, 185);
             i = i + 1;
         }
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A04U"));
-        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), FourCC("A04U"));
+        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
+        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
         GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@ArcueidSpellRFunction2));
         ClearAllData(hid);
     }
@@ -7486,8 +8508,8 @@ void ArcueidSpellRFunction4()
     SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
     SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
     SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), FourCC("A054"));
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), FourCC("A054"), false);
+    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
+    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
     PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
     SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.75f);
     SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack Slam");
@@ -7496,7 +8518,7 @@ void ArcueidSpellRFunction4()
 
 bool ArcueidSpellTFunction1()
 {
-    return GetSpellAbilityId() == FourCC("A02A");
+    return GetSpellAbilityId() == 'A02A' ;
 }
 
 bool ArcueidSpellTFunction2()
@@ -7504,11 +8526,13 @@ bool ArcueidSpellTFunction2()
     int i = 1;
     int hid = GetHandleId(GetExpiredTimer());
     float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 200 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))){
-        while (true) {
+    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
+    {
+        while (true)
+        {
             if (i == 3) break;
-            GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), FourCC("u011"), GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit()), i * GetRandomInt(60, 90));
-            UnitAddAbility(GlobalUnit, FourCC("A04U"));
+            GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u011' , GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit()), i * GetRandomInt(60, 90));
+            UnitAddAbility(GlobalUnit, 'A04U' );
             SetUnitFlyHeight(GlobalUnit, GetUnitFlyHeight(GetFilterUnit()) + 50, 9999);
             SetUnitScaleAndTime(GlobalUnit, .75f, .75f);
             i = i + 1;
@@ -7528,23 +8552,28 @@ void ArcueidSpellTFunction3()
     if (StopSpell(hid, 0) == false)
     {
         SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 25){
+        if (LocTime == 25)
+        {
             ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
             SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103));
         }
-        if (LocTime == 45){
+        if (LocTime == 45)
+        {
             GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 600, Filter(@ArcueidSpellTFunction2));
         }
-        if (LocTime == 50){
+        if (LocTime == 50)
+        {
             ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Stand");
-            if (GetLocalPlayer() == GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))){
+            if (GetLocalPlayer() == GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))
+            {
                 ClearSelection();
                 SelectUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
             }
-            while (true) {
+            while (true)
+            {
                 if (i == 3) break;
-                CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
+                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
                 SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
                 i = i + 1;
             }
@@ -7557,19 +8586,21 @@ void ArcueidSpellTFunction4()
 {
     timer tmr = CreateTimer();
     int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false){
+    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
+    {
         PlaySoundWithVolumeACF(ArcueidSounds[4], 100, 0);
         SaveInteger(GameHashTable, hid, 0, 0);
         SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
         SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
         SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
         PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        CreateNUnitsAtLocACF(1, FourCC("u00E"), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
+        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
         SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Six");
         DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
         TimerStart(tmr, .01f, true, @ArcueidSpellTFunction3);
     }
-    else {
+    else
+    {
         IssueImmediateOrder(GetTriggerUnit(), "stop");
         DestroyTimer(tmr);
     }
@@ -7616,17 +8647,39 @@ void HeroInit( int id )
 {
     switch( id )
     {
-        case 1: HeroInit1( ); break;
-        case 2: HeroInit2( ); break;
-        case 3: HeroInit3( ); break;
-        case 4: HeroInit4( ); break;
-        case 5: HeroInit5( ); break;
-        case 6: HeroInit6( ); break;
-        case 7: HeroInit7( ); break;
-        case 8: HeroInit8( ); break;
-        case 9: HeroInit9( ); break;
-        case 10: HeroInit10( ); break;
-        case 11: HeroInit11( ); break;
+        case 1:
+        HeroInit1( );
+        break;
+        case 2:
+        HeroInit2( );
+        break;
+        case 3:
+        HeroInit3( );
+        break;
+        case 4:
+        HeroInit4( );
+        break;
+        case 5:
+        HeroInit5( );
+        break;
+        case 6:
+        HeroInit6( );
+        break;
+        case 7:
+        HeroInit7( );
+        break;
+        case 8:
+        HeroInit8( );
+        break;
+        case 9:
+        HeroInit9( );
+        break;
+        case 10:
+        HeroInit10( );
+        break;
+        case 11:
+        HeroInit11( );
+        break;
     }
 }
 
@@ -7637,7 +8690,7 @@ void DefaultCommandsTriggers()
     t = CreateTrigger();
     TriggerRegisterPlayerChatEventRW(t, "-save", true);
     TriggerAddAction(t, @SaveLocationAction);
-    
+
     t = CreateTrigger();
     TriggerRegisterAnyPlayerEventRW(t, EVENT_PLAYER_END_CINEMATIC);
     TriggerAddAction(t, @ESCToSaveAction);
@@ -7707,9 +8760,11 @@ void GameTriggers()
     TR_SelectionMode = CreateTrigger();
     TriggerRegisterDialogEvent(TR_SelectionMode, ModeSelectionDialog);
     TriggerAddAction(TR_SelectionMode, @ModeSelectionFunction2);
-    while (true) {
+    while (true)
+    {
         if (i > 7) break;
-        if (GetPlayerController(Player(i)) == MAP_CONTROL_USER && GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING){
+        if (GetPlayerController(Player(i)) == MAP_CONTROL_USER && GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING)
+        {
             TotalPlayers = TotalPlayers + 1;
             if (GetPlayerTeam(Player(i)) == 0)
             {
@@ -7724,7 +8779,8 @@ void GameTriggers()
     }
     i = 0;
     GameTrigArr[0] = CreateTrigger();
-    while (true) {
+    while (true)
+    {
         if (i > 9) break;
         TriggerRegisterPlayerAllianceChange(GameTrigArr[0], Player(i), ALLIANCE_SHARED_CONTROL);
         i = i + 1;
@@ -7833,9 +8889,9 @@ void GameTriggers()
     TriggerRegisterAnyUnitEventRW(GameTrigArr[31], EVENT_PLAYER_UNIT_PICKUP_ITEM);
     TriggerAddAction(GameTrigArr[31], @ItemCombinationAction);
 
-	trigger t = CreateTrigger( );
-	TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_DAMAGED );
-	TriggerAddAction( t, @OnPlayerUnitDamaged );
+    trigger t = CreateTrigger( );
+    TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_DAMAGED );
+    TriggerAddAction( t, @OnPlayerUnitDamaged );
 }
 
 void GameSounds()
@@ -7936,39 +8992,47 @@ void CreateAllUnits()
     LocRectArr[3] = Rect( - 672, - 1184, 672, 160);
     LocRectArr[4] = CircleRectArr[3];
     LocRectArr[5] = CircleRectArr[2];
-    NeutralIntArr[1] = FourCC("mtk3");
-    NeutralIntArr[2] = FourCC("mtk4");
-    NeutralIntArr[3] = FourCC("mtk5");
-    NeutralIntArr[4] = FourCC("mtk1");
-    NeutralIntArr[5] = FourCC("mtk2");
-    while (true) {
+    NeutralIntArr[1] = 'mtk3' ;
+    NeutralIntArr[2] = 'mtk4' ;
+    NeutralIntArr[3] = 'mtk5' ;
+    NeutralIntArr[4] = 'mtk1' ;
+    NeutralIntArr[5] = 'mtk2' ;
+    while (true)
+    {
         if (i > 10) break;
-        if (i == 6){
+        if (i == 6)
+        {
             LocX = 5120;
             LocY = 0;
             ID = 1;
         }
-        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), FourCC("wgt1"), LocX, LocY, 270);
+        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'wgt1' , LocX, LocY, 270);
         WaygateSetDestination(GlobalUnit, GetRectCenterX(LocRectArr[ID]), GetRectCenterY(LocRectArr[ID]));
         WaygateActivate(GlobalUnit, true);
         LocY = LocY - 256;
         ID = ID + 1;
-        if (i != 3 && i < 6){
-            CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), FourCC("cofp"), GetRectCenterX(LocRectArr[i]), GetRectCenterY(LocRectArr[i]), 270);
+        if (i != 3 && i < 6)
+        {
+            CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'cofp' , GetRectCenterX(LocRectArr[i]), GetRectCenterY(LocRectArr[i]), 270);
         }
-        if (i < 3){
+        if (i < 3)
+        {
             NeutX = 4032;
             NeutY = - 128;
             NeutID = 1;
-            if (i == 2){
+            if (i == 2)
+            {
                 RevInt = true;
             }
-            while (true) {
+            while (true)
+            {
                 if (NeutID > 5) break;
-                if (NeutID == 2){
+                if (NeutID == 2)
+                {
                     NeutX = NeutX + 100;
                 }
-                if (NeutID == 3){
+                if (NeutID == 3)
+                {
                     NeutX = 4032;
                     NeutY = - 1088;
                 }
@@ -7976,13 +9040,14 @@ void CreateAllUnits()
                 NeutX = NeutX + 256;
                 NeutID = NeutID + 1;
             }
-            GlobalUnit = CreateUnit(Player(12 - i), FourCC("base"), SwapAmount(4350, RevInt), - 500, 270);
+            GlobalUnit = CreateUnit(Player(12 - i), 'base' , SwapAmount(4350, RevInt), - 500, 270);
             SetUnitVertexColor(GlobalUnit, 255, 255, 255, 75);
         }
         i = i + 1;
     }
     ID = GetRandomInt(1, 10);
-    if ((TeamPlayers[0] != 0 && TeamPlayers[1] != 0) && (TeamOneSelected[ID] == false && TeamTwoSelected[ID] == false)){
+    if ((TeamPlayers[0] != 0 && TeamPlayers[1] != 0) && (TeamOneSelected[ID] == false && TeamTwoSelected[ID] == false))
+    {
         HeroInit(ID);
     }
     MainBossUnit1 = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), HeroIDArray[ID], 0.f, - 3900.f, 90);
@@ -7991,14 +9056,14 @@ void CreateAllUnits()
     SetHeroStr(MainBossUnit1, 5000, false);
     SetHeroAgi(MainBossUnit1, 5000, false);
     SetHeroInt(MainBossUnit1, 5000, false);
-    UnitAddAbility(MainBossUnit1, FourCC("A017"));
-    UnitAddAbility(MainBossUnit1, FourCC("A02F"));
-    UnitAddItemById(MainBossUnit1, FourCC("I03S"));
-    UnitAddItemById(MainBossUnit1, FourCC("I00S"));
-    UnitAddItemById(MainBossUnit1, FourCC("I00U"));
-    UnitAddItemById(MainBossUnit1, FourCC("I00H"));
-    UnitAddItemById(MainBossUnit1, FourCC("I00T"));
-    UnitAddItemById(MainBossUnit1, FourCC("I00R"));
+    UnitAddAbility(MainBossUnit1, 'A017' );
+    UnitAddAbility(MainBossUnit1, 'A02F' );
+    UnitAddItemById(MainBossUnit1, 'I03S' );
+    UnitAddItemById(MainBossUnit1, 'I00S' );
+    UnitAddItemById(MainBossUnit1, 'I00U' );
+    UnitAddItemById(MainBossUnit1, 'I00H' );
+    UnitAddItemById(MainBossUnit1, 'I00T' );
+    UnitAddItemById(MainBossUnit1, 'I00R' );
 }
 
 void QuestCreationFunction()
@@ -8084,10 +9149,10 @@ void TestTriggers()
 void SoloGameDetection()
 {
     GR_LeftSide = CreateGroup();
-    GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("U001"), - 2200.f, 2800.f, 270);
+    GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'U001' , - 2200.f, 2800.f, 270);
     GroupAddUnit( GR_LeftSide, GlobalUnit);
     GR_RightSide = CreateGroup();
-    GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), FourCC("U001"), 2200.f, 2800.f, 270);
+    GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'U001' , 2200.f, 2800.f, 270);
     GroupAddUnit( GR_RightSide, GlobalUnit);
     if (TeamPlayers[0] == 0 || TeamPlayers[1] == 0)
     {
@@ -8103,7 +9168,8 @@ void SoloGameDetection()
         EnableTrigger(GameTrigArr[7]);
         TimerStart(CreateTimer(), 1, true, @InGameTimerAction);
     }
-    else {
+    else
+    {
         TimerStart(CreateTimer(), 2, false, @ModeSelectionFunction1);
         CreepSpawn1Action( );
     }
@@ -8157,7 +9223,10 @@ void config()
 
     for ( int i = 0; i < 12; i++ )
     {
-        if ( i == 8 || i == 9 ) { continue; }
+        if ( i == 8 || i == 9 )
+        {
+            continue;
+        }
         player p = Player( i );
         SetPlayerTeam( p, i > 3 && i != 10 ? 1 : 0 );
         SetPlayerRaceSelectable( p, false );
