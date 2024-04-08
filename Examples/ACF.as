@@ -1,46 +1,37 @@
 //#include "Scripts\\Blizzard.as"
 
 bool SameHeroBoolean = false;
-dialog ModeSelectionDialog = DialogCreate();
-dialog KillSelectionDialog = DialogCreate();
-group GetUnitDamagedGroup = CreateGroup();
-group GroupEnum = CreateGroup();
-hashtable GameHashTable = InitHashtable();
-int iCaster = 100;
-int iTarget = 101;
-int LeftBosses = 1;
-int RightBosses = 1;
-int KillLimitInteger1 = 0;
+bool TestCommandEnabled = false;
+dialog ModeSelectionDialog = DialogCreate( );
+dialog KillSelectionDialog = DialogCreate( );
+group GroupEnum = CreateGroup( );
+group GroupFilter = CreateGroup( );
+hashtable GameHT = InitHashtable( );
+hashtable DataHT = InitHashtable( );
+hashtable SoundHT = InitHashtable( );
+int KillLimit = 0;
 int TotalPlayers = 0;
-const int TotalHeroes = 11;
+int TotalHeroes = 0;
 int HeroesSelected = 0;
-float CameraReal = 2000.f;
-float MapMinX = - 6100.f + GetCameraMargin(CAMERA_MARGIN_LEFT);
-float MapMaxX = 6100.f - GetCameraMargin(CAMERA_MARGIN_RIGHT);
-float MapMinY = - 4400.f + GetCameraMargin(CAMERA_MARGIN_BOTTOM);
-float MapMaxY = 3350.f - GetCameraMargin(CAMERA_MARGIN_TOP);
-timer CreepUpgradeTimer1 = CreateTimer();
-timer CreepSpawnerTimer1 = CreateTimer();
-timer KillSelectionTimer = CreateTimer();
+float MapMinX = -6100.f + GetCameraMargin( CAMERA_MARGIN_LEFT );
+float MapMaxX = 6100.f - GetCameraMargin( CAMERA_MARGIN_RIGHT );
+float MapMinY = -4400.f + GetCameraMargin( CAMERA_MARGIN_BOTTOM );
+float MapMaxY = 3350.f - GetCameraMargin( CAMERA_MARGIN_TOP );
+timer CreepUpgradeTimer1 = CreateTimer( );
+timer CreepSpawnerTimer1 = CreateTimer( );
+timer KillSelectionTimer = CreateTimer( );
 rect worldBounds;
-multiboarditem MBItem;
 multiboard MainMultiboard;
-trigger ResetCDTrigger;
+timer TMR_ResetCD = nil;
 timerdialog ModeSelectionTD;
-unit MainBossUnit1;
-unit GlobalUnit;
-unit SysUnit;
 unit SelectionUnit;
 effect Ef_Selection;
 effect Ef_SelectionBack;
-item SysItem;
-item It_LastRemoved;
-array<button> SameHeroModeButtonArray( 12 );
+array<button> SameHeroModeButtonArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<bool> TeamOneSelected( PLAYER_NEUTRAL_AGGRESSIVE );
 array<bool> TeamTwoSelected( PLAYER_NEUTRAL_AGGRESSIVE );
 array<bool> HealthDisplayBooleanArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<bool> ESCLocationSaveBooleanArray( PLAYER_NEUTRAL_AGGRESSIVE );
-array<bool> HeroSelectedArray1( PLAYER_NEUTRAL_AGGRESSIVE );
 array<effect> EF_SelectionHeroModelArray;
 array<effect> EF_SelectionIconArray;
 bool B_IsCreepSpawn = true;
@@ -51,39 +42,13 @@ array<int> TeamDeaths( 2 );
 array<int> DyingUnitIntegerArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<int> KillingUnitIntegerArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<int> BossesKilledIntegerArray( PLAYER_NEUTRAL_AGGRESSIVE );
-array<int> TeleportationIDIntegerArray( PLAYER_NEUTRAL_AGGRESSIVE );
-array<int> NotificationEnabledIntArray( PLAYER_NEUTRAL_AGGRESSIVE );
-array<int> MBArr1( 12 );
-array<int> BossIDArray( 9 );
-array<int> HeroIDArray;
-array<int> HeroItemIDArray;
-group GR_LeftSide;
-group GR_RightSide;
-array<location> TeleportationLocationArray( PLAYER_NEUTRAL_AGGRESSIVE );
-array<player> GlobalPlayerArray1( PLAYER_NEUTRAL_AGGRESSIVE );
-array<float> SetScaleArr;
-array<rect> CircleRectArr(6);
-array<rect> TeamStartRectArr(2);
-array<sound> GeneralSounds;
-array<sound> NanayaShikiSounds;
-array<sound> ToonoShikiSounds;
-array<sound> RyougiShikiSounds;
-array<sound> SaberNeroSounds;
-array<sound> KuchikiByakuyaSounds;
-array<sound> AkameSounds;
-array<sound> SaberAlterSounds;
-array<sound> ScathachSounds;
-array<sound> AkainuSounds;
-array<sound> ReinforceSounds;
-array<sound> ArcueidSounds;
+array<int> MBArr1( PLAYER_NEUTRAL_AGGRESSIVE );
+array<rect> CircleRectArr( 5 );
 array<string> PlayerColorStringArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<string> PlayerColoredNameArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<string> PlayerNameArray( PLAYER_NEUTRAL_AGGRESSIVE );
-array<string> HeroModelArray;
-array<string> HeroIconArray;
 trigger TR_SelectionMode;
-array<trigger> GameTrigArr( 33 );
-array<unit> DummyUnitDamageArr( PLAYER_NEUTRAL_AGGRESSIVE );
+trigger TR_HeroSelection;
 array<unit> U_SelectionSelArr( PLAYER_NEUTRAL_AGGRESSIVE );
 array<unit> U_SelectionDumArr( PLAYER_NEUTRAL_AGGRESSIVE );
 array<unit> HeroUnitArray( PLAYER_NEUTRAL_AGGRESSIVE );
@@ -93,9001 +58,9252 @@ array<unit> MUnitArray( PLAYER_NEUTRAL_AGGRESSIVE );
 
 void TriggerRegisterAnyUnitEventRW( trigger t, playerunitevent whichEvent )
 {
-    for ( int i = 0; i < GetBJMaxPlayerSlots( ); i++ )
-    {
-        TriggerRegisterPlayerUnitEvent( t, Player( i ), whichEvent, nil );
-    }
+	for ( int i = 0; i <= PLAYER_NEUTRAL_PASSIVE; i++ )
+	{
+		TriggerRegisterPlayerUnitEvent( t, Player( i ), whichEvent, nil );
+	}
 }
 
 void TriggerRegisterAnyPlayerEventRW( trigger t, playerevent whichEvent )
 {
-    for ( int i = 0; i < GetBJMaxPlayerSlots( ); i++ )
-    {
-        TriggerRegisterPlayerEvent( t, Player( i ), whichEvent );
-    }
+	for ( int i = 0; i <= PLAYER_NEUTRAL_PASSIVE; i++ )
+	{
+		TriggerRegisterPlayerEvent( t, Player( i ), whichEvent );
+	}
 }
 
 void TriggerRegisterPlayerChatEventRW( trigger t, string text, bool caseSensitive )
 {
-    for ( int i = 0; i < GetBJMaxPlayerSlots( ); i++ )
-    {
-        TriggerRegisterPlayerChatEvent( t, Player( i ), text, caseSensitive );
-    }
+	for ( int i = 0; i <= PLAYER_NEUTRAL_PASSIVE; i++ )
+	{
+		TriggerRegisterPlayerChatEvent( t, Player( i ), text, caseSensitive );
+	}
 }
 
-float AngleBetweenPointsRW(location locA, location locB)
+bool IsAxisReal( float targX, float targY )
 {
-    return 180.0f / 3.14159f * Atan2(GetLocationY(locB) - GetLocationY(locA), GetLocationX(locB) - GetLocationX(locA));
-}
-float AngleBetweenUnits(unit CasterUnit, unit TargetUnit)
-{
-    return 180.0f / 3.14159f * Atan2(GetUnitY(TargetUnit) - GetUnitY(CasterUnit), GetUnitX(TargetUnit) - GetUnitX(CasterUnit));
+	return targX >= MapMinX && targX <= MapMaxX && targY >= MapMinY && targY <= MapMaxY;
 }
 
-float DistanceBetweenPointsRW(location locA, location locB)
+bool RectContainsAxis( rect r, float x, float y )
 {
-    float dx = GetLocationX(locB) - GetLocationX(locA);
-    float dy = GetLocationY(locB) - GetLocationY(locA);
-    return SquareRoot(dx * dx + dy * dy);
+	return x >= GetRectMinX( r ) && x <= GetRectMaxX( r ) && y >= GetRectMinY( r ) && y <= GetRectMaxY( r );
 }
 
-float RMinACF( float a, float b )
+float GetUnitAngle( unit source, unit target )
 {
-    if (a < b)
-    {
-        return a;
-    }
-
-    return b;
+	return MathAngleBetweenPoints( GetUnitX( source ), GetUnitY( source ), GetUnitX( target ), GetUnitY( target ) );
 }
 
-float RMaxACF( float a, float b )
+float GetUnitDistance( unit source, unit target )
 {
-    if (a < b)
-    {
-        return b;
-    }
-
-    return a;
+	return MathDistanceBetweenPoints( GetUnitX( source ), GetUnitY( source ), GetUnitX( target ), GetUnitY( target ) );
 }
 
-int SwapAmount(int LocInt1, bool LocBool)
+float ACF_GetUnitStatePercent( unit whichUnit, unitstate whichState, unitstate whichMaxState )
 {
-    if (LocBool)
-    {
-        LocInt1 = LocInt1 *  - 1;
-    }
-    return LocInt1;
-}
-
-float GetUnitStatePercentRW(unit whichUnit, unitstate whichState, unitstate whichMaxState)
-{
-    float value = GetUnitState(whichUnit, whichState);
-    float maxValue = GetUnitState(whichUnit, whichMaxState);
-    if ( whichUnit == nil || maxValue == 0)
-    {
-        return .0f;
-    }
-    return value / maxValue * 100.0f;
-}
-
-void CreateNUnitsAtLocACF(int count, int unitId, player whichPlayer, location loc, float face)
-{
-    while (true)
-    {
-        if (count == 0) break;
-        GlobalUnit = CreateUnit(whichPlayer, unitId, GetLocationX(loc), GetLocationY(loc), face);
-        count = count - 1;
-    }
+	float value = GetUnitState( whichUnit, whichState );
+	float maxValue = GetUnitState( whichUnit, whichMaxState );
+	if ( whichUnit == nil || maxValue == 0 )
+	{
+		return .0f;
+	}
+	return value / maxValue * 100.0f;
 }
 
 int CountUnitInGroupOfPlayer( player p, int id )
 {
-    int count = 0;
-    group g = CreateGroup( );
-    GroupEnumUnitsOfPlayer( g, p, nil );
+	int count = 0;
+	group g = GroupFilter;
 
-    for ( int i = 0; i < GroupGetCount( g ); i++ )
-    {
-        unit u = GroupGetUnitByIndex( g, i );
+	GroupClear( GroupFilter );
+	GroupEnumUnitsOfPlayer( GroupFilter, p, nil );
 
-        if ( IsUnitAlive( u ) && GetUnitTypeId( u ) == id )
-        {
-            count++;
-        }
-    }
-    DestroyGroup( g );
-    return count;
+	for ( int i = 0; i < GroupGetCount( GroupFilter ); i++ )
+	{
+		unit u = GroupGetUnitByIndex( GroupFilter, i );
+
+		if ( IsUnitAlive( u ) && GetUnitTypeId( u ) == id )
+		{
+			count++;
+		}
+	}
+
+	GroupClear( GroupFilter );
+
+	return count;
 }
 
-void CheckForStun()
+void GroupEnumUnitsInLine( group g, float x, float y, float angle, float dist, float aoe )
 {
-    unit LocUnit = LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 0);
-    int LocData = GetUnitUserData(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 0));
+	GroupClear( g );
+	GroupClear( GroupFilter );
+	for ( float moved = .0f; moved < dist; moved += aoe )
+	{
+		GroupEnumUnitsInRange( GroupFilter, x, y, aoe, nil );
 
-    if (LocData > 0)
-    {
-        SetUnitUserData(LocUnit, LocData - 1);
-    }
-    else
-    {
-        UnitRemoveAbility(LocUnit, 'B00A' );
-        PauseTimer(GetExpiredTimer());
-        FlushChildHashtable(GameHashTable, GetHandleId(GetExpiredTimer()));
-        DestroyTimer(GetExpiredTimer());
-    }
+		for ( unit u = GroupForEachUnit( GroupFilter ); u != nil; u = GroupForEachUnit( GroupFilter ) )
+		{
+			if ( !IsUnitInGroup( u, g ) )
+			{
+				GroupAddUnit( g, u );
+			}
+		}
+
+		x = MathPointProjectionX( x, angle, aoe );
+		y = MathPointProjectionY( y, angle, aoe );
+	}
 }
-void StunUnitACF(unit LocUnit, float LocReal)
+
+bool IsUnitCCed( unit u )
 {
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SetUnitUserData(LocUnit, R2I(LocReal * 100 + GetUnitUserData(LocUnit)));
-    if (GetUnitAbilityLevel(LocUnit, 'B00A' ) == 0)
-    {
-        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u00C', GetUnitX(LocUnit), GetUnitY(LocUnit), 0);
-        UnitShareVision(LocUnit, Player(PLAYER_NEUTRAL_PASSIVE), true);
-        IssueTargetOrder(GlobalUnit, "firebolt", LocUnit);
-        SaveUnitHandle(GameHashTable, hid, 0, LocUnit);
-        TimerStart(tmr, 0.01f, true, @CheckForStun);
-    }
-    else
-    {
-        DestroyTimer(tmr);
-    }
+	return GetUnitAbilityLevel( u, 'BPSE' ) > 0 || GetUnitAbilityLevel( u, 'B005' ) > 0;
 }
 
-void SetUnitScaleAndTime(unit LocUnit, float LocSize, float LocTime)
+void ACF_AddBuffTimed( unit u, uint bid, float time, bool isAdd = true )
 {
-    SetUnitScale(LocUnit, LocSize, LocSize, LocSize);
-    SetUnitTimeScale(LocUnit, LocTime);
+	if ( IsUnitDead( u ) ) { return; }
+
+	buff buf = GetUnitBuff( u, bid );
+	float prevTime = .0f;
+
+	if ( buf == nil )
+	{
+		buf = CreateBuff( bid );
+		UnitAddBuff( u, buf );
+	}
+	else
+	{
+		prevTime = GetBuffRemainingDuration( buf );
+	}
+
+	SetBuffRemainingDuration( buf, isAdd ? prevTime + time : time );
 }
 
-int GetInventoryIndexOfItemTypeRW(unit whichUnit, int itemId)
+void ACF_StunUnit( unit u, float time )
 {
-    int index = 0;
-    while (true)
-    {
-        SysItem = UnitItemInSlot(whichUnit, index);
-        if (SysItem != nil && GetItemTypeId(SysItem) == itemId)
-        {
-            return index + 1;
-        }
-        index = index + 1;
-        if (index >= 6 ) break;
-    }
-    return 0;
+	ACF_AddBuffTimed( u, 'BPSE', time );
 }
 
-item GetItemOfTypeFromUnitRW(unit whichUnit, int itemId)
+void ACF_DisableUnitTP( unit u, float time )
 {
-    int index = GetInventoryIndexOfItemTypeRW(whichUnit, itemId);
-
-    if (index == 0)
-    {
-        return nil;
-    }
-
-    return UnitItemInSlot(whichUnit, index - 1);
+	ACF_AddBuffTimed( u, 'B005', time );
 }
 
-int CountItemsOfTypeFromUnitRW(unit whichUnit, int whatItemtype)
+void ACF_PingMinimap( player p, float x, float y, bool extraEffects = false )
 {
-    int index = 0;
-    int count = 0;
-    while (true)
-    {
-        if (index >= 6 ) break;
-        if (GetItemTypeId(UnitItemInSlot(whichUnit, index)) == whatItemtype)
-        {
-            count = count + 1;
-        }
-        index = index + 1;
-    }
-    return count;
+	int pid = GetPlayerId( p );
+
+	switch( pid )
+	{
+		case 0: PingMinimapEx( x, y, 5, 100, 0, 0, extraEffects ); break;
+		case 1: PingMinimapEx( x, y, 5, 0, 0, 100, extraEffects ); break;
+		case 2: PingMinimapEx( x, y, 5, 0, 100, 100, extraEffects ); break;
+		case 3: PingMinimapEx( x, y, 5, 43, 14, 51, extraEffects ); break;
+		case 4: PingMinimapEx( x, y, 5, 100, 100, 0, extraEffects ); break;
+		case 5: PingMinimapEx( x, y, 5, 83, 37, 10, extraEffects ); break;
+		case 6: PingMinimapEx( x, y, 5, 0, 100, 0, extraEffects ); break;
+		case 7: PingMinimapEx( x, y, 5, 100, 50, 50, extraEffects ); break;
+	}
 }
 
-bool AvoidLeak()
+void SetUnitScaleAndTime( unit u, float length, float time )
 {
-    return true;
+	SetUnitScale( u, length, length, length );
+	SetUnitTimeScale( u, time );
 }
 
-unit SelectedUnitACF(player LocPlayer)
+int ACF_GetItemSlotById( unit whichUnit, int itemId )
 {
-    group g = CreateGroup();
-    GroupEnumUnitsSelected(g, LocPlayer, Condition(@AvoidLeak));
-    GlobalUnit = FirstOfGroup(g);
-    DestroyGroup(g);
-    return GlobalUnit;
+	for ( int i = 0; i < 6; i++ )
+	{
+		item itm = UnitItemInSlot( whichUnit, i );
+		if ( GetItemTypeId( itm ) == itemId ) { return i; }
+	}
+
+	return -1;
 }
 
-bool UnitHasItemById(unit LocaUnitId, int LocalTargetItemId)
+item ACF_GetItemById( unit whichUnit, int itemId )
 {
-    int index = 0;
-    if (LocalTargetItemId != 0)
-    {
-        while (true)
-        {
-            if (GetItemTypeId(UnitItemInSlot(LocaUnitId, index)) == LocalTargetItemId)
-            {
-                return true;
-            }
-            index = index + 1;
-            if (index >= 6) break;
-        }
-    }
-    return false;
+	int id = ACF_GetItemSlotById( whichUnit, itemId );
+
+	return id != -1 ? UnitItemInSlot( whichUnit, id ) : nil;
 }
 
-bool HasPersonalItemACF(unit LocUnit)
+int ACF_CountItems( unit u, int itemId )
 {
-    int index = 1;
-    while (true)
-    {
-        if (index > TotalHeroes) break;
-        if (UnitHasItemById(LocUnit, HeroItemIDArray[index]))
-        {
-            return true;
-        }
-        index = index + 1;
-    }
-    return false;
+	if ( u == nil || itemId == 0 ) { return 0; }
+
+	int count = 0;
+
+	for ( int i = 0; i < 6; i++ )
+	{
+		item itm = UnitItemInSlot( u, i );
+		if ( GetItemTypeId( itm ) == itemId ) { count++; }
+	}
+
+	return count;
 }
 
-void GameCreateVariables()
+bool ACF_UnitHasItemById( unit u, int iid )
 {
-    int i = 0;
-    while (true)
-    {
-        if (i > 7) break;
-        TeleportationLocationArray[i] = Location(0.f, - 500.f);
-        HeroSelectedArray1[i] = false;
-        NotificationEnabledIntArray[i] = 1;
-        DummyUnitDamageArr[i] = CreateUnit(Player(i), 'h005', 8000, 8000, 270);
-        i = i + 1;
-    }
+	return ACF_CountItems( u, iid ) > 0;
 }
+
+bool ACF_UnitHasEmptySlot( unit u )
+{
+	for ( int i = 0; i < 6; i++ )
+	{
+		if ( UnitItemInSlot( u, i ) == nil )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void ACF_SelectUnit( unit u, player p = nil )
+{
+	if ( p == nil ) { p = GetOwningPlayer( u ); }
+
+	if ( GetLocalPlayer( ) == p )
+	{
+		ClearSelection( );
+		SelectUnit( u, true );
+	}
+}
+
+void ACF_PanCameraToTimed( player p, float x, float y, float time )
+{
+	if ( GetLocalPlayer( ) == p )
+	{
+		PanCameraToTimed( x, y, time );
+	}
+}
+
+bool ACF_HasPersonalItem( unit u )
+{
+	return ACF_UnitHasItemById( u, LoadInteger( DataHT, GetUnitTypeId( u ), 'pitm' ) );
+}
+
+void GameCreateVariables( )
+{
+	for ( int i = 0; i < PLAYER_NEUTRAL_AGGRESSIVE; i++ )
+	{
+		player p = Player( i ); if ( GetPlayerSlotState( p ) != PLAYER_SLOT_STATE_PLAYING || GetPlayerController( p ) == MAP_CONTROL_COMPUTER ) { continue; }
+		int hid = GetHandleId( p );
+
+		SaveReal( DataHT, hid, '+tpX', .0f );
+		SaveReal( DataHT, hid, '+tpY', -500.f );
+		SaveReal( DataHT, hid, 'camH', 2000.f );
+		SaveBoolean( DataHT, hid, 'ntfc', true );
+	}
+}
+
 void CameraSetHeight( )
 {
-    SetCameraField( CAMERA_FIELD_TARGET_DISTANCE, CameraReal, 0.f );
+	int hid = GetHandleId( GetLocalPlayer( ) );
 
-    if ( not HeroSelectedArray1[ GetPlayerId( GetLocalPlayer( ) ) ] )
-    {
-        PanCameraToTimed( -1800.f, 5800.f, .0f );
-        SetCameraField( CAMERA_FIELD_ANGLE_OF_ATTACK, 270., 0.f );
-    }
+	SetCameraField( CAMERA_FIELD_TARGET_DISTANCE, LoadReal( DataHT, hid, 'camH' ), 0.f );
+
+	if ( !LoadBoolean( DataHT, hid, 'HERO' ) )
+	{
+		PanCameraToTimed( -1800.f, 5800.f, .0f );
+		SetCameraField( CAMERA_FIELD_ANGLE_OF_ATTACK, 270., 0.f );
+	}
 }
 
-void CameraAdjustionAction()
+void GameCameraSystemInit( )
 {
-    float InputAmount = S2R(SubString(GetEventPlayerChatString(), 8, 11));
-
-    if (GetLocalPlayer() == GetTriggerPlayer())
-    {
-        if (InputAmount >= 50.f && InputAmount <= 250.f )
-        {
-            CameraReal = 20.f * InputAmount;
-        }
-    }
+	TimerStart( CreateTimer( ), .01f, true, @CameraSetHeight );
 }
 
-void GameCameraSystemInit()
+bool ACF_DamageTarget( unit u, unit target, float dmg )
 {
-    trigger t = CreateTrigger();
-    TimerStart( CreateTimer(), .01f, true, @CameraSetHeight );
-    TriggerRegisterPlayerChatEventRW( t, "-camera ", false);
-    TriggerAddAction( t, @CameraAdjustionAction);
+	if ( ACF_HasPersonalItem( u ) )
+	{
+		dmg *= 1.15f;
+	}
+
+	return UnitDamageTarget( u, target, dmg, true, false, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC, WEAPON_TYPE_WHOKNOWS );
 }
 
-bool DamageTargetACF(unit LocTrigUnit, unit LocTargUnit, float LocDamage)
+void DialogShow( dialog dg, bool isShow )
 {
-    if (HasPersonalItemACF(LocTrigUnit))
-    {
-        LocDamage = LocDamage * 1.15f;
-    }
-    return UnitDamageTarget(LocTrigUnit, LocTargUnit, LocDamage, true, false, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC, WEAPON_TYPE_WHOKNOWS);
+	for ( int i = 0; i < PLAYER_NEUTRAL_AGGRESSIVE; i++ )
+	{
+		DialogDisplay( Player( i ), dg, isShow );
+	}
 }
 
-void DialogShow(dialog DialogName, bool Show)
+texttag TextTagCreate( string word, float x, float y, float z, float size, int red, int green, int blue, int alpha )
 {
-    int i = 0;
-    while (true)
-    {
-        if (i > 7) break;
-        DialogDisplay(Player(i), DialogName, Show);
-        i = i + 1;
-    }
+	texttag txtTag = CreateTextTag( );
+	SetTextTagText( txtTag, word, size * 0.023f / 10.f );
+	SetTextTagPos( txtTag, x, y, z );
+	SetTextTagColor( txtTag, red, green, blue, alpha );
+	return txtTag;
 }
 
-bool CombineItemsCondition()
+sound ACF_CreateSound( string filePath )
 {
-    return GetItemCharges(GetManipulatedItem()) > 0;
+	return CreateSound( filePath, false, false, false, 12700, 12700, "DefaultEAXON" );
 }
 
-void CombineItemsAction()
+void ACF_PlaySoundWithVolume( sound soundHandle, float volumePercent, float startingOffset )
 {
-    int ItemLoop = 0;
-    int Charges = 0;
-    int Maximum = 2;
-    while (true)
-    {
-        if (ItemLoop > 6) break;
-        if (GetItemTypeId(GetManipulatedItem()) == GetItemTypeId(UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1)))
-        {
-            if (GetItemCharges(UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1)) + GetItemCharges(GetManipulatedItem()) <= Maximum)
-            {
-                if (UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1) != GetManipulatedItem())
-                {
-                    Charges = GetItemCharges(UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1)) + GetItemCharges(GetManipulatedItem());
-                    SetItemCharges(UnitItemInSlot(GetManipulatingUnit(), ItemLoop - 1), Charges);
-                    RemoveItem(GetManipulatedItem());
-                    ItemLoop = 7;
-                }
-            }
-        }
-        ItemLoop = ItemLoop + 1;
-    }
+	if ( soundHandle == nil )
+	{
+		return;
+	}
+
+	int result = MathIntegerClamp( R2I( volumePercent * I2R( 127 ) * .01f ), 0, 127 );
+
+	SetSoundVolume( soundHandle, result );
+	StartSound( soundHandle );
+	SetSoundPlayPosition( soundHandle, R2I( startingOffset * 1000 ) );
 }
 
-texttag TextTagCreate(string word, float x, float y, float z, float size, int red, int green, int blue, int alpha)
+void PlayHeroSound( unit u, uint childKey, float volume, float startingOffset )
 {
-    texttag txtTag = CreateTextTag();
-    SetTextTagText( txtTag, word, size * 0.023f / 10.f);
-    SetTextTagPos( txtTag, x, y, z);
-    SetTextTagColor( txtTag, red, green, blue, alpha);
-    return txtTag;
+	ACF_PlaySoundWithVolume( LoadSoundHandle( SoundHT, GetHandleId( u ), childKey ), volume, startingOffset );
 }
 
-void ItemCombinationsCommandAction()
+void StopSoundEx( sound snd, bool killWhenDone, bool fadeOut )
 {
-    DisplayTimedTextToPlayer(GetTriggerPlayer(), 0.f, 0.f, 10.f, "*Mithril Shield+Champion Belt = |c0000ff00Gold Shield|r
-	*Hero's Axe + Ninja's Slipper = |c0000ff00Minotaur's Axe|r
-	*Speed Boots + Ninja's Slipper = |c0000ff00Blink Boots|r
-	*Red Stone + Ninja's Slipper + Champion Belt = |c0000ff00Gold Medal|r
-	*Red Stone + Red Stone = |c0000ff00Crystal|r
-	*Mithril Shield + Hero's Axe = |c0000ff00Sword of King|r
-	*Red Tablet + Stealth Cap = |c0000ff00Stealth Scroll|r");
+	if ( !GetSoundIsPlaying( snd ) ) { return; }
+	StopSound( snd, killWhenDone, fadeOut );
 }
 
-void CommandsNotificationAction()
+void StopHeroSound( unit u, uint childKey )
 {
-    UnitResetCooldown(MainBossUnit1);
-
-    int id = GetPlayerId( GetLocalPlayer( ) );
-
-    if ( NotificationEnabledIntArray[id] == 1 )
-    {
-        DisplayTextToPlayer( GetLocalPlayer( ), 0.f, 0.f, "|c0080ff00-commands|r: |c0000ffffdisplays available in-game commands|r.
-        |c0080ff00-TestCommands|r: |c0000ffffdisplays available in-game test commands|r.
-        |c0080ff00-noff/-non|r: |c0000ffffdisables/enables -commands notification|r.");
-    }
+	StopSoundEx( LoadSoundHandle( SoundHT, GetHandleId( u ), childKey ), false, false );
 }
 
-void DisplayCommandsAction()
+void SetUnitXY( unit u, float toX, float toY, bool pathing = false )
 {
-    DisplayTextToPlayer(GetTriggerPlayer(), 0.f, 0.f, "|c0080ff00-TestCommands|r: |c0000ffffDisplays available test commands|r.
-	|c0080ff00-camera 50~250|r: |c0000ffffMap camera distance change|r.
-	|c0080ff00-combinations|r: |c0000ffffA list of item combinations|r.
-	|c0080ff00-T|r: |c0000ffffTeleports you to the saved location (Requires 8 bosses killed)|r.
-	|c0080ff00-1|r: |c0000ffffWrites exact amount of hp of target if his hp exceeds 10000|r.
-	|c0080ff00-2|r: |c0000ffffPush ESC button 2 times to save your current position|r.
-	|c0080ff00-3|r: |c0000ffffShows the location where you saved|r.
-	|c0080ff00-4|r: |c0000ffffShows the location where you and your teammates saved|r.
-	|c0080ff00-clear|r: |c0000ffffClears text messages from chat|r.
-	|c0080ff00-Contacts|r: |c0000ffffDisplays Map Maker and Contact information|r.");
+	if ( pathing && IsTerrainPathable( toX, toY, PATHING_TYPE_WALKABILITY ) )
+	{
+		return;
+	}
+
+	if ( GetUnitMoveSpeed( u ) > 0 ) // && IsAxisReal( toX, toY ) -> max/min x/y of map
+	{
+		SetUnitX( u, toX );
+		SetUnitY( u, toY );
+	}
+	else
+	{
+		SetUnitPosition( u, toX, toY );
+	}
 }
 
-void TestCommandsDisplayAction()
+void HandleListCleanEffects( handlelist hl, bool destroyEffects, bool isDestroy )
 {
-    DisplayTextToPlayer(GetTriggerPlayer(), 0.f, 0.f, "|c0080ff00-nc|r: |c0000ffffRemoves cooldowns on abilities|r.
-	|c0080ff00-heroes|r: |c0000ffffGrants you all heroes available in the game|r.
-	|c0080ff00-gold|r: |c0000ffffGrants you 100000000 gold when used|r.
-	|cFFFFCC00-level XX|r: |c0000ffffSets the level of selected hero to XX|r.
-	|c0080ff00-NoCreep|r: |c0000ffffStops mobs spawning on mid|r.
-	|c0080ff00-SpawnTestUnit|r: |c0000ffffSpawns a unit, that has a lot of hp|r.");
+	if ( hl == nil ) { return; }
+
+	if ( destroyEffects )
+	{
+		for ( int i = 0; i < HandleListGetEffectCount( hl ); i++ )
+		{
+			effect ef = HandleListGetEffectByIndex( hl, i );
+			DestroyEffect( ef );
+		}
+	}
+
+	HandleListClear( hl );
+	if ( !isDestroy ) { return; }
+	HandleListDestroy( hl );
 }
 
-void MapInfoAndContactsActions()
+void MapStartData( )
 {
-    DisplayTextToPlayer(GetTriggerPlayer(), 0.f, 0.f, "|cFFFFCC00Map Maker and Contact Info:|r Unryze (https://vk.com/acfwc3 / https://vendev.info/)
-
-	|cFFFFCC00Helpers:|r Andutrache, Nelu_o, Maou, Sanyabane and Saasura");
+	PanCameraToTimed( -1800.f, 5900.f, .0f );
+	PlayerColorStringArray[0] = "|c00FF0000";
+	PlayerColorStringArray[1] = "|c000000FF";
+	PlayerColorStringArray[2] = "|c0021E7B6";
+	PlayerColorStringArray[3] = "|c005E0093";
+	PlayerColorStringArray[4] = "|c00FFFF00";
+	PlayerColorStringArray[5] = "|c00FF8000";
+	PlayerColorStringArray[6] = "|c0000B400";
+	PlayerColorStringArray[7] = "|c00FF64FF";
+	PlayerColorStringArray[10] = "|c00FF0000";
+	PlayerColorStringArray[11] = "|c000000FF";
 }
 
-void PlaySoundWithVolumeACF(sound soundHandle, float volumePercent, float startingOffset)
+void AILoop( )
 {
-    if ( soundHandle == nil )
-    {
-        return;
-    }
+	if ( true )
+	{
+		timer tmr = GetExpiredTimer( );
+		int hid = GetHandleId( tmr );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		int tick = LoadInteger( GameHT, hid, 'tick' ) + 1;
+		handlelist list = LoadHandleList( GameHT, hid, 'list' );
+		player p = GetOwningPlayer( source );
+		int team = GetPlayerTeam( p );
+		unit boss = LoadUnitHandle( DataHT, 'BOSS', 'unit' );
+		unit utarg = nil;
 
-    int result = MathIntegerClamp( R2I( volumePercent * I2R( 127 ) * .01f ), 0, 127 );
+		SaveInteger( GameHT, hid, 'tick', tick );
 
-    SetSoundVolume( soundHandle, result);
-    StartSound( soundHandle );
-    SetSoundPlayPosition( soundHandle, R2I(startingOffset * 1000));
-}
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
 
-void MapStartData()
-{
-    int i = 0;
-    PanCameraToTimed( -1800.f, 5900.f, .0f );
-    PlayerColorStringArray[0] = "|c00FF0000";
-    PlayerColorStringArray[1] = "|c000000FF";
-    PlayerColorStringArray[2] = "|c0021E7B6";
-    PlayerColorStringArray[3] = "|c005E0093";
-    PlayerColorStringArray[4] = "|c00FFFF00";
-    PlayerColorStringArray[5] = "|c00FF8000";
-    PlayerColorStringArray[6] = "|c0000B400";
-    PlayerColorStringArray[7] = "|c00FF64FF";
-    PlayerColorStringArray[10] = "|c00FF0000";
-    PlayerColorStringArray[11] = "|c000000FF";
-    while (true)
-    {
-        if (i > 7) break;
-        player p = Player(i);
+		HandleListClear( list );
+		HandleListEnumUnitsInRange( list, x, y, 600.f, nil );
 
-        SetPlayerAbilityAvailable( p, 'A03Q', false );
-        SetPlayerAbilityAvailable( p, 'A047', false );
-        SetPlayerAbilityAvailable( p, 'A02N', false );
-        SetPlayerAbilityAvailable( p, 'A02O', false );
-        SetPlayerAbilityAvailable( p, 'A02Q', false );
-        SetPlayerAbilityAvailable( p, 'A02R', false );
-        SetPlayerAbilityAvailable( p, 'A02V', false );
-        SetPlayerAbilityAvailable( p, 'A02W', false );
-        SetPlayerAbilityAvailable( p, 'A02Y', false );
-        SetPlayerAbilityAvailable( p, 'A02Z', false );
-        SetPlayerAbilityAvailable( p, 'A03M', false );
-        SetPlayerAbilityAvailable( p, 'A03N', false );
-        SetPlayerAbilityAvailable( p, 'A03O', false );
-        SetPlayerAbilityAvailable( p, 'A03P', false );
-        SetPlayerAbilityAvailable( p, 'A03D', false );
-        SetPlayerAbilityAvailable( p, 'A03G', false );
-        SetPlayerAbilityAvailable( p, 'A03H', false );
-        SetPlayerAbilityAvailable( p, 'A03I', false );
-        SetPlayerAbilityAvailable( p, 'A039', false );
-        SetPlayerAbilityAvailable( p, 'A03A', false );
-        SetPlayerAbilityAvailable( p, 'A03B', false );
-        SetPlayerAbilityAvailable( p, 'A03C', false );
-        SetPlayerAbilityAvailable( p, 'A04H', false );
-        SetPlayerAbilityAvailable( p, 'A04I', false );
-        SetPlayerAbilityAvailable( p, 'A04J', false );
-        SetPlayerAbilityAvailable( p, 'A04K', false );
-        SetPlayerAbilityAvailable( p, 'A032', false );
-        SetPlayerAbilityAvailable( p, 'A034', false );
-        SetPlayerAbilityAvailable( p, 'A036', false );
-        SetPlayerAbilityAvailable( p, 'A037', false );
-        SetPlayerAbilityAvailable( p, 'A03S', false );
-        SetPlayerAbilityAvailable( p, 'A03U', false );
-        SetPlayerAbilityAvailable( p, 'A03V', false );
-        SetPlayerAbilityAvailable( p, 'A03W', false );
-        SetPlayerAbilityAvailable( p, 'A03X', false );
-        SetPlayerAbilityAvailable( p, 'A049', false );
-        SetPlayerAbilityAvailable( p, 'A04C', false );
-        SetPlayerAbilityAvailable( p, 'A04B', false );
-        SetPlayerAbilityAvailable( p, 'A04D', false );
-        SetPlayerAbilityAvailable( p, 'A04E', false );
-        SetPlayerAbilityAvailable( p, 'A03Y', false );
-        SetPlayerAbilityAvailable( p, 'A03Z', false );
-        SetPlayerAbilityAvailable( p, 'A040', false );
-        SetPlayerAbilityAvailable( p, 'A042', false );
-        SetPlayerAbilityAvailable( p, 'A043', false );
-        SetPlayerAbilityAvailable( p, 'A044', false );
-        SetPlayerAbilityAvailable( p, 'A04N', false );
-        SetPlayerAbilityAvailable( p, 'A052', false );
-        SetPlayerAbilityAvailable( p, 'A01Y', false );
-        SetPlayerAbilityAvailable( p, 'A026', false );
-        SetPlayerAbilityAvailable( p, 'A027', false );
-        SetPlayerAbilityAvailable( p, 'A02A', false );
-        SetPlayerState( p, PLAYER_STATE_GIVES_BOUNTY, 1);
-        i++;
-    }
-    SetPlayerHandicapXP(GetOwningPlayer(MainBossUnit1), 3);
-}
-void AISetItem()
-{
-    It_LastRemoved = GetEnumItem();
-}
-bool AIItemFilter()
-{
-    return IsItemVisible(GetFilterItem()) && GetWidgetLife(GetFilterItem()) > 0;
-}
-bool AIHasEmptyInventorySlot(unit u)
-{
-    return UnitItemInSlot(u, 0) == nil || UnitItemInSlot(u, 1) == nil || UnitItemInSlot(u, 2) == nil || UnitItemInSlot(u, 3) == nil || UnitItemInSlot(u, 4) == nil || UnitItemInSlot(u, 5) == nil;
-}
-bool AIFilterEnemyConditions()
-{
-    return GetUnitCurrentLife(GetFilterUnit()) > 0 && IsPlayerEnemy(GetOwningPlayer(GetFilterUnit()), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 0)));
-}
-void AIHeroMoveLoop()
-{
-    IssuePointOrder(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 0), "attack", GetRandomReal( - 1900.f, 1900.f), GetRandomReal( - 110.f, 180.f));
-}
-void AILoop()
-{
-    if ( true )
-    {
-        unit source = LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 0);
-        unit uTemp;
-        unit utarg;
+		for( int i = 0; i < HandleListGetUnitCount( list ); i++ )
+		{
+			unit u = HandleListGetUnitByIndex( list, i );
 
-        GroupClear( GroupEnum );
-        GroupEnumUnitsInRange( GroupEnum, GetUnitX(source), GetUnitY(source), 600.f, Condition(@AIFilterEnemyConditions));
+			if ( IsUnitAlive( u ) && IsPlayerEnemy( GetOwningPlayer( u ), p ) )
+			{
+				utarg = u;
 
-        for( int i = 0; i < GroupGetCount( GroupEnum ); i++ )
-        {
-            uTemp = GroupGetUnitByIndex( GroupEnum, i );
-            if ( uTemp == nil )
-            {
-                break;
-            }
+				if ( IsUnitType( u, UNIT_TYPE_HERO ) )
+				{
+					break;
+				}
+			}
+		}
 
-            if ( IsUnitType( uTemp, UNIT_TYPE_HERO ) )
-            {
-                utarg = uTemp; break;
-            }
-        }
+		if ( utarg == nil )
+		{
+			if ( source != boss )
+			{
+				HandleListClear( list );
+				HandleListEnumItemsInRange( list, x, y, 1600.f, nil );
 
-        if ( utarg == nil )
-        {
-            utarg = FirstOfGroup( GroupEnum );
-        }
+				for( int i = 0; i < HandleListGetItemCount( list ); i++ )
+				{
+					if ( !ACF_UnitHasEmptySlot( source ) ) { break; }
+					item itm = HandleListGetItemByIndex( list, i );
 
-        if ( utarg == nil )
-        {
-            It_LastRemoved = nil;
-            EnumItemsInRange( GetUnitX(source), GetUnitY(source), 1600.f, Condition(@AIItemFilter), @AISetItem);
-            if (It_LastRemoved != nil && (GetItemType(It_LastRemoved) == ITEM_TYPE_POWERUP || AIHasEmptyInventorySlot(source)))
-            {
-                IssueTargetOrder(source, "smart", It_LastRemoved);
-            }
-        }
-        else
-        {
-            IssueTargetOrder(source, "attack", uTemp);
-            IssueTargetOrder(source, "purge", uTemp);
-            IssueTargetOrder(source, "drain", uTemp);
-            IssueTargetOrder(source, "curse", uTemp);
-            IssuePointOrderLoc(source, "shockwave", GetUnitLoc(uTemp));
-            IssuePointOrderLoc(source, "blizzard", GetUnitLoc(uTemp));
-            IssuePointOrderLoc(source, "inferno", GetUnitLoc(uTemp));
-            IssuePointOrderLoc(source, "carrionswarm", GetUnitLoc(uTemp));
-            IssueImmediateOrder(source, "stomp");
-            IssueImmediateOrder(source, "roar");
-            if ((IsUnitType(uTemp, UNIT_TYPE_HERO) == false && GetUnitCurrentLife(uTemp) >= 500) || IsUnitType(uTemp, UNIT_TYPE_HERO))
-            {
-                IssueImmediateOrder(source, "thunderclap");
-                IssueTargetOrder(source, "cripple", uTemp);
-                IssueTargetOrder(source, "hex", uTemp);
-                IssueTargetOrder(source, "banish", uTemp);
-                IssuePointOrderLoc(source, "breathoffire", GetUnitLoc(uTemp));
-                IssuePointOrderLoc(source, "earthquake", GetUnitLoc(uTemp));
-            }
-            if (GetUnitStatePercentRW(source, UNIT_STATE_LIFE, UNIT_STATE_MAX_LIFE) <= 20 && source != MainBossUnit1)
-            {
-                if (GetPlayerTeam(GetOwningPlayer(source)) == 0)
-                {
-                    IssuePointOrder(source, "move", -4288.f, -576.f);
-                }
-                else
-                {
-                    IssuePointOrder(source, "move", 4288.f, - 576.f);
-                }
-            }
-        }
-    }
+					if ( IsItemVisible( itm ) && GetItemLife( itm ) >= .0f && GetItemType( itm ) == ITEM_TYPE_POWERUP )
+					{
+						IssueTargetOrder( source, "smart", itm );
+						break;
+					}
+				}
+
+				HandleListClear( list );
+			}
+		}
+		else
+		{
+			float targX = GetUnitX( utarg );
+			float targY = GetUnitY( utarg );
+
+			IssueTargetOrder( source, "attack", utarg );
+			IssueTargetOrder( source, "purge", utarg );
+			IssueTargetOrder( source, "drain", utarg );
+			IssueTargetOrder( source, "curse", utarg );
+			IssuePointOrder( source, "shockwave", targX, targY );
+			IssuePointOrder( source, "blizzard", targX, targY );
+			IssuePointOrder( source, "inferno", targX, targY );
+			IssuePointOrder( source, "carrionswarm", targX, targY );
+			IssueImmediateOrder( source, "stomp" );
+			IssueImmediateOrder( source, "roar" );
+
+			if ( ( !IsUnitType( utarg, UNIT_TYPE_HERO ) && GetUnitCurrentLife( utarg ) >= 500.f ) || IsUnitType( utarg, UNIT_TYPE_HERO ) )
+			{
+				IssueImmediateOrder( source, "thunderclap" );
+				IssueTargetOrder( source, "cripple", utarg );
+				IssueTargetOrder( source, "hex", utarg );
+				IssueTargetOrder( source, "banish", utarg );
+				IssuePointOrder( source, "breathoffire", targX, targY );
+				IssuePointOrder( source, "earthquake", targX, targY );
+			}
+
+			if ( source != boss )
+			{
+				if ( ACF_GetUnitStatePercent( source, UNIT_STATE_LIFE, UNIT_STATE_MAX_LIFE ) <= 20.f )
+				{
+					IssuePointOrder( source, "move", team == 0 ? -4288.f : 4288.f, -576.f );
+				}
+				else
+				{
+					if ( tick >= 10 )
+					{
+						IssuePointOrder( source, "attack", GetRandomReal( -1900.f, 1900.f ), GetRandomReal( -110.f, 180.f ) );
+						tick = 0;
+					}
+				}
+			}
+		}
+	}
 }
 
 void StartAI( unit u )
 {
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
+	int u_hid = GetHandleId( u );
 
-    SaveUnitHandle(GameHashTable, hid, 0, u);
-    TimerStart(tmr, 1.f, true, @AILoop);
+	if ( LoadBoolean( DataHT, GetHandleId( u ), 'ISAI' ) ) { return; }
+	SaveBoolean( DataHT, GetHandleId( u ), 'ISAI', true );
 
-    if (u != MainBossUnit1)
-    {
-        if (GetAIDifficulty(GetOwningPlayer(u)) == AI_DIFFICULTY_NEWBIE)
-        {
-            SetPlayerHandicapXP(GetOwningPlayer(u), 1.5f);
-        }
-        else if (GetAIDifficulty(GetOwningPlayer(u)) == AI_DIFFICULTY_NORMAL)
-        {
-            SetPlayerHandicapXP(GetOwningPlayer(u), 2.f );
-        }
-        else if (GetAIDifficulty(GetOwningPlayer(u)) == AI_DIFFICULTY_INSANE)
-        {
-            SetPlayerHandicapXP(GetOwningPlayer(u), 3.f );
-        }
-        IssuePointOrder(u, "attack", GetRandomReal( -1900.f, 1900.f), GetRandomReal( -1200.f, 200.f));
+	timer tmr = CreateTimer( );
+	int hid = GetHandleId( tmr );
 
-        tmr = CreateTimer();
-        hid = GetHandleId( tmr );
-        SaveUnitHandle(GameHashTable, hid, 0, u);
-        TimerStart( tmr, 10.f, true, @AIHeroMoveLoop);
-    }
+	SaveUnitHandle( GameHT, hid, 'usrc', u );
+	SaveHandleList( GameHT, hid, 'list', HandleListCreate( ) );
+	//TimerStart( tmr, 1.f, true, @AILoop );
+
+	if ( u != LoadUnitHandle( DataHT, 'BOSS', 'unit' ) )
+	{
+		player p = GetOwningPlayer( u );
+		aidifficulty ai = GetAIDifficulty( p );
+
+		if ( ai == AI_DIFFICULTY_NEWBIE )
+		{
+			SetPlayerHandicapXP( p, 1.5f );
+		}
+		else if ( ai == AI_DIFFICULTY_NORMAL )
+		{
+			SetPlayerHandicapXP( p, 2.f );
+		}
+		else if ( ai == AI_DIFFICULTY_INSANE )
+		{
+			SetPlayerHandicapXP( p, 3.f );
+		}
+
+		IssuePointOrder( u, "attack", GetRandomReal( -1900.f, 1900.f ), GetRandomReal( -1200.f, 200.f ) );
+	}
 }
 
-void HeroPickArrayCreation()
+namespace PickSystem
 {
-    int i = 1;
-    int SysHeroX = - 2600;
-    int SysHeroY = 6200;
-    int startX = 700;
-    int startY = 6200;
-    int size = TotalHeroes + 1;
+	void InitHeroData( uint id, uint uid, float scale, uint itemId, string modelPath, string iconPath )
+	{
+		SaveInteger( DataHT, id, 'type', uid );
+		SaveReal( DataHT, uid, 'size', scale );
+		SaveStr( DataHT, uid, 'mmdl', modelPath + ".mdl" );
+		SaveStr( DataHT, uid, 'imdl', modelPath + "Icon.mdl" );
+		SaveStr( DataHT, uid, 'icon', iconPath );
 
-    HeroIDArray.resize( size );
-    SetScaleArr.resize( size );
-    HeroItemIDArray.resize( size );
-    HeroModelArray.resize( size );
-    HeroIconArray.resize( size );
-    HeroUnitArray.resize( size );
-    U_SelectionHeroDummyArr.resize( size );
-    EF_SelectionIconArray.resize( size );
-    EF_SelectionHeroModelArray.resize( size );
+		SaveInteger( DataHT, uid, 'pitm', itemId );
 
-    BossIDArray[1] = 'U001';
-    BossIDArray[2] = 'U002';
-    BossIDArray[3] = 'U003';
-    BossIDArray[4] = 'U004';
-    BossIDArray[5] = 'U005';
-    BossIDArray[6] = 'U006';
-    BossIDArray[7] = 'U007';
-    BossIDArray[8] = 'U008';
-
-
-    HeroIDArray[1] =  'H00A';
-    HeroIDArray[2] =  'H00B';
-    HeroIDArray[3] =  'H00C';
-    HeroIDArray[4] =  'H00D';
-    HeroIDArray[5] =  'H00E';
-    HeroIDArray[6] =  'H00F';
-    HeroIDArray[7] =  'H00G';
-    HeroIDArray[8] =  'H00H';
-    HeroIDArray[9] =  'H00I';
-    HeroIDArray[10] = 'H00J';
-    HeroIDArray[11] = 'H00K';
-
-    SetScaleArr[1] = 1.4f;
-    SetScaleArr[2] = 1.4f;
-    SetScaleArr[3] = 1.5f;
-    SetScaleArr[4] = 2.2f;
-    SetScaleArr[5] = 2.4f;
-    SetScaleArr[6] = 2.2f;
-    SetScaleArr[7] = 1.5f;
-    SetScaleArr[8] = 2.4f;
-    SetScaleArr[9] = 1.8f;
-    SetScaleArr[10] = 2.4f;
-    SetScaleArr[11] = 2.4f;
-
-    HeroItemIDArray[1] =  'I006';
-    HeroItemIDArray[2] =  'I01J';
-    HeroItemIDArray[3] =  'I01F';
-    HeroItemIDArray[4] =  'I01W';
-    HeroItemIDArray[5] =  'I008';
-    HeroItemIDArray[6] =  'I016';
-    HeroItemIDArray[7] =  'I01V';
-    HeroItemIDArray[8] =  'I01P';
-    HeroItemIDArray[9] =  'I018';
-    HeroItemIDArray[10] = 'I010';
-    HeroItemIDArray[11] = 'I00E';
-
-    HeroModelArray[1] = "Characters\\NanayaShiki\\NanayaShiki";
-    HeroModelArray[2] = "Characters\\ToonoShiki\\ToonoShiki";
-    HeroModelArray[3] = "Characters\\RyougiShiki\\RyougiShiki";
-    HeroModelArray[4] = "Characters\\SaberAlter\\SaberAlter";
-    HeroModelArray[5] = "Characters\\SaberNero\\SaberNero";
-    HeroModelArray[6] = "Characters\\KuchikiByakuya\\KuchikiByakuya";
-    HeroModelArray[7] = "Characters\\Akame\\Akame";
-    HeroModelArray[8] = "Characters\\Scathach\\Scathach";
-    HeroModelArray[9] = "Characters\\Akainu\\Akainu";
-    HeroModelArray[10] = "Characters\\Reinforce\\Reinforce";
-    HeroModelArray[11] = "Characters\\Arcueid\\Arcueid";
-
-    HeroIconArray[1] = "Characters\\NanayaShiki\\ReplaceableTextures\\CommandButtons\\BTNNanayaShikiIcon.blp";
-    HeroIconArray[2] = "Characters\\ToonoShiki\\ReplaceableTextures\\CommandButtons\\BTNToonoShikiIcon.blp";
-    HeroIconArray[3] = "Characters\\RyougiShiki\\ReplaceableTextures\\CommandButtons\\BTNRyougiShikiIcon.blp";
-    HeroIconArray[4] = "Characters\\SaberAlter\\ReplaceableTextures\\CommandButtons\\BTNSaberAlterIcon.blp";
-    HeroIconArray[5] = "Characters\\SaberNero\\ReplaceableTextures\\CommandButtons\\BTNSaberNeroIcon.blp";
-    HeroIconArray[6] = "Characters\\KuchikiByakuya\\ReplaceableTextures\\CommandButtons\\BTNKuchikiByakuyaIcon.blp";
-    HeroIconArray[7] = "Characters\\Akame\\ReplaceableTextures\\CommandButtons\\BTNAkameIcon.blp";
-    HeroIconArray[8] = "Characters\\Scathach\\ReplaceableTextures\\CommandButtons\\BTNScathachIcon.blp";
-    HeroIconArray[9] = "Characters\\Akainu\\ReplaceableTextures\\CommandButtons\\BTNAkainuIcon.blp";
-    HeroIconArray[10] = "Characters\\Reinforce\\ReplaceableTextures\\CommandButtons\\BTNReinforceIcon.blp";
-    HeroIconArray[11] = "Characters\\Arcueid\\ReplaceableTextures\\CommandButtons\\BTNArcueidIcon.blp";
-
-    SelectionUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u012', - 1800, 5525, 270);
-    SetUnitScale( SelectionUnit, 2.5f, 2.5f, 2.5f);
-    Ef_Selection = AddSpecialEffectTarget("HeroSelectionSystem\\HeroSelectionEffect.mdl", SelectionUnit, "origin");
-    Ef_SelectionBack = AddSpecialEffectTarget("HeroSelectionSystem\\HeroSelectionBackground.mdl", SelectionUnit, "origin");
-    while (true)
-    {
-        if (i > TotalHeroes) break;
-        if (i == 6 || i == 11)
-        {
-            SysHeroX = - 2600;
-            SysHeroY = SysHeroY - 100;
-            startX = 700;
-            startY -= 150;
-        }
-        U_SelectionHeroDummyArr[i] = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u013', SysHeroX, SysHeroY, 270);
-        SetUnitVertexColor(U_SelectionHeroDummyArr[i], 255, 255, 255, 0);
-        SetUnitUserData(U_SelectionHeroDummyArr[i], i);
-        EF_SelectionIconArray[i] = AddSpecialEffect(HeroModelArray[i] + "Icon.mdl", SysHeroX, SysHeroY);
-        HeroUnitArray[i] = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), HeroIDArray[i], startX, startY, 270);
-        SetUnitInvulnerable(HeroUnitArray[i], true);
-        SysHeroX = SysHeroX + 100;
-        startX += 150;
-        i = i + 1;
-    }
+		TotalHeroes++;
+	}
 }
 
-void MoveHeroToTeamLocation(int pid, int HeroID)
+namespace BossSystem
 {
-    bool RevInt = false;
-    int DataID = 0;
+	void InitBossData( uint id, uint uid )
+	{
+		SaveInteger( DataHT, 'btid', id, uid );
+	}
 
-    if (HeroesSelected < TotalPlayers)
-    {
-        HeroesSelected = HeroesSelected + 1;
-        HeroSelectedArray1[pid] = true;
-    }
-    if ((TeamPlayers[0] != 0 && TeamPlayers[1] != 0) && (TeamOneSelected[HeroID] == false && TeamTwoSelected[HeroID] == false))
-    {
-        HeroInit(HeroID);
-    }
-    if (GetPlayerTeam(Player(pid)) == 0)
-    {
-        DataID = pid + 1;
-        TeamOneSelected[HeroID] = true;
-    }
-    else
-    {
-        DataID = pid + 2;
-        TeamTwoSelected[HeroID] = true;
-        RevInt = true;
-    }
-    MUnitArray[pid] = CreateUnit(Player(pid), HeroIDArray[HeroID], I2R( SwapAmount( -4480, RevInt) ), -480.f, 270.f );
-    if (GetPlayerController(Player(pid)) == MAP_CONTROL_USER)
-    {
-        SetPlayerName(Player(pid), PlayerColoredNameArray[pid] + " [ " + GetUnitName(MUnitArray[pid]) + " ]");
-        if ( GetLocalPlayer() == Player(pid) )
-        {
-            SetCameraField( CAMERA_FIELD_ANGLE_OF_ATTACK, 305.f, 0.f );
-            CameraReal = 2000.f;
-            PanCameraToTimed(GetUnitX(MUnitArray[pid]), GetUnitY(MUnitArray[pid]), 0.f );
-            ClearSelection();
-            SelectUnit(MUnitArray[pid], true);
-        }
-    }
-    else
-    {
-        StartAI(MUnitArray[pid]);
-        SetPlayerName(Player(pid), PlayerColorStringArray[pid] + GetHeroProperName(MUnitArray[pid]));
-    }
-    if ( not SameHeroBoolean )
-    {
-        RemoveUnit(HeroUnitArray[HeroID]);
-        RemoveUnit(U_SelectionHeroDummyArr[HeroID]);
-    }
+	unit CreateSide( uint id, uint side )
+	{
+		unit u = CreateUnit( Player( PLAYER_NEUTRAL_AGGRESSIVE ), LoadInteger( DataHT, 'btid', id ), side == 'lbos' ? -2200.f : 2200.f, 2800.f, 270.f );
+		SaveInteger( DataHT, GetHandleId( u ), 'side', side );
+		SaveInteger( DataHT, GetHandleId( u ), 'indx', id );
 
-    multiboarditem mbitem = MultiboardGetItem(MainMultiboard, DataID, 0);
-    MultiboardSetItemIcon(mbitem, HeroIconArray[HeroID]);
-    MultiboardReleaseItem( mbitem );
-    mbitem = MultiboardGetItem(MainMultiboard, DataID, 0);
-    MultiboardSetItemValue(mbitem, PlayerColoredNameArray[pid]);
-    MultiboardReleaseItem( mbitem );
+		return u;
+	}
 
-    DisplayTextToPlayer(GetLocalPlayer(), 0.f, 0.f, PlayerColoredNameArray[pid] + "|r:|c0000ffff has chosen " + PlayerColorStringArray[pid] + GetUnitName(MUnitArray[pid]) + "|r");
-}
-void ComputerHeroSelection()
-{
-    int i = 0;
-    int HeroID = GetRandomInt(1, TotalHeroes);
+	void Init( )
+	{
+		InitBossData( 0, 'U001' );
+		InitBossData( 1, 'U002' );
+		InitBossData( 2, 'U003' );
+		InitBossData( 3, 'U004' );
+		InitBossData( 4, 'U005' );
+		InitBossData( 5, 'U006' );
+		InitBossData( 6, 'U007' );
+		InitBossData( 7, 'U008' );
 
-    if (HeroesSelected == TotalPlayers)
-    {
-        DestroyEffect( Ef_Selection );
-        DestroyEffect( Ef_SelectionBack );
-        RemoveUnit(SelectionUnit);
-        while (true)
-        {
-            if (i > 7) break;
-            if (GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING && GetPlayerController(Player(i)) == MAP_CONTROL_COMPUTER)
-            {
-                while (true)
-                {
-                    if (TeamOneSelected[HeroID] == false && TeamTwoSelected[HeroID] == false) break;
-                    HeroID = GetRandomInt(1, TotalHeroes);
-                }
-                MoveHeroToTeamLocation(i, HeroID);
-            }
-            i = i + 1;
-        }
-        i = 1;
-        while (true)
-        {
-            if (i > TotalHeroes) break;
-            DestroyEffect(EF_SelectionIconArray[i]);
-            RemoveUnit(U_SelectionHeroDummyArr[i]);
-            RemoveUnit(HeroUnitArray[i]);
-            i = i + 1;
-        }
-        DisableTrigger(GameTrigArr[7]);
-    }
+		CreateSide( 0, 'lbos' );
+		CreateSide( 0, 'rbos' );
+	}
 }
 
-void HeroSelectionAction()
+void HeroPickArrayCreation( )
 {
-    player p = GetTriggerPlayer( );
-    int TeamID = GetPlayerTeam( p );
-    int pid = GetPlayerId( p );
-    int heroId = GetUnitUserData(GetTriggerUnit());
-    string smdl = "";
+	PickSystem::InitHeroData(  1, 'H00A', 1.4f, 'I006', "Characters\\NanayaShiki\\NanayaShiki",			"Characters\\NanayaShiki\\ReplaceableTextures\\CommandButtons\\BTNNanayaShikiIcon.blp" 			 );
+	PickSystem::InitHeroData(  2, 'H00B', 1.4f, 'I01J', "Characters\\ToonoShiki\\ToonoShiki",			"Characters\\ToonoShiki\\ReplaceableTextures\\CommandButtons\\BTNToonoShikiIcon.blp" 			 );
+	PickSystem::InitHeroData(  3, 'H00C', 1.5f, 'I01F', "Characters\\RyougiShiki\\RyougiShiki",			"Characters\\RyougiShiki\\ReplaceableTextures\\CommandButtons\\BTNRyougiShikiIcon.blp" 			 );
+	PickSystem::InitHeroData(  4, 'H00D', 2.2f, 'I01W', "Characters\\SaberAlter\\SaberAlter",			"Characters\\SaberAlter\\ReplaceableTextures\\CommandButtons\\BTNSaberAlterIcon.blp" 			 );
+	PickSystem::InitHeroData(  5, 'H00E', 2.4f, 'I008', "Characters\\SaberNero\\SaberNero",				"Characters\\SaberNero\\ReplaceableTextures\\CommandButtons\\BTNSaberNeroIcon.blp" 				 );
+	PickSystem::InitHeroData(  6, 'H00F', 2.2f, 'I016', "Characters\\KuchikiByakuya\\KuchikiByakuya",	"Characters\\KuchikiByakuya\\ReplaceableTextures\\CommandButtons\\BTNKuchikiByakuyaIcon.blp" 	 );
+	PickSystem::InitHeroData(  7, 'H00G', 1.5f, 'I01V', "Characters\\Akame\\Akame",						"Characters\\Akame\\ReplaceableTextures\\CommandButtons\\BTNAkameIcon.blp" 						 );
+	PickSystem::InitHeroData(  8, 'H00H', 2.4f, 'I01P', "Characters\\Scathach\\Scathach",				"Characters\\Scathach\\ReplaceableTextures\\CommandButtons\\BTNScathachIcon.blp" 				 );
+	PickSystem::InitHeroData(  9, 'H00I', 1.8f, 'I018', "Characters\\Akainu\\Akainu",					"Characters\\Akainu\\ReplaceableTextures\\CommandButtons\\BTNAkainuIcon.blp" 					 );
+	PickSystem::InitHeroData( 10, 'H00J', 2.4f, 'I010', "Characters\\Reinforce\\Reinforce",				"Characters\\Reinforce\\ReplaceableTextures\\CommandButtons\\BTNReinforceIcon.blp" 				 );
+	PickSystem::InitHeroData( 11, 'H00K', 2.4f, 'I00E', "Characters\\Arcueid\\Arcueid",					"Characters\\Arcueid\\ReplaceableTextures\\CommandButtons\\BTNArcueidIcon.blp" 					 );
 
-    if ( not HeroSelectedArray1[pid] && GetUnitTypeId(GetTriggerUnit()) == 'u013' )
-    {
-        if (U_SelectionSelArr[pid] != HeroUnitArray[heroId])
-        {
-            if ( GetLocalPlayer() == p )
-            {
-                smdl = HeroModelArray[heroId] + ".mdl";
-                ClearSelection();
-                SelectUnit(HeroUnitArray[heroId], true);
-            }
-            DestroyEffect(EF_SelectionHeroModelArray[pid]);
-            RemoveUnit(U_SelectionDumArr[pid]);
-            U_SelectionDumArr[pid] = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u012', -1800.f, 5525.f, 270.f );
-            SetUnitTimeScale(U_SelectionDumArr[pid], 1.5f);
-            SetUnitScale(U_SelectionDumArr[pid], SetScaleArr[heroId], SetScaleArr[heroId], SetScaleArr[heroId]);
-            EF_SelectionHeroModelArray[pid] = AddSpecialEffectTarget(smdl, U_SelectionDumArr[pid], "origin" );
+	int size = TotalHeroes + 1;
 
-            U_SelectionSelArr[pid] = HeroUnitArray[heroId];
-        }
-        else
-        {
-            if ((TeamOneSelected[heroId] == false && TeamID == 0) || (TeamTwoSelected[heroId] == false && TeamID == 1))
-            {
-                DestroyEffect(EF_SelectionHeroModelArray[pid]);
-                RemoveUnit(U_SelectionDumArr[pid]);
-                MoveHeroToTeamLocation(pid, heroId);
-                ComputerHeroSelection();
-            }
-            else
-            {
-                DisplayTextToPlayer( p, .0f, .0f, "|c0000ffffHero already selected by your ally!" );
-            }
-        }
-    }
-}
-void PlayerNameSettingAction()
-{
-    int tid = 1;
+	HeroUnitArray.resize( size );
+	U_SelectionHeroDummyArr.resize( size );
+	EF_SelectionIconArray.resize( size );
+	EF_SelectionHeroModelArray.resize( size );
 
-    for ( int i = 0; i < 12; i++ )
-    {
-        player p = Player( i );
-        string name = "";
+	float x = -2600.f;
+	float y = 6200.f;
+	float x_d = 700.f;
+	float y_d = 6200.f;
 
-        if ( i <= 7 )
-        {
-            if ( GetPlayerSlotState( p ) == PLAYER_SLOT_STATE_PLAYING )
-            {
-                if ( GetPlayerController( p ) == MAP_CONTROL_COMPUTER )
-                {
-                    name = "Bot " + I2S( i + 1 );
-                }
-                else
-                {
-                    name = GetPlayerName( p );
-                }
-            }
-            else
-            {
-                name = "- Empty Slot -";
-            }
-        }
-        else if ( i >= 10 )
-        {
-            name = "Base Tower " + I2S( tid );
-            tid++;
-        }
+	player p = Player( PLAYER_NEUTRAL_PASSIVE );
 
-        if ( name.isEmpty( ) )
-        {
-            continue;
-        }
+	SelectionUnit = CreateUnit( p, 'u012', -1800.f, 5525.f, 270.f );
+	SetUnitScale( SelectionUnit, 2.5f, 2.5f, 2.5f );
+	Ef_Selection = AddSpecialEffectTarget( "HeroSelectionSystem\\HeroSelectionEffect.mdl", SelectionUnit, "origin" );
+	Ef_SelectionBack = AddSpecialEffectTarget( "HeroSelectionSystem\\HeroSelectionBackground.mdl", SelectionUnit, "origin" );
 
-        PlayerNameArray[i] = name;
-        PlayerColoredNameArray[i] = PlayerColorStringArray[i] + PlayerNameArray[i] + "|r";
+	for ( int i = 0; i < TotalHeroes; i++ )
+	{
+		if ( ( i % 5 ) == 0 )
+		{
+			x = -2600.f;
+			y -= 100.f;
+			x_d = 700.f;
+			y_d -= 150.f;
+		}
 
-        SetPlayerName( p, PlayerColoredNameArray[i] ); // crashes -> PlayerColoredNameArray[i]
-    }
+		int id = i + 1;
+		int uid = LoadInteger( DataHT, id, 'type' ); if ( uid == 0 ) { continue; }
+
+		unit u = CreateUnit( p, 'u013', x, y, 270.f );
+		SetUnitVertexColor( u, 255, 255, 255, 0 );
+		SetUnitUserData( u, id );
+		U_SelectionHeroDummyArr[id] = u;
+		EF_SelectionIconArray[id] = AddSpecialEffect( LoadStr( DataHT, uid, 'imdl' ), x, y );
+		
+		HeroUnitArray[id] = CreateUnit( p, uid, x_d, y_d, 270.f );
+		SetUnitInvulnerable( HeroUnitArray[id], true );
+
+		x += 100.f;
+		x_d += 150.f;
+	}
 }
 
-bool ResetCDTargets()
+void MoveHeroToTeamLocation( int pid, int heroId )
 {
-    if (GetOwningPlayer(GetFilterUnit()) != Player(PLAYER_NEUTRAL_AGGRESSIVE))
-    {
-        UnitResetCooldown(GetFilterUnit());
-    }
-    return true;
-}
-void ResetCooldownTimedAction()
-{
-    GroupEnumUnitsInRect(GroupEnum, worldBounds, Condition(@ResetCDTargets));
-}
-void NoCooldownActivationAction()
-{
-    if (IsTriggerEnabled(ResetCDTrigger))
-    {
-        DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c00ff0000No-CoolDown Mode Operation Disabled!");
-        DisableTrigger(ResetCDTrigger);
-    }
-    else
-    {
-        DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c0000FF00No-CoolDown Mode Operation Enabled!");
-        EnableTrigger(ResetCDTrigger);
-    }
-}
-void AllHeroPickAction()
-{
-    int i = 1;
-    float CenterX = 4288.f;
-    DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c0000ff00The host got all heroes.|r");
-    if (GetPlayerTeam(GetTriggerPlayer()) == 0)
-    {
-        CenterX = - 4288.f;
-    }
-    while (true)
-    {
-        if (i > TotalHeroes) break;
-        CreateUnit(GetTriggerPlayer(), HeroIDArray[i], CenterX, -576.f, 270.f );
-        i = i + 1;
-    }
-}
-void NoCreepAction()
-{
-    if ( B_IsCreepSpawn )
-    {
-        DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c00ff0000Creeps on mid will no longer spawn.|r");
-        B_IsCreepSpawn = false;
-    }
-    else
-    {
-        DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ff00Creeps on mid will start to spawn.|r");
-        B_IsCreepSpawn = true;
-    }
-}
-void TestUnitSpawnAction()
-{
-    DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ff00Test Unit Has Been Spawned.|r");
-    CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'tstu', 0.f, -500.f, 270.f );
-}
-void GetUsedAbilityIDAction()
-{
-    DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c0000ff00Used Ability ID|r: " + "[" + Id2String(GetSpellAbilityId()) + "]");
-}
-void UnitIDAction()
-{
-    DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c0000ff00Selected unit ID|r: " + "[" + Id2String(GetUnitTypeId(GetTriggerUnit())) + "]");
-}
-void PickedUpItemIDAction()
-{
-    DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 10.f, "|c0000ff00Picked Item ID|r: " + "[" + Id2String(GetItemTypeId(GetManipulatedItem())) + "]");
-}
-location CreateLocationACF(location LocalLocation1, float LocalReal1, float LocalReal2)
-{
-    return Location(GetLocationX(LocalLocation1) + LocalReal1 * Cos( Deg2Rad( LocalReal2 ) ), GetLocationY(LocalLocation1) + LocalReal1 * Sin( Deg2Rad( LocalReal2 ) ));
-}
-void SetUnitFacing2(unit LocalCaster1, location LocalLocation2, float LocalReal24)
-{
-    location LocalLocation3 = GetUnitLoc(LocalCaster1);
-    SetUnitFacingTimed(LocalCaster1, AngleBetweenPointsRW(LocalLocation3, LocalLocation2), LocalReal24);
-    RemoveLocation(LocalLocation3);
-}
-void SetUnitFacing1(unit LocalCaster1, unit LocalTarg1, float LocalReal24)
-{
-    location LocalLocation2 = GetUnitLoc(LocalTarg1);
-    SetUnitFacing2(LocalCaster1, LocalLocation2, LocalReal24);
-    RemoveLocation(LocalLocation2);
+	player p = Player( pid );
+	int team = GetPlayerTeam( p );
+
+	if ( HeroesSelected < TotalPlayers )
+	{
+		HeroesSelected++;
+		SaveBoolean( DataHT, GetHandleId( p ), 'HERO', true );
+	}
+
+	if ( team == 0 )
+	{
+		TeamOneSelected[heroId] = true;
+	}
+	else
+	{
+		TeamTwoSelected[heroId] = true;
+	}
+
+	int uid = LoadInteger( DataHT, heroId, 'type' );
+	unit u = CreateUnit( p, uid, team == 0 ? -4480.f : 4480.f, -480.f, 270.f );
+	InitHero( u );
+	if ( GetPlayerController( p ) == MAP_CONTROL_USER )
+	{
+		SetPlayerName( p, PlayerColoredNameArray[pid] + " [ " + GetUnitName( u ) + " ]" );
+		if ( GetLocalPlayer( ) == p )
+		{
+			SetCameraField( CAMERA_FIELD_ANGLE_OF_ATTACK, 305.f, 0.f );
+			PanCameraToTimed( GetUnitX( u ), GetUnitY( u ), 0.f );
+			ClearSelection( );
+			SelectUnit( u, true );
+		}
+	}
+	else
+	{
+		StartAI( u );
+		SetPlayerName( p, PlayerColorStringArray[pid] + GetHeroProperName( u ) );
+	}
+
+	MUnitArray[pid] = u;
+
+	if ( !SameHeroBoolean )
+	{
+		RemoveUnit( HeroUnitArray[heroId] );
+		RemoveUnit( U_SelectionHeroDummyArr[heroId] );
+	}
+
+	int mbId = pid + 1 + GetPlayerTeam( p );
+
+	multiboarditem mbitem = MultiboardGetItem( MainMultiboard, mbId, 0 );
+	MultiboardSetItemIcon( mbitem, LoadStr( DataHT, uid, 'icon' ) );
+	MultiboardReleaseItem( mbitem );
+	mbitem = MultiboardGetItem( MainMultiboard, mbId, 0 );
+	MultiboardSetItemValue( mbitem, PlayerColoredNameArray[pid] );
+	MultiboardReleaseItem( mbitem );
+
+	DisplayTextToPlayer( GetLocalPlayer( ), 0.f, 0.f, PlayerColoredNameArray[pid] + "|r:|c0000ffff has chosen " + PlayerColorStringArray[pid] + GetUnitName( MUnitArray[pid] ) + "|r" );
 }
 
-void LinearDisplacementAction()
+void ComputerHeroSelection( )
 {
-    timer tmr = GetExpiredTimer();
-    int hid = GetHandleId( tmr );
-    float LocCos = LoadReal(GameHashTable, hid, 0);
-    float LocSin = LoadReal(GameHashTable, hid, 1);
-    float LocReal1 = LoadReal(GameHashTable, hid, 2);
-    float LocReal2 = LoadReal(GameHashTable, hid, 3);
-    float LocTrigUnitX = LoadReal(GameHashTable, hid, 4);
-    float LocTrigUnitY = LoadReal(GameHashTable, hid, 5);
-    unit LocTrigUnit = LoadUnitHandle(GameHashTable, hid, 6);
-    bool LocPathing = LoadBoolean(GameHashTable, hid, 8);
-    string LocAttach = LoadStr(GameHashTable, hid, 9);
-    string LocEffect = LoadStr(GameHashTable, hid, 10);
-    int LocInt1 = LoadInteger(GameHashTable, hid, 11);
-    int LocInt2 = LoadInteger(GameHashTable, hid, 12);
-    float LocMoveX = GetUnitX(LocTrigUnit) + LocReal1 * LocCos;
-    float LocMoveY = GetUnitY(LocTrigUnit) + LocReal1 * LocSin;
-    float LocDuration = LoadReal(GameHashTable, hid, 13);
+	if ( HeroesSelected >= TotalPlayers )
+	{
+		DestroyEffect( Ef_Selection );
+		DestroyEffect( Ef_SelectionBack );
+		RemoveUnit( SelectionUnit );
 
-    if (LocDuration > 0 && GetUnitCurrentLife(LocTrigUnit) > 0)
-    {
-        SaveReal(GameHashTable, hid, 13, LocDuration - 1);
-        if (LocPathing == false)
-        {
-            if (IsTerrainPathable(LocMoveX, LocMoveY, PATHING_TYPE_WALKABILITY))
-            {
-                SaveInteger(GameHashTable, hid, 11, 0);
-            }
-            else
-            {
-                SetUnitX(LocTrigUnit, LocMoveX);
-                SetUnitY(LocTrigUnit, LocMoveY);
-            }
-        }
-        else
-        {
-            SetUnitX(LocTrigUnit, LocMoveX);
-            SetUnitY(LocTrigUnit, LocMoveY);
-        }
-        if (LocInt2 == 0)
-        {
-            if (GetUnitFlyHeight(LocTrigUnit) < 5.f)
-            {
-                DestroyEffect(AddSpecialEffect(LocEffect, GetUnitX(LocTrigUnit), GetUnitY(LocTrigUnit)));
-            }
-        }
-        if (LocInt2 == 2)
-        {
-            SaveInteger(GameHashTable, hid, 12, 0);
-        }
-        SaveReal(GameHashTable, hid, 2, LocReal1 - LocReal2);
-        if (LocReal1 <= 0 || RMinACF(RMaxACF(LocTrigUnitX * 1, MapMinX), MapMaxX) != LocTrigUnitX || RMinACF(RMaxACF(LocTrigUnitY * 1, MapMinY), MapMaxY) != LocTrigUnitY)
-        {
-            SaveInteger(GameHashTable, hid, 11, 0);
-        }
-        if (LocInt1 == 0)
-        {
-            SetUnitFlyHeight(LocTrigUnit, GetUnitDefaultFlyHeight(LocTrigUnit), 200);
-            SetUnitTimeScale(LocTrigUnit, 1);
-        }
-    }
-    else
-    {
-        PauseTimer( tmr );
-        FlushChildHashtable(GameHashTable, hid);
-        DestroyTimer( tmr );
-    }
+		for ( int i = 0; i < 8; i++ )
+		{
+			player p = Player( i );
+			
+			if ( GetPlayerSlotState( p ) == PLAYER_SLOT_STATE_PLAYING && GetPlayerController( p ) == MAP_CONTROL_COMPUTER )
+			{
+				for ( int rand = GetRandomInt( 1, TotalHeroes ); !TeamOneSelected[rand] && !TeamTwoSelected[rand]; rand = GetRandomInt( 1, TotalHeroes ) )
+				{
+					MoveHeroToTeamLocation( i, rand );
+				}
+			}
+		}
+
+		for ( int i = 1; i <= TotalHeroes; i++ )
+		{
+			DestroyEffect( EF_SelectionIconArray[i] );
+			RemoveUnit( U_SelectionHeroDummyArr[i] );
+			RemoveUnit( HeroUnitArray[i] );
+		}
+
+		DisableTrigger( TR_HeroSelection );
+	}
 }
 
-void LinearDisplacement(unit u, float LocFacing, float LocDistance, float LocTime, float LocRate, bool LocDestrDestruct, bool LocPathing, string LocAttach, string LocEffect)
+void HeroSelectionAction( )
 {
-    if ( u == nil )
-    {
-        return;
-    }
+	player p = GetTriggerPlayer( );
+	unit u = GetTriggerUnit( );
+	int teamId = GetPlayerTeam( p );
+	int pid = GetPlayerId( p );
+	int heroId = GetUnitUserData( u );
+	int uid = LoadInteger( DataHT, heroId, 'type' );
+	string smdl = "";
 
-    timer t = CreateTimer();
-    int hid = GetHandleId(t);
-    SaveReal(GameHashTable, hid, 0, Cos(Deg2Rad(LocFacing)));
-    SaveReal(GameHashTable, hid, 1, Sin(Deg2Rad(LocFacing)));
-    SaveReal(GameHashTable, hid, 2, 2 * LocDistance * LocRate / LocTime);
-    SaveReal(GameHashTable, hid, 3, (2 * LocDistance * LocRate / LocTime) * LocRate / LocTime);
-    SaveReal(GameHashTable, hid, 4, GetUnitX(u));
-    SaveReal(GameHashTable, hid, 5, GetUnitY(u));
-    SaveUnitHandle(GameHashTable, hid, 6, u);
-    SaveBoolean(GameHashTable, hid, 8, LocPathing);
-    SaveStr(GameHashTable, hid, 9, LocAttach);
-    SaveStr(GameHashTable, hid, 10, LocEffect);
-    SaveInteger(GameHashTable, hid, 11, 1);
-    SaveInteger(GameHashTable, hid, 12, 0);
-    SaveReal(GameHashTable, hid, 13, LocTime / LocRate);
-    TimerStart(t, LocRate, true, @LinearDisplacementAction);
-}
+	if ( !LoadBoolean( DataHT, GetHandleId( p ), 'HERO' ) && GetUnitTypeId( u ) == 'u013' )
+	{
+		if ( U_SelectionSelArr[pid] != HeroUnitArray[heroId] )
+		{
+			float scale = LoadReal( DataHT, uid, 'size' );
 
-void DisplaceUnitAction()
-{
-    timer tmr = GetExpiredTimer();
-    int hid = GetHandleId( tmr );
-    unit u = LoadUnitHandle(GameHashTable, hid, 0);
-    float LocOrigHeigth = LoadReal(GameHashTable, hid, 1);
-    float LocAngle = LoadReal(GameHashTable, hid, 2);
-    float LocDist = LoadReal(GameHashTable, hid, 3);
-    float LocHeightMax = LoadReal(GameHashTable, hid, 4);
-    float LocDHeight = LoadReal(GameHashTable, hid, 5);
-    float LocGetX = LoadReal(GameHashTable, hid, 6);
-    float LocGetY = LoadReal(GameHashTable, hid, 7);
-    int LocSteep = LoadInteger(GameHashTable, hid, 8);
-    int LocSteepMax = LoadInteger(GameHashTable, hid, 9);
-    int LocIsAffected = LoadInteger(GameHashTable, GetHandleId(u), 50);
+			if ( GetLocalPlayer( ) == p )
+			{
+				smdl = LoadStr( DataHT, uid, 'mmdl' );
+				ClearSelection( );
+				SelectUnit( HeroUnitArray[heroId], true );
+			}
+			DestroyEffect( EF_SelectionHeroModelArray[pid] );
+			RemoveUnit( U_SelectionDumArr[pid] );
+			U_SelectionDumArr[pid] = CreateUnit( Player( PLAYER_NEUTRAL_PASSIVE ), 'u012', -1800.f, 5525.f, 270.f );
+			SetUnitTimeScale( U_SelectionDumArr[pid], 1.5f );
+			SetUnitScale( U_SelectionDumArr[pid], scale, scale, scale );
+			EF_SelectionHeroModelArray[pid] = AddSpecialEffectTarget( smdl, U_SelectionDumArr[pid], "origin" );
 
-    if ((LocSteep < LocSteepMax && LocIsAffected == 1) && GetUnitCurrentLife(u) > 0)
-    {
-        SetUnitX(u, RMinACF(RMaxACF(LocGetX + LocSteep * LocDist * Cos(LocAngle * 3.14159f / 180.f) * 1.f, MapMinX), MapMaxX));
-        SetUnitY(u, RMinACF(RMaxACF(LocGetY + LocSteep * LocDist * Sin(LocAngle * 3.14159f / 180.f) * 1.f, MapMinY), MapMaxY));
-        SaveInteger(GameHashTable, hid, 8, LocSteep + 1);
-        SetUnitFlyHeight(u, ( - (2 * I2R(LocSteep) * LocDHeight - 1) * (2 * I2R(LocSteep) * LocDHeight - 1) + 1) * LocHeightMax + LocOrigHeigth, 99999);
-        IssueImmediateOrder(u, "stop");
-    }
-    else
-    {
-        SetUnitFlyHeight(u, LocOrigHeigth, 99999);
-        SetUnitPathing(u, true);
-        SaveInteger(GameHashTable, GetHandleId(u), 50, 0);
-        PauseTimer( tmr );
-        FlushChildHashtable(GameHashTable, hid);
-        DestroyTimer( tmr );
-    }
+			U_SelectionSelArr[pid] = HeroUnitArray[heroId];
+		}
+		else
+		{
+			if ( ( TeamOneSelected[heroId] == false && teamId == 0 ) || ( TeamTwoSelected[heroId] == false && teamId == 1 ) )
+			{
+				DestroyEffect( EF_SelectionHeroModelArray[pid] );
+				RemoveUnit( U_SelectionDumArr[pid] );
+				MoveHeroToTeamLocation( pid, heroId );
+				ComputerHeroSelection( );
+			}
+			else
+			{
+				DisplayTextToPlayer( p, .0f, .0f, "|c0000ffffHero already selected by your ally!" );
+			}
+		}
+	}
 }
 
-void DisplaceUnitWithArgs(unit u, float LocAngle, float LocTotalDist, float LocTotalTime, float LocRate, float LocHeightMax)
+void PlayerNameSettingAction( )
 {
-    if ( u == nil )
-    {
-        return;
-    }
-    int LocIsAffected = LoadInteger(GameHashTable, GetHandleId(u), 50);
-    if (LocIsAffected == 1)
-    {
-        return;
-    }
+	int tid = 1;
 
-    timer t = CreateTimer();
-    int hid = GetHandleId(t);
-    float LocGetX = GetUnitX(u);
-    float LocGetY = GetUnitY(u);
-    int LocSteepMax = R2I(LocTotalTime / LocRate);
-    int LocSteep = 0;
-    float LocDist = LocTotalDist / LocSteepMax;
-    float LocDHeight = 1.f / LocSteepMax;
-    float LocOrigHeigth = GetUnitFlyHeight(u);
+	for ( int i = 0; i < 12; i++ )
+	{
+		player p = Player( i );
+		string name = "";
 
-    int aid = 'Amrf';
+		if ( i <= 7 )
+		{
+			if ( GetPlayerSlotState( p ) == PLAYER_SLOT_STATE_PLAYING )
+			{
+				if ( GetPlayerController( p ) == MAP_CONTROL_COMPUTER )
+				{
+					name = "Bot " + I2S( i + 1 );
+				}
+				else
+				{
+					name = GetPlayerName( p );
+				}
+			}
+			else
+			{
+				name = "- Empty Slot -";
+			}
+		}
+		else if ( i >= 10 )
+		{
+			name = "Base Tower " + I2S( tid );
+			tid++;
+		}
 
-    if ( GetUnitAbility( u, aid ) == nil )
-    {
-        UnitAddAbility( u, aid );
-        ShowAbility( GetUnitAbility( u, aid ), false );
-    }
+		if ( name.isEmpty( ) )
+		{
+			continue;
+		}
 
-    SetUnitPathing(u, false);
-    SaveInteger(GameHashTable, GetHandleId(u), 50, 1);
-    SaveUnitHandle(GameHashTable, hid, 0, u);
-    SaveReal(GameHashTable, hid, 1, LocOrigHeigth);
-    SaveReal(GameHashTable, hid, 2, LocAngle);
-    SaveReal(GameHashTable, hid, 3, LocDist);
-    SaveReal(GameHashTable, hid, 4, LocHeightMax);
-    SaveReal(GameHashTable, hid, 5, LocDHeight);
-    SaveReal(GameHashTable, hid, 6, LocGetX);
-    SaveReal(GameHashTable, hid, 7, LocGetY);
-    SaveInteger(GameHashTable, hid, 8, LocSteep);
-    SaveInteger(GameHashTable, hid, 9, LocSteepMax);
-    TimerStart(t, LocRate, true, @DisplaceUnitAction);
-}
-void DamageVisualDrawNumber(string LocNumber, float LocPosX, float LocPosY, string LocSuffix)
-{
-    DestroyEffect(AddSpecialEffect("DamageSystemVisual\\Number_" + LocNumber + LocSuffix + ".mdx", LocPosX, LocPosY));
-}
-float DamageVisualGetPosition(float GraphicSpacement, float LocInitPos, int LocActual, int LocFinal, float LocRatio)
-{
-    return LocInitPos - (GraphicSpacement * LocRatio * (LocFinal / 2)) + (GraphicSpacement * LocRatio * LocActual);
-}
-void DamageVisualDrawNumberAction(unit LocSource, unit LocTarget, float LocAmount)
-{
-    float GraphicSpacement = 70.f;
-    float LocPosX = GetUnitX(LocTarget);
-    float LocPosY = GetUnitY(LocTarget) + GetUnitFlyHeight(LocTarget) + 150;
-    string LocNumbers = I2S(R2I(LocAmount));
-    int LocSize = StringLength(LocNumbers);
-    float LocNewPosX = 0;
-    string LocSuffix = "";
-    float LocRatio = 0;
-    int index = 0;
-    if (LocAmount >= 5000)
-    {
-        LocSuffix = "_Large";
-        LocRatio = 1.3f;
-    }
-    else if (LocAmount >= 500)
-    {
-        LocSuffix = "";
-        LocRatio = 1.0f;
-    }
-    else
-    {
-        LocSuffix = "_Small";
-        LocRatio = 0.7f;
-    }
+		PlayerNameArray[i] = name;
+		PlayerColoredNameArray[i] = PlayerColorStringArray[i] + PlayerNameArray[i] + "|r";
 
-    index = - 1;
-    while (true)
-    {
-        index = index + 1;
-        if (index > LocSize - 1) break;
-        LocNewPosX = DamageVisualGetPosition(GraphicSpacement, LocPosX, index, LocSize, LocRatio);
-        if (IsUnitInvisible(LocTarget, GetOwningPlayer(LocSource)) == false)
-        {
-            DamageVisualDrawNumber(SubString(LocNumbers, index, index + 1), LocNewPosX, LocPosY, LocSuffix);
-        }
-    }
+		SetPlayerName( p, PlayerColoredNameArray[i] ); // crashes -> PlayerColoredNameArray[i]
+	}
 }
-void AkamePoisonDamage()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 10 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) + .1f * GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iTarget), 'B006' ) > 0)
-    {
-        DamageTargetACF(DummyUnitDamageArr[GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-    }
-    else
-    {
-        FlushChildHashtable(GameHashTable, hid);
-        DestroyTimer(GetExpiredTimer());
-    }
-}
-void AkamePoisonCheck(unit LocTrigUnit, unit LocTargUnit)
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveUnitHandle(GameHashTable, hid, iCaster, LocTrigUnit);
-    SaveUnitHandle(GameHashTable, hid, iTarget, LocTargUnit);
-    TimerStart(tmr, 1, true, @AkamePoisonDamage);
-}
-void OnPlayerUnitDamaged()
-{
-    float SourceDmg = GetEventDamage();
 
-    if ( SourceDmg > 1.f )
-    {
-        trigger t = GetTriggeringTrigger();
-        unit Source = GetEventDamageSource();
-        unit Target = GetTriggerUnit();
-        int LocID = GetUnitTypeId(Target);
+void AllHeroPickAction( )
+{
+	player p = GetTriggerPlayer( );
+	float CenterX = GetPlayerTeam( p ) == 0 ? -4288.f : 4288.f;
+	DisplayTimedTextToPlayer( p, .0f, .0f, 10.f, "|c0000ff00The host got all heroes.|r" );
 
-        float Multiplier = 1;
-        float DealtTrigDmg = 0;
-        float DmgMult = 0;
-        float LocReqHP = 0;
+	for ( int i = 1; i <= TotalHeroes; i++ )
+	{
+		InitHero( CreateUnit( p, LoadInteger( DataHT, i, 'type' ), CenterX, -576.f, 270.f ) );
+	}
+}
 
-        DisableTrigger( t );
-        if ( GetEventIsAttack( ) )
-        {
-            if ( LocID == 'n000' && ( GetUnitTypeId(Source) == 'base' || IsUnitType( Source, UNIT_TYPE_HERO ) ) )
-            {
-                SetUnitPosition(KawarimiTriggerUnitArray[GetPlayerId(GetOwningPlayer(Target))], GetUnitX(Source), GetUnitY(Source));
-                UnitApplyTimedLife(Target, 'BOmi', .01f);
-            }
+void SetUnitFlyHeightEx( unit u, float height, float time )
+{
+	ability a = GetUnitAbility( u, 'A04U' );
 
-            if ( GetUnitTypeId( Source ) == 'H00G' )
-            {
-                if (GetUnitAbilityLevel(Target, 'B006' ) <= 0)
-                {
-                    AkamePoisonCheck(Source, Target);
-                }
-                IssueTargetOrder(DummyUnitDamageArr[GetPlayerId(GetOwningPlayer(Source))], "slow", Target);
-            }
-            else if (GetUnitTypeId(Source) == 'H00K' )
-            {
-                SetUnitCurrentLife(Source, SourceDmg * .15f + GetUnitCurrentLife(Source));
-            }
+	if ( a == nil )
+	{
+		UnitAddAbility( u, 'A04U' );
+		a = GetUnitAbility( u, 'A04U' );
+	}
 
-            if (GetUnitAbilityLevel(Source, 'B002' ) > 0 || GetUnitAbilityLevel(Source, 'B000' ) > 0)
-            {
-                if (GetUnitAbilityLevel(Source, 'B002' ) > 0)
-                {
-                    DmgMult = 10;
-                }
-                if (GetUnitAbilityLevel(Source, 'B000' ) > 0)
-                {
-                    DmgMult = 20;
-                }
-                if (HasPersonalItemACF(Source))
-                {
-                    DmgMult = DmgMult + DmgMult / 2;
-                    LocReqHP = 10;
-                }
-                else
-                {
-                    LocReqHP = 5;
-                }
-                DealtTrigDmg = GetHeroLevel(Source) * DmgMult + GetHeroInt(Source, true) * DmgMult / 100;
-                if (GetUnitStatePercentRW(Target, UNIT_STATE_LIFE, UNIT_STATE_MAX_LIFE) <= LocReqHP && Target != MainBossUnit1)
-                {
-                    if (GetUnitAbilityLevel(Source, 'B002' ) > 0)
-                    {
-                        UnitRemoveAbility(Source, 'A02X' );
-                        UnitAddAbility(Source, 'A02X' );
-                        UnitRemoveAbility(Source, 'B002' );
-                    }
-                    if (GetUnitAbilityLevel(Source, 'B000' ) > 0)
-                    {
-                        UnitRemoveAbility(Source, 'A035' );
-                        UnitAddAbility(Source, 'A035' );
-                        UnitRemoveAbility(Source, 'B000' );
-                    }
-                    CreateUnit(GetOwningPlayer(Source), 'u00J' , GetUnitX(Target), GetUnitY(Target), 270);
-                    DealtTrigDmg = 100000000;
-                    DestroyEffect(AddSpecialEffect("GeneralEffects\\BloodEffect1.mdx", GetUnitX(Target), GetUnitY(Target)));
-                    DestroyEffect(AddSpecialEffect("GeneralEffects\\26.mdx", GetUnitX(Target), GetUnitY(Target)));
-                }
+	ShowAbility( a, false );
+	SetUnitFlyHeight( u, height, time );
+}
 
-                SetEventDamage( GetEventDamage( ) + DealtTrigDmg );
-            }
-            if (GetUnitTypeId(Source) == 'H00J'  && GetRandomInt(0, 100) <= 15)
-            {
-                DealtTrigDmg = GetHeroLevel(Source) * 50 + GetHeroInt(Source, true);
-                GlobalUnit = CreateUnit(GetOwningPlayer(Source), 'u00E', GetUnitX(Source), GetUnitY(Source), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 1.5f, .3f);
-                GlobalUnit = CreateUnit(GetOwningPlayer(Source), 'u00L', GetUnitX(Source), GetUnitY(Source), AngleBetweenUnits(Source, Target));
-                SetUnitScaleAndTime(GlobalUnit, 1.5f, .3f);
-                DisplaceUnitWithArgs(Target, AngleBetweenUnits(Source, Target), 200, .25f, .01f, 0);
-                SetEventDamage( GetEventDamage( ) + DealtTrigDmg );
-                //DamageTargetACF(Source, Target, DealtTrigDmg);
-            }
-            if (GetUnitTypeId(Source) == 'H00H' )
-            {
-                if (IsUnitType(Target, UNIT_TYPE_HERO) == false)
-                {
-                    DmgMult = 2;
-                }
-                DmgMult = 0.01f * Multiplier;
-                DealtTrigDmg = .005f * Multiplier * GetUnitMaxLife(Target);
+// Effect API
+effect CreateEffect( string model, float x, float y, float facing )
+{
+	effect ef = AddSpecialEffect( model, x, y );
+	SetSpecialEffectFacing( ef, facing );
 
-                SetEventDamage( GetEventDamage( ) + DealtTrigDmg );
+	return ef;
+}
 
-                //DamageTargetACF(Source, Target, DealtTrigDmg);
-                SetUnitCurrentLife(Source, GetUnitMaxLife(Source) * DmgMult + GetUnitCurrentLife(Source));
-            }
-        }
+effect CreateEffectEx( string model, float x, float y, float height = .0f, float facing = 270.f, float scale = 1.f, float timeScale = 1.f )
+{
+	effect ef = CreateEffect( model, x, y, facing );
+	SetSpecialEffectHeight( ef, height );
+	SetSpecialEffectScale( ef, scale );
+	SetSpecialEffectTimeScale( ef, timeScale );
 
-        if (GetUnitTypeId(Source) == 'base' )
-        {
-            SetEventDamage( GetEventDamage( ) + GetUnitMaxLife(Target) * .02f );
-        }
+	return ef;
+}
 
-        SourceDmg = GetEventDamage(); // DealtTrigDmg +
-        if (GetUnitTypeId(Source) != 'base' )
-        {
-            DamageVisualDrawNumberAction(Source, Target, SourceDmg);
-        }
+void RemoveEffect( effect ef )
+{
+	if ( ef == nil ) { return; }
 
-        if ( LocID == 'tstu'  )
-        {
-            SetEventDamage( .0f );
-        }
+	SetSpecialEffectVisible( ef, false );
+	DestroyEffect( ef );
+}
 
-        EnableTrigger( t );
-    }
-}
-void SaberNeroHealthRegen()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float MaxHP = GetUnitMaxLife(LoadUnitHandle(GameHashTable, hid, iCaster));
-    float CurrentHP = GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster));
-    SetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster), (MaxHP - CurrentHP) * .04f + CurrentHP);
-}
-void EnteringUnitCheckAction()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    unit Unit = GetEnteringUnit();
-    player TrigPlayer = GetOwningPlayer(Unit);
-    int ID = GetPlayerId(TrigPlayer);
-    if (IsUnitType(Unit, UNIT_TYPE_HERO) && Unit != MainBossUnit1)
-    {
-        if (GetUnitTypeId(Unit) == 'H00E' )
-        {
-            SaveUnitHandle(GameHashTable, hid, iCaster, MUnitArray[ID]);
-            TimerStart(tmr, 1, true, @SaberNeroHealthRegen);
-        }
-    }
-}
-void ReviveSystemTriggerFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    unit ReviveSystemLocalUnit1 = LoadUnitHandle(GameHashTable, hid, 0);
-    int ReviveUnitID = LoadInteger(GameHashTable, hid, 1);
-    bool RevInt = false;
-    if (GetPlayerTeam(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, 0))) == 0)
-    {
-        RevInt = true;
-    }
-    DestroyEffect(LoadEffectHandle(GameHashTable, hid, 1));
-    ReviveHero(ReviveSystemLocalUnit1, SwapAmount(4288, RevInt), - 576, true);
-    SetUnitFlyHeight(ReviveSystemLocalUnit1, 0, 2000);
-    if (GetLocalPlayer() == GetOwningPlayer(ReviveSystemLocalUnit1))
-    {
-        ClearSelection();
-        PanCameraToTimed(SwapAmount(4288, RevInt), - 576, .2f);
-        SelectUnit(ReviveSystemLocalUnit1, true);
-    }
-    if (GetPlayerController(GetOwningPlayer(ReviveSystemLocalUnit1)) == MAP_CONTROL_COMPUTER)
-    {
-        IssuePointOrder(ReviveSystemLocalUnit1, "attack", GetRandomReal( - 1900.f, 1900.f), GetRandomReal( - 1200.f, 200.f));
-    }
-    PauseTimer(GetExpiredTimer());
-    FlushChildHashtable(GameHashTable, hid);
-    DestroyTimer(GetExpiredTimer());
-}
-void ReviveSystemAction()
-{
-    timer ReviveSystemLocalTimer1 = CreateTimer();
-    int hid = GetHandleId(ReviveSystemLocalTimer1);
-    if (IsUnitType(GetDyingUnit(), UNIT_TYPE_HERO) && GetPlayerSlotState(GetTriggerPlayer()) == PLAYER_SLOT_STATE_PLAYING && GetPlayerId(GetTriggerPlayer()) < 12)
-    {
-        SaveUnitHandle(GameHashTable, hid, 0, GetTriggerUnit());
-        SaveEffectHandle(GameHashTable, hid, 1, AddSpecialEffect("GeneralEffects\\UnitEffects\\DeathIndicator.mdl", GetUnitX(GetDyingUnit()), GetUnitY(GetDyingUnit()) + 300));
-        TimerStart(ReviveSystemLocalTimer1, 4, false, @ReviveSystemTriggerFunction3);
-    }
-    else
-    {
-        DestroyTimer(ReviveSystemLocalTimer1);
-    }
-}
-void AbilityTextTagCreationAction()
-{
-    texttag TextTag = CreateTextTag();
-    float speed = 100.f;
-    float angle = 90.f;
-    float size = 13.f;
-    float vel = speed * 0.071f / 128.f;
-    float xvel = vel * Cos( Deg2Rad( angle ) );
-    float yvel = vel * Sin( Deg2Rad( angle ) );
-    float textHeight = size * 0.023f / 10.f;
-    if (GetSpellAbilityId() == 'A021'  || GetSpellAbilityId() == 'A00X' )
-    {
-    }
-    else
-    {
-        UnitRemoveAbility(GetTriggerUnit(), 'B018' );
-        UnitRemoveAbility(GetTriggerUnit(), 'Binv' );
-    }
-    if (IsUnitType(GetTriggerUnit(), UNIT_TYPE_HERO) && GetSpellAbilityId() != 'A055'  && GetSpellAbilityId() != 'A01S' )
-    {
-        SetTextTagText(TextTag, GetObjectName(GetSpellAbilityId()), textHeight);
-        SetTextTagColor(TextTag, 255, 0, 0, 100);
-        SetTextTagPosUnit(TextTag, GetTriggerUnit(), 50);
-        SetTextTagVelocity(TextTag, xvel, yvel);
-        SetTextTagPermanent(TextTag, false);
-        SetTextTagLifespan(TextTag, 2.f);
-        SetTextTagFadepoint(TextTag, .25f);
-    }
-}
-void BossCheckFunction1()
-{
-    if ( ! (GetUnitX(MainBossUnit1) >=  - 544.f && GetUnitX(MainBossUnit1) <= 544.f && GetUnitY(MainBossUnit1) >=  - 4100.f && GetUnitY(MainBossUnit1) <=  - 2800.f))
-    {
-        DestroyEffect(AddSpecialEffect("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(MainBossUnit1), GetUnitY(MainBossUnit1)));
-        SetUnitPosition(MainBossUnit1, 0.f, - 3850.f);
-    }
-}
-void BossCheckInit()
-{
-    TimerStart(CreateTimer(), 1.f, true, @BossCheckFunction1);
-}
-void MultiBoardCreationFunction1()
-{
-    DisplayTimedTextToPlayer(GetLocalPlayer(), 0.f, 0.f, 5.f, "|c00ff0000Welcome to Anime Character Fight|r
-	|c00ff0000Wish you an amazing victory: |r|c0000ffffor a sweet defeat :)|r
-	|c00ff0000SO!: |r|c0000ffffFor spells sounds download patch from vk.com/acfwc3 or chaosrealm.info!|r");
-    MainMultiboard = CreateMultiboard();
-    MultiboardSetRowCount(MainMultiboard, 11);
-    MultiboardSetColumnCount(MainMultiboard, 3);
-    MultiboardSetTitleText(MainMultiboard, "|Cff00ff00Scoreboard|r |c00ff0000" + I2S(TeamKills[0]) + "|r/|c000000ff" + I2S(TeamKills[1]) + "|r");
-    MultiboardDisplay(MainMultiboard, true);
-    MBItem = MultiboardGetItem(MainMultiboard, 10, 0);
-    MultiboardSetItemWidth(MBItem, 12.f / 100.f);
-    MultiboardReleaseItem(MBItem);
-    MBItem = MultiboardGetItem(MainMultiboard, 10, 1);
-    MultiboardSetItemWidth(MBItem, 12.f / 100.f);
-    MultiboardReleaseItem(MBItem);
-    int i = 0;
-    int j = 0;
-    while (true)
-    {
-        if (i > 9) break;
-        MBItem = MultiboardGetItem(MainMultiboard, i, 0);
-        MultiboardSetItemWidth(MBItem, 12 / 100.0f);
-        MultiboardReleaseItem(MBItem);
-        MBItem = MultiboardGetItem(MainMultiboard, i, 1);
-        MultiboardSetItemWidth(MBItem, 4 / 100.0f);
-        MultiboardReleaseItem(MBItem);
-        MBItem = MultiboardGetItem(MainMultiboard, i, 2);
-        MultiboardSetItemWidth(MBItem, 4 / 100.0f);
-        MultiboardReleaseItem(MBItem);
-        if (i == 0 || i == 5)
-        {
-            MBItem = MultiboardGetItem(MainMultiboard, i, 1);
-            MultiboardSetItemValue(MBItem, "0");
-            MultiboardReleaseItem(MBItem);
-            MBItem = MultiboardGetItem(MainMultiboard, i, 2);
-            MultiboardSetItemValue(MBItem, "0");
-            MultiboardReleaseItem(MBItem);
-            MBItem = MultiboardGetItem(MainMultiboard, i, 1);
-            MultiboardSetItemIcon(MBItem, "ReplaceableTextures\\CommandButtons\\BTNTransmute.blp");
-            MultiboardReleaseItem(MBItem);
-            MBItem = MultiboardGetItem(MainMultiboard, i, 2);
-            MultiboardSetItemIcon(MBItem, "ReplaceableTextures\\CommandButtons\\BTNDeathCoil.blp");
-            MultiboardReleaseItem(MBItem);
-        }
-        if (i != 0 && i != 5)
-        {
-            MBItem = MultiboardGetItem(MainMultiboard, i, 0);
-            if (GetPlayerSlotState(Player(j)) == PLAYER_SLOT_STATE_PLAYING)
-            {
-                MultiboardSetItemValue(MBItem, PlayerColoredNameArray[j] + "|r");
-            }
-            else
-            {
-                MultiboardSetItemValue(MBItem, PlayerColorStringArray[j] + "- Empty Slot -|r");
-            }
-            MultiboardSetItemIcon(MBItem, "UI\\Widgets\\Console\\Human\\CommandButton\\human-button-lvls-overlay.blp");
-            MultiboardReleaseItem(MBItem);
-            MBItem = MultiboardGetItem(MainMultiboard, i, 1);
-            MultiboardSetItemIcon(MBItem, "ReplaceableTextures\\CommandButtons\\BTNArcaniteMelee.blp");
-            MultiboardReleaseItem(MBItem);
-            MBItem = MultiboardGetItem(MainMultiboard, i, 2);
-            MultiboardSetItemIcon(MBItem, "ReplaceableTextures\\CommandButtons\\BTNFrostArmor.blp");
-            MultiboardReleaseItem(MBItem);
-            MBItem = MultiboardGetItem(MainMultiboard, i, 1);
-            MultiboardSetItemValue(MBItem, PlayerColorStringArray[j] + "0" + "|r");
-            MultiboardReleaseItem(MBItem);
-            MBItem = MultiboardGetItem(MainMultiboard, i, 2);
-            MultiboardSetItemValue(MBItem, PlayerColorStringArray[j] + "0" + "|r");
-            MultiboardReleaseItem(MBItem);
-            j++;
-        }
-        i++;
-    }
-    MBItem = MultiboardGetItem(MainMultiboard, 0, 0);
-    MultiboardSetItemValue(MBItem, "|c00ff0000RED|r TEAM");
-    MultiboardReleaseItem(MBItem);
-    MBItem = MultiboardGetItem(MainMultiboard, 5, 0);
-    MultiboardSetItemValue(MBItem, "|c000000ffBLUE|r TEAM");
-    MultiboardReleaseItem(MBItem);
-    MBItem = MultiboardGetItem(MainMultiboard, 10, 0);
-    MultiboardSetItemValue(MBItem, "Kills: Undecided");
-    MultiboardReleaseItem(MBItem);
-    MBItem = MultiboardGetItem(MainMultiboard, 10, 1);
-    MultiboardSetItemValue(MBItem, "0:0:0");
-    MultiboardReleaseItem(MBItem);
-    MBItem = MultiboardGetItem(MainMultiboard, 0, 0);
-    MultiboardSetItemIcon(MBItem, "ReplaceableTextures\\CommandButtons\\BTNOrbofSlowness.blp");
-    MultiboardReleaseItem(MBItem);
-    MBItem = MultiboardGetItem(MainMultiboard, 5, 0);
-    MultiboardSetItemIcon(MBItem, "ReplaceableTextures\\CommandButtons\\BTNMoonStone.blp");
-    MultiboardReleaseItem(MBItem);
-    MBItem = MultiboardGetItem(MainMultiboard, 10, 0);
-    MultiboardSetItemIcon(MBItem, "ReplaceableTextures\\CommandButtons\\BTNLament.blp");
-    MultiboardReleaseItem(MBItem);
-    MBItem = MultiboardGetItem(MainMultiboard, 10, 1);
-    MultiboardSetItemIcon(MBItem, "ReplaceableTextures\\WorldeditUI\\Events-time.blp");
-    MultiboardReleaseItem(MBItem);
-    MultiboardDisplay(MainMultiboard, true);
-}
-void InGameTimerAction()
-{
-    timer tmr = GetExpiredTimer();
-    int hid = GetHandleId( tmr );
-    int secs = LoadInteger(GameHashTable, hid, 0);
-    int mins = LoadInteger(GameHashTable, hid, 1);
-    int hours = LoadInteger(GameHashTable, hid, 2);
+timer LifeTimer;
+hashtable LifeHT = InitHashtable( );
 
-    if (secs == 59)
-    {
-        SaveInteger(GameHashTable, hid, 0, 0);
-        SaveInteger(GameHashTable, hid, 1, mins + 1);
-    }
-    else
-    {
-        SaveInteger(GameHashTable, hid, 0, secs + 1);
-    }
-    if (mins == 59)
-    {
-        SaveInteger(GameHashTable, hid, 1, 0);
-        SaveInteger(GameHashTable, hid, 2, hours + 1);
-    }
+void OnProcessEffectList( )
+{
+	int hid = GetHandleId( GetExpiredTimer( ) );
+	handlelist hl = LoadHandleList( LifeHT, hid, 'ELST' ); if ( hl == nil ) { return; }
+	int max = HandleListGetCount( hl );
 
-    multiboarditem mbitem = MultiboardGetItem(MainMultiboard, 10, 1);
-    MultiboardSetItemValue( mbitem, I2S( hours ) + ":" + I2S( mins ) + ":" + I2S( secs ) );
-    MultiboardReleaseItem( mbitem );
-}
-bool RegisterHeroDeathCondition()
-{
-    return IsUnitType(GetDyingUnit(), UNIT_TYPE_HERO) && IsUnitAlly(GetKillingUnit(), GetOwningPlayer(GetDyingUnit())) != true && GetOwningPlayer(GetDyingUnit()) != Player(PLAYER_NEUTRAL_AGGRESSIVE);
-}
-void RegisterHeroDeathAction()
-{
-    int FirstIndex = 0;
-    int SecondIndex = 0;
-    int FirstID = 0;
-    int SecondID = 0;
-    int KillingID = 1 + GetPlayerId(GetOwningPlayer(GetKillingUnit()));
-    int DyingID = 1 + GetPlayerId(GetOwningPlayer(GetDyingUnit()));
-    if (GetPlayerTeam(GetOwningPlayer(GetDyingUnit())) == 0)
-    {
-        FirstIndex = 5;
-        FirstID = 1;
-        KillingID = KillingID + 1;
-    }
-    else
-    {
-        SecondIndex = 5;
-        SecondID = 1;
-        DyingID = DyingID + 1;
-    }
-    if (GetOwningPlayer(GetKillingUnit()) != Player(PLAYER_NEUTRAL_AGGRESSIVE) && GetUnitTypeId(GetKillingUnit()) != 'base' )
-    {
-        DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 5, PlayerColoredNameArray[GetPlayerId(GetOwningPlayer(GetKillingUnit()))] + " |c008080c0Killed|r " + PlayerColoredNameArray[GetPlayerId(GetOwningPlayer(GetDyingUnit()))]);
-        KillingUnitIntegerArray[KillingID] = KillingUnitIntegerArray[KillingID] + 1;
-        MBItem = MultiboardGetItem(MainMultiboard, KillingID, 1);
-        MultiboardSetItemValue(MBItem, PlayerColorStringArray[GetPlayerId(GetOwningPlayer(GetKillingUnit()))] + I2S(KillingUnitIntegerArray[KillingID]));
-        MultiboardReleaseItem(MBItem);
-        TeamKills[FirstID] = TeamKills[FirstID] + 1;
-        MBItem = MultiboardGetItem(MainMultiboard, FirstIndex, 1);
-        MultiboardSetItemValue(MBItem, I2S(TeamKills[FirstID]));
-        MultiboardReleaseItem(MBItem);
-    }
-    DyingUnitIntegerArray[DyingID] = DyingUnitIntegerArray[DyingID] + 1;
-    MBItem = MultiboardGetItem(MainMultiboard, DyingID, 2);
-    MultiboardSetItemValue(MBItem, PlayerColorStringArray[GetPlayerId(GetOwningPlayer(GetDyingUnit()))] + I2S(DyingUnitIntegerArray[DyingID]));
-    MultiboardReleaseItem(MBItem);
-    TeamDeaths[SecondID] = TeamDeaths[SecondID] + 1;
-    MBItem = MultiboardGetItem(MainMultiboard, SecondIndex, 2);
-    MultiboardSetItemValue(MBItem, I2S(TeamDeaths[SecondID]));
-    MultiboardReleaseItem(MBItem);
-    MultiboardSetTitleText(MainMultiboard, "|Cff00ff00Scoreboard|r |c00ff0000" + I2S(TeamKills[0]) + "|r/|c000000ff" + I2S(TeamKills[1]) + "|r");
-}
-void KillSelectionDialogAction()
-{
-    int i = 0;
-    while (true)
-    {
-        if (i > 8) break;
-        if (GetClickedButton() == SameHeroModeButtonArray[i])
-        {
-            MBArr1[i] = MBArr1[i] + 1;
-        }
-        i = i + 1;
-    }
-}
-void KillSelectionTimerExpireAction()
-{
-    int MaxVotes = 0;
-    int TotalVotes = 0;
-    int MaxVotesID = 0;
-    int index = 0;
-    bool VotesTied = false;
-    DialogShow(KillSelectionDialog, false);
-    DialogClear(KillSelectionDialog);
-    DialogDestroy(KillSelectionDialog);
-    TimerDialogDisplay(ModeSelectionTD, false);
-    DestroyTimerDialog(ModeSelectionTD);
-    MultiboardDisplay(MainMultiboard, true);
-    while (true)
-    {
-        if (index > 8) break;
-        if (MBArr1[index] > 0)
-        {
-            TotalVotes = TotalVotes + 1;
-        }
-        if (MBArr1[index] == MaxVotes)
-        {
-            VotesTied = true;
-        }
-        if (MBArr1[index] > MaxVotes)
-        {
-            MaxVotes = MBArr1[index];
-            MaxVotesID = index;
-            VotesTied = false;
-        }
-        index = index + 1;
-    }
-    if (MaxVotesID == 0)
-    {
-        KillLimitInteger1 = 20 * GetRandomInt(1, 7);
-    }
-    else if (MaxVotesID == 8)
-    {
-        KillLimitInteger1 = 999999999;
-    }
-    else if (MaxVotesID != 0 && MaxVotesID != 8)
-    {
-        KillLimitInteger1 = 20 * MaxVotesID;
-    }
-    if (VotesTied == true || TotalVotes <= 0)
-    {
-        if (TotalPlayers == 1 || TeamPlayers[0] == 0 || TeamPlayers[1] == 0)
-        {
-            KillLimitInteger1 = 999999999;
-        }
-        if (TeamPlayers[0] == 1 && TeamPlayers[1] == 1)
-        {
-            KillLimitInteger1 = 20;
-        }
-        if ((TeamPlayers[0] == 1 && TeamPlayers[1] == 2) || (TeamPlayers[0] == 2 && TeamPlayers[1] == 1))
-        {
-            KillLimitInteger1 = 40;
-        }
-        if (TeamPlayers[0] == 2 && TeamPlayers[1] == 2)
-        {
-            KillLimitInteger1 = 60;
-        }
-        if ((TeamPlayers[0] == 2 && TeamPlayers[1] == 3) || (TeamPlayers[0] == 3 && TeamPlayers[1] == 2))
-        {
-            KillLimitInteger1 = 80;
-        }
-        if (TeamPlayers[0] == 3 && TeamPlayers[1] == 3)
-        {
-            KillLimitInteger1 = 100;
-        }
-        if ((TeamPlayers[0] == 3 && TeamPlayers[1] == 4) || (TeamPlayers[0] == 4 && TeamPlayers[1] == 3))
-        {
-            KillLimitInteger1 = 120;
-        }
-        if (TeamPlayers[0] == 4 && TeamPlayers[1] == 4)
-        {
-            KillLimitInteger1 = 140;
-        }
-    }
-    if (TotalVotes > 0)
-    {
-        DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "
-		|cFFFFCC00Votes for |c0000ffff[Random]|r|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[0]) + "|r
-		|cFFFFCC00Votes for |c0000ffff[20 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[1]) + "|r
-		|cFFFFCC00Votes for |c0000ffff[40 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[2]) + "|r
-		|cFFFFCC00Votes for |c0000ffff[60 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[3]) + "|r
-		|cFFFFCC00Votes for |c0000ffff[80 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[4]) + "|r
-		|cFFFFCC00Votes for |c0000ffff[100 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[5]) + "|r
-		|cFFFFCC00Votes for |c0000ffff[120 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[6]) + "|r
-		|cFFFFCC00Votes for |c0000ffff[140 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[7]) + "|r
-		|cFFFFCC00Votes for |c0000ffff[Unlimited Kills]|cFFFFCC00:|r |c0000ffff" + I2S(MBArr1[8]) + "|r");
-    }
-    MBItem = MultiboardGetItem(MainMultiboard, 10, 0);
-    if (KillLimitInteger1 <= 140)
-    {
-        DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|cFFFFCC00Kill Limit is:|r |c0000ffff[" + I2S(KillLimitInteger1) + "]|r |cFFFFCC00Kills|r");
-        MultiboardSetItemValue(MBItem, "Kills: " + I2S(KillLimitInteger1));
-    }
-    else
-    {
-        DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|cFFFFCC00Kill Limit is:|r |c0000ffff[Unlimited]|r |cFFFFCC00Kills.|r");
-        MultiboardSetItemValue(MBItem, "Kills: Unlimited");
-    }
-    MultiboardReleaseItem(MBItem);
-    EnableTrigger(GameTrigArr[7]);
-    DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|c0000ffffHero Selection has been activated!|r");
-    MultiboardDisplay(MainMultiboard, false);
-    MultiboardDisplay(MainMultiboard, true);
-    TimerStart(CreateTimer(), 1, true, @InGameTimerAction);
-}
-void KillSelectionAction()
-{
-    DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|c0000ffffAttention to All Players!
+	//print( "OnProcessEffectList: " + "hl = " + I2S( GetHandleId( hl ) ) + " | max: " + I2S( max ) + "\n" );
 
-	You have 5 seconds to choose desirable Kill Limit");
-    ModeSelectionTD = CreateTimerDialog(KillSelectionTimer);
-    TimerDialogSetTitle(ModeSelectionTD, "|c00ffff00Kill Limit Selection");
-    TimerDialogDisplay(ModeSelectionTD, true);
-    TimerStart(KillSelectionTimer, 5, false, @KillSelectionTimerExpireAction);
-    DialogSetMessage(KillSelectionDialog, "Select Kill Limit");
-    SameHeroModeButtonArray[0] = DialogAddButton(KillSelectionDialog, "Random", 0);
-    SameHeroModeButtonArray[1] = DialogAddButton(KillSelectionDialog, "20 Kills [1 vs 1]", 0);
-    SameHeroModeButtonArray[2] = DialogAddButton(KillSelectionDialog, "40 Kills", 0);
-    SameHeroModeButtonArray[3] = DialogAddButton(KillSelectionDialog, "60 Kills [2 vs 2]", 0);
-    SameHeroModeButtonArray[4] = DialogAddButton(KillSelectionDialog, "80 Kills", 0);
-    SameHeroModeButtonArray[5] = DialogAddButton(KillSelectionDialog, "100 Kills [3 vs 3]", 0);
-    SameHeroModeButtonArray[6] = DialogAddButton(KillSelectionDialog, "120 Kills", 0);
-    SameHeroModeButtonArray[7] = DialogAddButton(KillSelectionDialog, "140 Kills [4 vs 4]", 0);
-    SameHeroModeButtonArray[8] = DialogAddButton(KillSelectionDialog, "Unlimited Kills", 0);
-    DialogShow(KillSelectionDialog, true);
+	for ( int i = 0; i < max; i++ )
+	{
+		effect ef = HandleListGetEffectByIndex( hl, i ); if ( ef == nil ) { break; }
+		int ef_hid = GetHandleId( ef );
+		float life = LoadReal( LifeHT, ef_hid, 'LIFE' ) - .05f;
+
+		if ( life <= .0f )
+		{
+			HandleListRemoveHandle( hl, ef );
+
+			string anim = LoadStr( LifeHT, ef_hid, 'ANIM' );
+
+			if ( anim.isEmpty( ) )
+			{
+				RemoveEffect( ef );
+			}
+			else
+			{
+				SetSpecialEffectAnimation( ef, anim );
+				DestroyEffect( ef );
+			}
+			
+			i--;
+			max = HandleListGetCount( hl );
+		}
+		else
+		{
+			SaveReal( LifeHT, ef_hid, 'LIFE', life );
+		}
+	}
 }
-void ModeSelectionFunction2()
+
+void SetEffectTimedLife( effect ef, float time, string anim = "" )
 {
-    if (GetClickedButton() == SameHeroModeButtonArray[10])
-    {
-        MBArr1[10] = MBArr1[10] + 1;
-    }
-    if (GetClickedButton() == SameHeroModeButtonArray[11])
-    {
-        MBArr1[11] = MBArr1[11] + 1;
-    }
+	if ( IsHandleDestroyed( ef ) ) { return; } // returns true if ef is nil, or underlaying object was destroyed.
+
+	int ef_hid = GetHandleId( ef );
+	SaveReal( LifeHT, ef_hid, 'LIFE', time );
+	SaveStr( LifeHT, ef_hid, 'ANIM', anim );
+
+	int hid = GetHandleId( LifeTimer );
+	handlelist hl = LoadHandleList( LifeHT, hid, 'ELST' );
+
+	if ( hl == nil )
+	{
+		LifeTimer = CreateTimer( );
+		hid = GetHandleId( LifeTimer );
+		hl = HandleListCreate( );
+
+		SaveHandleList( LifeHT, hid, 'ELST', hl );
+
+		TimerStart( LifeTimer, .05f, true, @OnProcessEffectList );
+	}
+
+	HandleListAddHandle( hl, ef );
 }
-void ModeSelectionFunction3()
+
+namespace EffectAPI
 {
-    DialogShow(ModeSelectionDialog, false);
-    DialogClear(ModeSelectionDialog);
-    DialogDestroy(ModeSelectionDialog);
-    TimerDialogDisplay(ModeSelectionTD, false);
-    MultiboardDisplay(MainMultiboard, true);
-    DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|cFFFFCC00Same Hero Mode Results:
-	For:|r |c0000ffff" + I2S(MBArr1[10]) + "|r |cFFFFCC00Against:|r |c0000ffff" + I2S(MBArr1[11]) + "|r" );
-    if (MBArr1[10] > MBArr1[11])
-    {
-        SameHeroBoolean = true;
-        DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|c0000FF00Same Hero Mode Enabled!");
-    }
-    else
-    {
-        DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|c00ff0000Same Hero Mode Disabled!");
-    }
-    TimerStart(KillSelectionTimer, 1, false, @KillSelectionAction);
+	void Dash( unit source, int effCount = 6, float moveStep = 40.f, float initSize = .4f, float sizeStep = .25f, float timeScale = 1.25f, float height = 50.f )
+	{
+		float angle = GetUnitFacing( source );
+		float x = MathPointProjectionX( GetUnitX( source ), angle, 100.f );
+		float y = MathPointProjectionY( GetUnitY( source ), angle, 100.f );
+		effect ef;
+
+		for ( int i = 0; i < effCount; i++ )
+		{
+			float move = -( moveStep + moveStep * i );
+
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", MathPointProjectionX( x, angle, move ), MathPointProjectionY( y, angle, move ), height, angle, initSize + sizeStep * i, timeScale );
+			SetSpecialEffectAlpha( ef, 0xA0 );
+			SetSpecialEffectPitch( ef, -90.f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+	}
+
+	void Jump( unit source, int effCount = 6 )
+	{
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = GetUnitFacing( source );
+		effect ef;
+
+		//ef = CreateEffectEx( "GeneralEffects\\FuzzyStomp.mdl", x, y, 0.f, GetRandomReal( 0.f, 360.f ), 3.f, 1.f );
+		//SetEffectTimedLife( ef, 1.f );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", x, y ) );
+
+		for ( int i = 0; i < effCount; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, GetRandomReal( .0f, 360.f ), 1.f + .25f * i, GetRandomReal( .5f, 1.5f ) );
+			SetSpecialEffectAlpha( ef, 0xA0 );
+			SetEffectTimedLife( ef, 4.f );
+		}
+	}
+
+	void InverseDash( unit source, int effCount = 6, float moveStep = 25.f, float initSize = .4f, float sizeStep = .15f, float timeScale = 1.25f, float height = 50.f )
+	{
+		Dash( source, effCount, -moveStep, initSize, sizeStep, timeScale, height );
+	}
+
+	void PushWind( unit source, unit target, float baseHeight = 50.f, float pitch = -90.f )
+	{
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = MathAngleBetweenPoints( x, y, targX, targY );
+		float dist = MathDistanceBetweenPoints( x, y, targX, targY );
+		effect ef;
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			float move = 25.f + 25.f * i;
+
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", MathPointProjectionX( x, angle, move ), MathPointProjectionY( y, angle, move ), 50.f, angle, 1.f + .25f * i, 1.f );
+			SetSpecialEffectPitch( ef, pitch );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, baseHeight, angle, 1.5f, 2.f );
+		SetSpecialEffectPitch( ef, pitch );
+		SetEffectTimedLife( ef, 4.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\SlamEffect.mdl", targX, targY, baseHeight, angle, 1.f, 2.f );
+		SetSpecialEffectPitch( ef, pitch );
+		SetEffectTimedLife( ef, 3.f );
+	}
 }
-void ModeSelectionFunction1()
+//
+
+bool DisplaceWar3ImageToTarget( war3image source, war3image target, float speed, float minDist )
 {
-    timer tmr = CreateTimer();
-    DisplayTimedTextToPlayer(GetLocalPlayer(), .0f, .0f, 5.f, "|c00FFFF00Hero Selection is disabled
+	float x = GetWar3ImageX( source );
+	float y = GetWar3ImageY( source );
+	float targX = GetWar3ImageX( target );
+	float targY = GetWar3ImageY( target );
+	float angle = MathAngleBetweenPoints( x, y, targX, targY );
+	float dist = MathDistanceBetweenPoints( x, y, targX, targY );
+
+	SetWar3ImageFacing( source, angle, true );
+
+	if ( dist > minDist )
+	{
+		x = MathPointProjectionX( x, angle, speed );
+		y = MathPointProjectionY( y, angle, speed );
+		dist = MathDistanceBetweenPoints( x, y, targX, targY );
+		SetWar3ImagePosition( source, x, y );
+	}
+
+	return dist <= minDist;
+}
+
+void DisplaceCircular( player enemyTo, float startX, float startY, float aoe, float angle, float scale = 1.f, string eff = "" )
+{
+	for ( int i = 0; i < 1; i++ )
+	{
+		float x = MathPointProjectionX( startX, angle, angle );
+		float y = MathPointProjectionY( startY, angle, angle );
+
+		if ( !eff.isEmpty( ) )
+		{
+			effect ef = CreateEffectEx( eff, x, y, .0f, .0f, scale, 1.f );
+			
+			DestroyEffect( ef );
+		}
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, aoe, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, enemyTo ) )
+			{
+				SetUnitXY( u, x, y );
+			}
+		}
+
+		angle += 180.f;
+	}
+}
+
+void DisplaceUnitAction( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int magnitude = LoadInteger( GameHT, hid, 'magc' );
+	int magnitudeMax = LoadInteger( GameHT, hid, 'magm' );
+	float heightOrig = LoadReal( GameHT, hid, 'horg' );
+	unit u = LoadUnitHandle( GameHT, hid, 'usrc' );
+	int isMoved = LoadInteger( GameHT, GetHandleId( u ), 'disp' );
+
+	if ( ( magnitude < magnitudeMax && isMoved > 0 ) && IsUnitAlive( u ) )
+	{
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float step = LoadReal( GameHT, hid, 'step' );
+		float x = LoadReal( GameHT, hid, 'srcX' );
+		float y = LoadReal( GameHT, hid, 'srcY' );
+
+		float moveX = MathPointProjectionX( x, angle, magnitude * step );
+		float moveY = MathPointProjectionY( y, angle, magnitude * step );
+		bool isMove = IsAxisReal( moveX, moveY );
+
+		if ( isMove )
+		{
+			SetUnitXY( u, moveX, moveY );
+		}
+		
+		float heightMax = LoadReal( GameHT, hid, 'hmax' );
+		float heightStep = LoadReal( GameHT, hid, 'hstp' );
+		float hmag = ( 2.f * I2R( magnitude ) * heightStep - 1 );
+		SaveInteger( GameHT, hid, 'magc', magnitude + 1 );
+		SetUnitFlyHeightEx( u, ( 1.f + -hmag * hmag ) * heightMax + heightOrig, 99999.f );
+	}
+	else
+	{
+		SetUnitFlyHeightEx( u, heightOrig, 99999.f );
+		SetUnitPathing( u, true );
+		SaveInteger( GameHT, GetHandleId( u ), 'disp', isMoved - 1 );
+		PauseTimer( tmr );
+		FlushChildHashtable( GameHT, hid );
+		DestroyTimer( tmr );
+	}
+}
+
+void DisplaceUnitWithArgs( unit u, float angle, float dist, float time, float rate, float heightMax )
+{
+	if ( u == nil || LoadInteger( GameHT, GetHandleId( u ), 'disp' ) > 0 ) { return; }
+
+	timer tmr = CreateTimer( );
+	int hid = GetHandleId( tmr );
+	float x = GetUnitX( u );
+	float y = GetUnitY( u );
+	int magnitudeMax = R2I( time / rate );
+	int magnitude = 0;
+	float step = dist / magnitudeMax;
+	float heightStep = 1.f / magnitudeMax;
+	float heightOrig = GetUnitFlyHeight( u );
+
+	SetUnitPathing( u, false );
+	SaveInteger( GameHT, GetHandleId( u ), 'disp', 1 );
+	SaveUnitHandle( GameHT, hid, 'usrc', u );
+	SaveReal( GameHT, hid, 'horg', heightOrig );
+	SaveReal( GameHT, hid, 'angl', angle );
+	SaveReal( GameHT, hid, 'step', step );
+	SaveReal( GameHT, hid, 'hmax', heightMax );
+	SaveReal( GameHT, hid, 'hstp', heightStep );
+	SaveReal( GameHT, hid, 'srcX', x );
+	SaveReal( GameHT, hid, 'srcY', y );
+	SaveInteger( GameHT, hid, 'magc', magnitude );
+	SaveInteger( GameHT, hid, 'magm', magnitudeMax );
+	TimerStart( tmr, rate, true, @DisplaceUnitAction );
+}
+
+void DisplaceWar3ImageAction( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int magnitude = LoadInteger( GameHT, hid, 'magc' );
+	int magnitudeMax = LoadInteger( GameHT, hid, 'magm' );
+	float heightOrig = LoadReal( GameHT, hid, 'horg' );
+	war3image source = LoadEffectHandle( GameHT, hid, '+src' );
+	int isMoved = LoadInteger( GameHT, GetHandleId( source ), 'disp' );
+
+	if ( ( magnitude < magnitudeMax && isMoved > 0 ) )
+	{
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float step = LoadReal( GameHT, hid, 'step' );
+		float x = LoadReal( GameHT, hid, 'srcX' );
+		float y = LoadReal( GameHT, hid, 'srcY' );
+		float moveX = MathPointProjectionX( x, angle, magnitude * step );
+		float moveY = MathPointProjectionY( y, angle, magnitude * step );
+		bool isMove = IsAxisReal( moveX, moveY );
+
+		if ( isMove )
+		{
+			SetWar3ImagePosition( source, moveX, moveY );
+		}
+		
+		float heightMax = LoadReal( GameHT, hid, 'hmax' );
+		float heightStep = LoadReal( GameHT, hid, 'hstp' );
+		float hmag = ( 2.f * I2R( magnitude ) * heightStep - 1 );
+		SaveInteger( GameHT, hid, 'magc', magnitude + 1 );
+		SetWar3ImageHeight( source, ( 1.f + -hmag * hmag ) * heightMax + heightOrig );
+	}
+	else
+	{
+		SetWar3ImageHeight( source, heightOrig );
+		ResetWar3ImageZ( source );
+		SaveInteger( GameHT, GetHandleId( source ), 'disp', isMoved - 1 );
+		PauseTimer( tmr );
+		FlushChildHashtable( GameHT, hid );
+		DestroyTimer( tmr );
+	}
+}
+
+void DisplaceWar3ImageWithArgs( war3image source, float angle, float dist, float time, float rate, float heightMax )
+{
+	if ( source == nil || LoadInteger( GameHT, GetHandleId( source ), 'disp' ) > 0 ) { return; }
+
+	timer tmr = CreateTimer( );
+	int hid = GetHandleId( tmr );
+	float x = GetWar3ImageX( source );
+	float y = GetWar3ImageY( source );
+	int magnitudeMax = R2I( time / rate );
+	int magnitude = 0;
+	float step = dist / magnitudeMax;
+	float heightStep = 1.f / magnitudeMax;
+	float heightOrig = GetWar3ImageHeight( source );
+
+	SaveInteger( GameHT, GetHandleId( source ), 'disp', 1 );
+	SaveWar3ImageHandle( GameHT, hid, '+src', source );
+	SaveReal( GameHT, hid, 'horg', heightOrig );
+	SaveReal( GameHT, hid, 'angl', angle );
+	SaveReal( GameHT, hid, 'step', step );
+	SaveReal( GameHT, hid, 'hmax', heightMax );
+	SaveReal( GameHT, hid, 'hstp', heightStep );
+	SaveReal( GameHT, hid, 'srcX', x );
+	SaveReal( GameHT, hid, 'srcY', y );
+	SaveInteger( GameHT, hid, 'magc', magnitude );
+	SaveInteger( GameHT, hid, 'magm', magnitudeMax );
+	TimerStart( tmr, rate, true, @DisplaceWar3ImageAction );
+}
+
+void DisplaceWar3ImageLinearAction( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	float angle = LoadReal( GameHT, hid, 'angl' );
+	float step = LoadReal( GameHT, hid, 'step' );
+	war3image source = LoadWar3ImageHandle( GameHT, hid, '+src' );
+	float x = GetWar3ImageX( source );
+	float y = GetWar3ImageY( source );
+	float moveX = MathPointProjectionX( x, angle, step );
+	float moveY = MathPointProjectionY( y, angle, step );
+	bool isMove = LoadBoolean( GameHT, hid, 'PATH' ) ? !IsTerrainPathable( moveX, moveY, PATHING_TYPE_WALKABILITY ) : true;
+
+	if ( step <= 0 || !IsAxisReal( moveX, moveY ) || !isMove )
+	{
+		PauseTimer( tmr );
+		FlushChildHashtable( GameHT, hid );
+		DestroyTimer( tmr );
+		return;
+	}
+
+	string effMdl = LoadStr( GameHT, hid, 'emdl' );
+
+	if ( !effMdl.isEmpty( ) )
+	{
+		DestroyEffect( AddSpecialEffect( effMdl, x, y ) );
+	}
+
+	SetWar3ImagePosition( source, moveX, moveY );
+	SaveReal( GameHT, hid, 'step', step - LoadReal( GameHT, hid, 'rate' ) );
+}
+
+void DisplaceWar3ImageLinear( war3image source, float angle, float dist, float ticks, float rate, bool destDestr, bool ignorePathing, string effmdl = "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl" )
+{
+	if ( source == nil )
+	{
+		return;
+	}
+
+	timer tmr = CreateTimer( );
+	int hid = GetHandleId( tmr );
+	float step = 2.f * dist * rate / ticks;
+
+	SaveReal( GameHT, hid, 'angl', angle );
+	SaveReal( GameHT, hid, 'step', step );
+	SaveReal( GameHT, hid, 'rate', step * rate / ticks );
+	SaveWar3ImageHandle( GameHT, hid, '+src', source );
+	SaveBoolean( GameHT, hid, 'PATH', !ignorePathing );
+	SaveStr( GameHT, hid, 'emdl', effmdl );
+	SaveReal( GameHT, hid, 'time', ticks / rate );
+	TimerStart( tmr, rate, true, @DisplaceWar3ImageLinearAction );
+}
+
+void DamageVisualDrawNumber( string i, float x, float y, string suffix )
+{
+	DestroyEffect( AddSpecialEffect( "DamageSystemVisual\\Number_" + i + suffix + ".mdx", x, y ) );
+}
+
+float DamageVisualGetPosition( float startX, float x, int index, int length, float scale )
+{
+	return x - ( startX * scale * ( length / 2 ) ) + ( startX * scale * index );
+}
+
+void DamageVisualDrawNumberAction( unit u, unit target, float dmg )
+{
+	if ( dmg == .0f ) { return; }
+
+	float startX = 70.f;
+	float x = GetUnitX( target );
+	float y = GetUnitY( target ) + GetUnitFlyHeight( target ) + 150;
+	string numb = I2S( R2I( dmg ) );
+	int length = StringLength( numb );
+	float newX = 0;
+	string suffix = "";
+	float scale = 0;
+	int index = 0;
+
+	if ( dmg >= 5000 )
+	{
+		suffix = "_Large";
+		scale = 1.3f;
+	}
+	else if ( dmg >= 500 )
+	{
+		suffix = "";
+		scale = 1.0f;
+	}
+	else
+	{
+		suffix = "_Small";
+		scale = 0.7f;
+	}
+
+	index = - 1;
+	while ( true )
+	{
+		index++;
+		if ( index > length - 1 ) break;
+		newX = DamageVisualGetPosition( startX, x, index, length, scale );
+		if ( IsUnitInvisible( target, GetOwningPlayer( u ) ) == false )
+		{
+			DamageVisualDrawNumber( SubString( numb, index, index + 1 ), newX, y, suffix );
+		}
+	}
+}
+
+void AkamePoisonDamage( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+	unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+
+	if ( GetUnitAbilityLevel( target, 'B006' ) > 0 )
+	{
+		float dmg = 10 + GetHeroLevel( source ) + .1f * GetHeroInt( source, true );
+		ACF_DamageTarget( source, target, dmg );
+	}
+	else
+	{
+		FlushChildHashtable( GameHT, hid );
+		DestroyTimer( tmr );
+	}
+}
+
+void AkamePoisonCheck( unit source, unit targ )
+{
+	timer tmr = CreateTimer( );
+	int hid = GetHandleId( tmr );
+
+	SaveUnitHandle( GameHT, hid, 'usrc', source );
+	SaveUnitHandle( GameHT, hid, 'utrg', targ );
+	TimerStart( tmr, 1.f, true, @AkamePoisonDamage );
+}
+
+void OnPlayerUnitProjectileHit( )
+{
+	projectile proj = GetTriggerProjectile( );
+	int pr_hid = GetHandleId( proj );
+	unit source = GetTriggerProjectileSource( );
+	unit target = GetTriggerProjectileTargetUnit( );
+	int aid = LoadInteger( GameHT, pr_hid, 'atid' );
+
+	switch( aid )
+	{
+		case 'A04B': // Akainu E
+		{
+
+			break;
+		}
+	}
+
+	FlushChildHashtable( GameHT, pr_hid );
+}
+
+void OnPlayerUnitDamaged( )
+{
+	float dmg = GetEventDamage( );
+
+	trigger t = GetTriggeringTrigger( );
+	unit source = GetEventDamageSource( );
+	unit target = GetTriggerUnit( );
+	int tid = GetUnitTypeId( target );
+
+	float multiplier = 1.f;
+	float dmgMulti = 0;
+
+	DisableTrigger( t );
+
+	if ( GetEventIsAttack( ) )
+	{
+		if ( tid == 'n000' && ( GetUnitTypeId( source ) == 'base' || IsUnitType( source, UNIT_TYPE_HERO ) ) )
+		{
+			SetUnitXY( KawarimiTriggerUnitArray[GetPlayerId( GetOwningPlayer( target ) )], GetUnitX( source ), GetUnitY( source ) );
+			UnitApplyTimedLife( target, 'BOmi', .01f );
+		}
+
+		if ( GetUnitTypeId( source ) == 'H00G' )
+		{
+			int bid = 'B006';
+			buff buf = GetUnitBuff( target, bid );
+			float dur = GetBuffBaseRealFieldById( bid, IsUnitHero( target ) ? ABILITY_RLF_DURATION_HERO : ABILITY_RLF_DURATION_NORMAL );
+
+			if ( buf == nil )
+			{
+				UnitAddBuffById( target, bid );
+				buf = GetUnitBuff( target, bid );
+				AkamePoisonCheck( source, target );
+			}
+
+			SetBuffRemainingDuration( buf, dur );
+		}
+		else if ( GetUnitTypeId( source ) == 'H00K' )
+		{
+			SetUnitCurrentLife( source, dmg * .15f + GetUnitCurrentLife( source ) );
+		}
+
+		if ( GetUnitAbilityLevel( source, 'B002' ) > 0 || GetUnitAbilityLevel( source, 'B000' ) > 0 )
+		{
+			if ( GetUnitAbilityLevel( source, 'B002' ) > 0 )
+			{
+				dmgMulti = 10;
+			}
+			if ( GetUnitAbilityLevel( source, 'B000' ) > 0 )
+			{
+				dmgMulti = 20;
+			}
+
+			float reqHP = 5.f;
+
+			if ( ACF_HasPersonalItem( source ) )
+			{
+				dmgMulti = dmgMulti + dmgMulti / 2;
+				reqHP = 10.f;
+			}
+
+			dmg = GetHeroLevel( source ) * dmgMulti + GetHeroInt( source, true ) * dmgMulti / 100;
+			if ( ACF_GetUnitStatePercent( target, UNIT_STATE_LIFE, UNIT_STATE_MAX_LIFE ) <= reqHP && target != LoadUnitHandle( DataHT, 'BOSS', 'unit' ) )
+			{
+				int aid = 0;
+
+				if ( GetUnitAbilityLevel( source, 'B002' ) > 0 )
+				{
+					aid = 'A02X';
+					UnitRemoveAbility( source, 'B002' );
+				}
+
+				if ( GetUnitAbilityLevel( source, 'B000' ) > 0 )
+				{
+					aid = 'A035';
+					UnitRemoveAbility( source, 'B000' );
+				}
+
+				SetAbilityRemainingCooldown( GetUnitAbility( source, aid ), .01f );
+
+				dmg = 100000000.f;
+				float targX = GetUnitX( target );
+				float targY = GetUnitY( target );
+
+				SetEffectTimedLife( CreateEffectEx( "Characters\\NanayaShiki\\REffect2.mdl", targX, targY, 100.f, 270.f, 1.f, 4.f ), 4.f );
+				
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\26.mdx", targX, targY ) );
+			}
+
+			SetEventDamage( GetEventDamage( ) + dmg );
+		}
+
+		if ( GetUnitTypeId( source ) == 'H00J'  && GetRandomInt( 0, 100 ) <= 15 )
+		{
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+			float targX = GetUnitX( target );
+			float targY = GetUnitY( target );
+			float angle = MathAngleBetweenPoints( x, y, targX, targY );
+			effect ef;
+
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 50.f, angle, 1.5f, 3.f );
+			SetSpecialEffectPitch( ef, -90.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "GeneralEffects\\SlamEffect.mdl", x, y, 50.f, angle, 1.5f, 3.f );
+			SetSpecialEffectPitch( ef, -90.f );
+			SetEffectTimedLife( ef, 3.f );
+
+			dmg = GetHeroLevel( source ) * 50 + GetHeroInt( source, true );
+			DisplaceUnitWithArgs( target, angle, 200.f, .25f, .01f, 0 );
+			SetEventDamage( GetEventDamage( ) + dmg );
+		}
+
+		if ( GetUnitTypeId( source ) == 'H00H' )
+		{
+			if ( !IsUnitType( target, UNIT_TYPE_HERO ) )
+			{
+				dmgMulti = 2;
+			}
+			dmgMulti = .01f * multiplier;
+			dmg = .005f * multiplier * GetUnitMaxLife( target );
+
+			SetEventDamage( GetEventDamage( ) + dmg );
+			SetUnitCurrentLife( source, GetUnitMaxLife( source ) * dmgMulti + GetUnitCurrentLife( source ) );
+		}
+	}
+
+	if ( GetUnitTypeId( source ) == 'base' )
+	{
+		SetEventDamage( GetEventDamage( ) + GetUnitMaxLife( target ) * .02f );
+	}
+
+	dmg = GetEventDamage( );
+	if ( GetUnitTypeId( source ) != 'base' )
+	{
+		DamageVisualDrawNumberAction( source, target, dmg );
+	}
+
+	if ( tid == 'tstu'  )
+	{
+		SetEventDamage( .0f );
+	}
+
+	EnableTrigger( t );
+}
+
+void DecideWinnersAction( )
+{
+	for( int i = 0; i < PLAYER_NEUTRAL_AGGRESSIVE; i++ )
+	{
+		player p = Player( i ); if ( GetPlayerSlotState( p ) != PLAYER_SLOT_STATE_PLAYING ) { continue; }
+
+		RemovePlayer( p, GetPlayerTeam( p ) == I_WinningTeam ? PLAYER_GAME_RESULT_VICTORY : PLAYER_GAME_RESULT_DEFEAT );
+	}
+
+	EndGame( true );
+}
+
+void GameEndUnitPauseFunction( )
+{
+	for( int i = 0; i < PLAYER_NEUTRAL_AGGRESSIVE; i++ )
+	{
+		player p = Player( i ); if ( GetPlayerSlotState( p ) != PLAYER_SLOT_STATE_PLAYING ) { continue; }
+		unit u = MUnitArray[ i ];
+		ACF_PanCameraToTimed( p, GetUnitX( u ), GetUnitY( u ), .0f );
+		SetUnitXY( u, GetPlayerTeam( p ) == 0 ? -800.f : 800.f, 1536.f );
+		SetUnitFacing( u, 270.f );
+		SetUnitInvulnerable( u, true );
+		PauseUnit( u, true );
+	}
+}
+
+void PrepareFinishGameAction( int teamId )
+{
+	float x = teamId == 0 ? -800.f : 800.f;
+
+	I_WinningTeam = teamId;
+	TextTagCreate( "|c0000FF00Winners!|r", x, 1700.f, 0, 20, 255, 255, 255, 0 );
+	TextTagCreate( "|c00ff0000Losers!|r", -x, 1700.f, 0, 20, 255, 255, 255, 0 );
+	TimerStart( CreateTimer( ), 1.f, true, @GameEndUnitPauseFunction );
+	TimerStart( CreateTimer( ), 10.f, false, @DecideWinnersAction );
+}
+
+void OnAnyWidgetDeath( )
+{
+	widget w_d = GetTriggerWidget( );
+
+	switch( GetHandleBaseTypeId( w_d ) )
+	{
+		case '+w3w': // any widget, unused
+		{
+			return;
+		}
+		case 'item':
+		{
+			item itm = GetTriggerItem( );
+			OnProcessItemState( itm );
+
+			return;
+		}
+		case '+w3d':
+		{
+			destructable dest = GetTriggerDestructable( );
+
+			return;
+		}
+		case '+w3u':
+		{
+			unit killer = GetKillingUnit( );
+			player k_p = GetOwningPlayer( killer );
+			int k_pid = GetPlayerId( k_p );
+			int kp_hid = GetHandleId( k_p );
+			int k_team = GetPlayerTeam( k_p );
+			unit dying = GetDyingUnit( );
+			int d_hid = GetHandleId( dying );
+			int d_uid = GetUnitTypeId( dying );
+			player d_p = GetOwningPlayer( dying );
+			int d_pid = GetPlayerId( d_p );
+			int d_team = GetPlayerTeam( d_p );
+
+			if ( d_uid == 'n000' )
+			{
+				unit source = KawarimiTriggerUnitArray[ d_pid ];
+
+				SetUnitInvulnerable( source, false );
+				ShowUnit( source, true );
+				PauseUnit( source, false );
+
+				GroupEnumUnitsInRange( GroupEnum, GetUnitX( dying ), GetUnitY( dying ), 300.f, nil );
+
+				for( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+				{
+					if ( IsUnitDead( u ) || IsUnitAlly( u, d_p ) ) { continue; }
+					ACF_AddBuffTimed( u, 'BPSE', 2.f );
+				}
+
+				DestroyEffect( AddSpecialEffect( "Abilities\\Spells\\Human\\ThunderClap\\ThunderClapCaster.mdl", GetUnitX( dying ), GetUnitY( dying ) ) );
+				ACF_SelectUnit( source, d_p );
+
+				return;
+			}
+
+			if ( IsUnitType( dying, UNIT_TYPE_HERO ) )
+			{
+				int d_lvl = GetHeroLevel( dying );
+				unit mainBoss = LoadUnitHandle( DataHT, 'BOSS', 'unit' );
+
+				if ( killer == mainBoss )
+				{
+					SetHeroStr( killer, GetHeroStr( killer, false ) + d_lvl * 2, true );
+					SetHeroAgi( killer, GetHeroAgi( killer, false ) + d_lvl * 2, true );
+					SetHeroInt( killer, GetHeroInt( killer, false ) + d_lvl * 2, true );
+					SetUnitCurrentLife( killer, GetUnitCurrentLife( killer ) + GetUnitMaxLife( killer ) * d_lvl * .01f );
+					DestroyEffect( AddSpecialEffect( "Characters\\Arcueid\\ArcueidREffect1.mdl", GetUnitX( killer ), GetUnitY( killer ) ) );
+					DestroyEffect( AddSpecialEffect( "Characters\\Arcueid\\ArcueidREffect2.mdl", GetUnitX( killer ), GetUnitY( killer ) ) );
+				}
+
+				if ( dying == mainBoss )
+				{
+					DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 10.f, PlayerColoredNameArray[ k_pid ] + " |c008080c0Killed|r " + "|c0000FF00" + GetHeroProperName( dying ) );
+					PrepareFinishGameAction( k_team );
+					return;
+				}
+
+				if ( GetPlayerSlotState( d_p ) == PLAYER_SLOT_STATE_PLAYING )
+				{
+					timer tmr = CreateTimer( );
+					int hid = GetHandleId( tmr );
+					effect ef = AddSpecialEffect( "GeneralEffects\\UnitEffects\\DeathIndicator.mdl", GetUnitX( dying ), GetUnitY( dying ) );
+					SetSpecialEffectHeight( ef, 150.f );
+
+					SavePlayerHandle( GameHT, hid, '+ply', d_p );
+					SaveUnitHandle( GameHT, hid, 'usrc', dying );
+					SaveEffectHandle( GameHT, hid, 'efct', ef );
+					TimerStart( tmr, 4.f, false, 
+						function( )
+						{
+							timer tmr = GetExpiredTimer( );
+							int hid = GetHandleId( tmr );
+							player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+							unit u = LoadUnitHandle( GameHT, hid, 'usrc' );
+							float x = GetPlayerTeam( p ) == 0 ? -4288.f : 4288.f;
+
+							DestroyEffect( LoadEffectHandle( GameHT, hid, 'efct' ) );
+							ReviveHero( u, x, -576.f, true );
+							SetUnitFlyHeightEx( u, 0.f, 2000.f );
+							ACF_SelectUnit( u, p );
+							ACF_PanCameraToTimed( p, GetUnitX( u ), GetUnitY( u ), .2f );
+
+							if ( GetPlayerController( p ) == MAP_CONTROL_COMPUTER )
+							{
+								IssuePointOrder( u, "attack", GetRandomReal( -1900.f, 1900.f ), GetRandomReal( -1200.f, 200.f ) );
+							}
+
+							PauseTimer( tmr );
+							FlushChildHashtable( GameHT, hid );
+							DestroyTimer( tmr );
+						}
+					 );
+				}
+
+				int side = LoadInteger( DataHT, d_hid, 'side' );
+
+				if ( side == 'lbos' || side == 'rbos' )
+				{
+					BossesKilledIntegerArray[ k_pid ]++;
+					DisplayTextToPlayer( k_p, .0f, .0f, "|cFFFFCC00Bosses Killed:|r |c00ff8040" + I2S( BossesKilledIntegerArray[ k_pid ] ) + "|r" );
+					SetPlayerState( k_p, PLAYER_STATE_RESOURCE_LUMBER, GetPlayerState( k_p, PLAYER_STATE_RESOURCE_LUMBER ) + 1 );
+					if ( BossesKilledIntegerArray[ k_pid ] == 8 )
+					{
+						DisplayTextToPlayer( GetLocalPlayer( ), 0, 0, PlayerColoredNameArray[k_pid] + "|r has earnt enough kills for -T command" );
+						SaveBoolean( GameHT, kp_hid, 'ISTP', true );
+					}
+
+					FlushChildHashtable( DataHT, d_hid );
+					
+					int id = LoadInteger( DataHT, d_hid, 'indx' );
+
+					if ( id >= 0 && id <= 7 )
+					{
+						timer tmr = CreateTimer( );
+						int hid = GetHandleId( tmr );
+
+						SaveInteger( GameHT, hid, 'side', side );
+						SaveInteger( GameHT, hid, 'indx', id );
+						
+						TimerStart( tmr, 10.f, false,
+							function( )
+							{
+								timer tmr = GetExpiredTimer( );
+								int hid = GetHandleId( tmr );
+								int side = LoadInteger( GameHT, hid, 'side' );
+								int i = LoadInteger( GameHT, hid, 'indx' );
+								
+								BossSystem::CreateSide( i + 1, side );
+
+								FlushChildHashtable( GameHT, hid );
+								DestroyTimer( tmr );
+							}
+						 );
+					}
+
+					return;
+				}
+
+				if ( !IsPlayerAlly( k_p, d_p ) )
+				{
+					multiboarditem mbItem;
+					int mbIndex = 0;
+
+					if ( k_p != Player( PLAYER_NEUTRAL_AGGRESSIVE ) && GetUnitTypeId( killer ) != 'base' )
+					{
+						mbIndex = k_pid + ( d_team == 0 ? 2 : 1 );
+					
+						DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, PlayerColoredNameArray[ k_pid ] + " |c008080c0Killed|r " + PlayerColoredNameArray[ d_pid ] );
+						KillingUnitIntegerArray[mbIndex]++;
+						TeamKills[k_team]++;
+						
+						mbItem = MultiboardGetItem( MainMultiboard, mbIndex, 1 );
+						MultiboardSetItemValue( mbItem, PlayerColorStringArray[ k_pid ] + I2S( KillingUnitIntegerArray[mbIndex] ) );
+						MultiboardReleaseItem( mbItem );
+
+						mbItem = MultiboardGetItem( MainMultiboard, d_team == 0 ? 5 : 0, 1 );
+						MultiboardSetItemValue( mbItem, I2S( TeamKills[k_team] ) );
+						MultiboardReleaseItem( mbItem );
+					}
+
+					mbIndex = d_pid + ( d_team == 1 ? 2 : 1 );
+
+					DyingUnitIntegerArray[mbIndex]++;
+					TeamDeaths[d_team]++;
+
+					mbItem = MultiboardGetItem( MainMultiboard, mbIndex, 2 );
+					MultiboardSetItemValue( mbItem, PlayerColorStringArray[ d_pid ] + I2S( DyingUnitIntegerArray[mbIndex] ) );
+					MultiboardReleaseItem( mbItem );
+					
+					mbItem = MultiboardGetItem( MainMultiboard, d_team == 1 ? 5 : 0, 2 );
+					MultiboardSetItemValue( mbItem, I2S( TeamDeaths[d_team] ) );
+					MultiboardReleaseItem( mbItem );
+					MultiboardSetTitleText( MainMultiboard, "|Cff00ff00Scoreboard|r |c00ff0000" + I2S( TeamKills[0] ) + "|r/|c000000ff" + I2S( TeamKills[1] ) + "|r" );
+				}
+
+				if ( TeamKills[0] >= KillLimit || TeamKills[1] >= KillLimit )
+				{
+					if ( TeamKills[0] >= KillLimit )
+					{
+						PrepareFinishGameAction( 0 );
+					}
+					else if ( TeamKills[1] >= KillLimit )
+					{
+						PrepareFinishGameAction( 1 );
+					}
+				}
+			}
+
+
+			return;
+		}
+	}
+}
+
+void BossCheckInit( )
+{
+	TimerStart( CreateTimer( ), 1.f, true, 
+		function( )
+		{
+			unit u = LoadUnitHandle( DataHT, 'BOSS', 'unit' ); if ( IsUnitDead( u ) ) { DestroyTimer( GetExpiredTimer( ) ); return; }
+			float x = GetUnitX( u );
+			float y = GetUnitY( u );
+
+			if ( !( x >= -544.f && x <= 544.f && y >= -4100.f && y <= -2800.f ) )
+			{
+				DestroyEffect( AddSpecialEffect( "Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", x, y ) );
+				x = .0f;
+				y = -3850.f;
+				SetUnitXY( u, x, y );
+				DestroyEffect( AddSpecialEffect( "Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", x, y ) );
+			}
+		}
+	 );
+}
+
+void MultiBoardCreationFunction1( )
+{
+	DisplayTimedTextToPlayer( GetLocalPlayer( ), 0.f, 0.f, 5.f, "|c00ff0000Welcome to Anime Character Fight|r
+	|c00ff0000Wish you an amazing victory: |r|c0000ffffor a sweet defeat : )|r
+	|c00ff0000SO!: |r|c0000ffffFor spells sounds download patch from vk.com/acfwc3 or chaosrealm.info!|r" );
+	MainMultiboard = CreateMultiboard( );
+	MultiboardSetRowCount( MainMultiboard, 11 );
+	MultiboardSetColumnCount( MainMultiboard, 3 );
+	MultiboardSetTitleText( MainMultiboard, "|Cff00ff00Scoreboard|r |c00ff0000" + I2S( TeamKills[0] ) + "|r/|c000000ff" + I2S( TeamKills[1] ) + "|r" );
+	MultiboardDisplay( MainMultiboard, true );
+
+	multiboarditem mbItem = MultiboardGetItem( MainMultiboard, 10, 0 );
+	MultiboardSetItemWidth( mbItem, 12.f / 100.f );
+	MultiboardReleaseItem( mbItem );
+	mbItem = MultiboardGetItem( MainMultiboard, 10, 1 );
+	MultiboardSetItemWidth( mbItem, 12.f / 100.f );
+	MultiboardReleaseItem( mbItem );
+	int i = 0;
+	int j = 0;
+	while ( true )
+	{
+		if ( i > 9 ) break;
+		mbItem = MultiboardGetItem( MainMultiboard, i, 0 );
+		MultiboardSetItemWidth( mbItem, 12 / 100.0f );
+		MultiboardReleaseItem( mbItem );
+		mbItem = MultiboardGetItem( MainMultiboard, i, 1 );
+		MultiboardSetItemWidth( mbItem, 4 / 100.0f );
+		MultiboardReleaseItem( mbItem );
+		mbItem = MultiboardGetItem( MainMultiboard, i, 2 );
+		MultiboardSetItemWidth( mbItem, 4 / 100.0f );
+		MultiboardReleaseItem( mbItem );
+		if ( i == 0 || i == 5 )
+		{
+			mbItem = MultiboardGetItem( MainMultiboard, i, 1 );
+			MultiboardSetItemValue( mbItem, "0" );
+			MultiboardReleaseItem( mbItem );
+			mbItem = MultiboardGetItem( MainMultiboard, i, 2 );
+			MultiboardSetItemValue( mbItem, "0" );
+			MultiboardReleaseItem( mbItem );
+			mbItem = MultiboardGetItem( MainMultiboard, i, 1 );
+			MultiboardSetItemIcon( mbItem, "ReplaceableTextures\\CommandButtons\\BTNTransmute.blp" );
+			MultiboardReleaseItem( mbItem );
+			mbItem = MultiboardGetItem( MainMultiboard, i, 2 );
+			MultiboardSetItemIcon( mbItem, "ReplaceableTextures\\CommandButtons\\BTNDeathCoil.blp" );
+			MultiboardReleaseItem( mbItem );
+		}
+		if ( i != 0 && i != 5 )
+		{
+			mbItem = MultiboardGetItem( MainMultiboard, i, 0 );
+			if ( GetPlayerSlotState( Player( j ) ) == PLAYER_SLOT_STATE_PLAYING )
+			{
+				MultiboardSetItemValue( mbItem, PlayerColoredNameArray[j] + "|r" );
+			}
+			else
+			{
+				MultiboardSetItemValue( mbItem, PlayerColorStringArray[j] + "- Empty Slot -|r" );
+			}
+			MultiboardSetItemIcon( mbItem, "UI\\Widgets\\Console\\Human\\CommandButton\\human-button-lvls-overlay.blp" );
+			MultiboardReleaseItem( mbItem );
+			mbItem = MultiboardGetItem( MainMultiboard, i, 1 );
+			MultiboardSetItemIcon( mbItem, "ReplaceableTextures\\CommandButtons\\BTNArcaniteMelee.blp" );
+			MultiboardReleaseItem( mbItem );
+			mbItem = MultiboardGetItem( MainMultiboard, i, 2 );
+			MultiboardSetItemIcon( mbItem, "ReplaceableTextures\\CommandButtons\\BTNFrostArmor.blp" );
+			MultiboardReleaseItem( mbItem );
+			mbItem = MultiboardGetItem( MainMultiboard, i, 1 );
+			MultiboardSetItemValue( mbItem, PlayerColorStringArray[j] + "0" + "|r" );
+			MultiboardReleaseItem( mbItem );
+			mbItem = MultiboardGetItem( MainMultiboard, i, 2 );
+			MultiboardSetItemValue( mbItem, PlayerColorStringArray[j] + "0" + "|r" );
+			MultiboardReleaseItem( mbItem );
+			j++;
+		}
+		i++;
+	}
+	mbItem = MultiboardGetItem( MainMultiboard, 0, 0 );
+	MultiboardSetItemValue( mbItem, "|c00ff0000RED|r TEAM" );
+	MultiboardReleaseItem( mbItem );
+	mbItem = MultiboardGetItem( MainMultiboard, 5, 0 );
+	MultiboardSetItemValue( mbItem, "|c000000ffBLUE|r TEAM" );
+	MultiboardReleaseItem( mbItem );
+	mbItem = MultiboardGetItem( MainMultiboard, 10, 0 );
+	MultiboardSetItemValue( mbItem, "Kills: Undecided" );
+	MultiboardReleaseItem( mbItem );
+	mbItem = MultiboardGetItem( MainMultiboard, 10, 1 );
+	MultiboardSetItemValue( mbItem, "0:0:0" );
+	MultiboardReleaseItem( mbItem );
+	mbItem = MultiboardGetItem( MainMultiboard, 0, 0 );
+	MultiboardSetItemIcon( mbItem, "ReplaceableTextures\\CommandButtons\\BTNOrbofSlowness.blp" );
+	MultiboardReleaseItem( mbItem );
+	mbItem = MultiboardGetItem( MainMultiboard, 5, 0 );
+	MultiboardSetItemIcon( mbItem, "ReplaceableTextures\\CommandButtons\\BTNMoonStone.blp" );
+	MultiboardReleaseItem( mbItem );
+	mbItem = MultiboardGetItem( MainMultiboard, 10, 0 );
+	MultiboardSetItemIcon( mbItem, "ReplaceableTextures\\CommandButtons\\BTNLament.blp" );
+	MultiboardReleaseItem( mbItem );
+	mbItem = MultiboardGetItem( MainMultiboard, 10, 1 );
+	MultiboardSetItemIcon( mbItem, "ReplaceableTextures\\WorldeditUI\\Events-time.blp" );
+	MultiboardReleaseItem( mbItem );
+	MultiboardDisplay( MainMultiboard, true );
+}
+
+void InGameTimerAction( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int secs = LoadInteger( GameHT, hid, 'secs' );
+	int mins = LoadInteger( GameHT, hid, 'mins' );
+	int hours = LoadInteger( GameHT, hid, 'hors' );
+
+	if ( secs == 59 )
+	{
+		SaveInteger( GameHT, hid, 'secs', 0 );
+		SaveInteger( GameHT, hid, 'mins', mins + 1 );
+	}
+	else
+	{
+		SaveInteger( GameHT, hid, 'secs', secs + 1 );
+	}
+
+	if ( mins == 59 )
+	{
+		SaveInteger( GameHT, hid, 'mins', 0 );
+		SaveInteger( GameHT, hid, 'hors', hours + 1 );
+	}
+
+	multiboarditem mbitem = MultiboardGetItem( MainMultiboard, 10, 1 );
+	MultiboardSetItemValue( mbitem, I2S( hours ) + ":" + I2S( mins ) + ":" + I2S( secs ) );
+	MultiboardReleaseItem( mbitem );
+}
+
+void KillSelectionDialogAction( )
+{
+	int i = 0;
+	while ( true )
+	{
+		if ( i > 8 ) break;
+		if ( GetClickedButton( ) == SameHeroModeButtonArray[i] )
+		{
+			MBArr1[i] = MBArr1[i] + 1;
+		}
+		i++;
+	}
+}
+
+void KillSelectionTimerExpireAction( )
+{
+	int voteMax = 0;
+	int votes = 0;
+	int voteId = 0;
+	int index = 0;
+	bool isTied = false;
+
+	DialogShow( KillSelectionDialog, false );
+	DialogClear( KillSelectionDialog );
+	DialogDestroy( KillSelectionDialog );
+	TimerDialogDisplay( ModeSelectionTD, false );
+	DestroyTimerDialog( ModeSelectionTD );
+	MultiboardDisplay( MainMultiboard, true );
+
+	while ( true )
+	{
+		if ( index > 8 ) break;
+		if ( MBArr1[index] > 0 )
+		{
+			votes = votes + 1;
+		}
+		if ( MBArr1[index] == voteMax )
+		{
+			isTied = true;
+		}
+		if ( MBArr1[index] > voteMax )
+		{
+			voteMax = MBArr1[index];
+			voteId = index;
+			isTied = false;
+		}
+		index++;
+	}
+
+	if ( voteId == 0 )
+	{
+		KillLimit = 20 * GetRandomInt( 1, 7 );
+	}
+	else if ( voteId == 8 )
+	{
+		KillLimit = 999999999;
+	}
+	else if ( voteId != 0 && voteId != 8 )
+	{
+		KillLimit = 20 * voteId;
+	}
+
+	if ( isTied || votes <= 0 )
+	{
+		if ( TotalPlayers <= 1 )
+		{
+			KillLimit = 999999999;
+		}
+		else
+		{
+			KillLimit = TotalPlayers * 20 - 20;
+		}
+	}
+
+	if ( votes > 0 )
+	{
+		DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, "
+		|cFFFFCC00Votes for |c0000ffff[Random]|r|cFFFFCC00:|r |c0000ffff" + I2S( MBArr1[0] ) + "|r
+		|cFFFFCC00Votes for |c0000ffff[20 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S( MBArr1[1] ) + "|r
+		|cFFFFCC00Votes for |c0000ffff[40 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S( MBArr1[2] ) + "|r
+		|cFFFFCC00Votes for |c0000ffff[60 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S( MBArr1[3] ) + "|r
+		|cFFFFCC00Votes for |c0000ffff[80 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S( MBArr1[4] ) + "|r
+		|cFFFFCC00Votes for |c0000ffff[100 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S( MBArr1[5] ) + "|r
+		|cFFFFCC00Votes for |c0000ffff[120 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S( MBArr1[6] ) + "|r
+		|cFFFFCC00Votes for |c0000ffff[140 Kills]|r|cFFFFCC00:|r |c0000ffff" + I2S( MBArr1[7] ) + "|r
+		|cFFFFCC00Votes for |c0000ffff[Unlimited Kills]|cFFFFCC00:|r |c0000ffff" + I2S( MBArr1[8] ) + "|r" );
+	}
+
+	multiboarditem mbItem = MultiboardGetItem( MainMultiboard, 10, 0 );
+
+	if ( KillLimit != 999999999 )
+	{
+		DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, "|cFFFFCC00Kill Limit is:|r |c0000ffff[" + I2S( KillLimit ) + "]|r |cFFFFCC00Kills|r" );
+		MultiboardSetItemValue( mbItem, "Kills: " + I2S( KillLimit ) );
+	}
+	else
+	{
+		DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, "|cFFFFCC00Kill Limit is:|r |c0000ffff[Unlimited]|r |cFFFFCC00Kills.|r" );
+		MultiboardSetItemValue( mbItem, "Kills: Unlimited" );
+	}
+
+	MultiboardReleaseItem( mbItem );
+	EnableTrigger( TR_HeroSelection );
+	DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, "|c0000ffffHero Selection has been activated!|r" );
+	MultiboardDisplay( MainMultiboard, false );
+	MultiboardDisplay( MainMultiboard, true );
+	TimerStart( CreateTimer( ), 1, true, @InGameTimerAction );
+}
+
+void KillSelectionAction( )
+{
+	DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, "|c0000ffffAttention to All Players!
+
+	You have 5 seconds to choose desirable Kill Limit" );
+	ModeSelectionTD = CreateTimerDialog( KillSelectionTimer );
+	TimerDialogSetTitle( ModeSelectionTD, "|c00ffff00Kill Limit Selection" );
+	TimerDialogDisplay( ModeSelectionTD, true );
+	TimerStart( KillSelectionTimer, 5, false, @KillSelectionTimerExpireAction );
+	DialogSetMessage( KillSelectionDialog, "Select Kill Limit" );
+	SameHeroModeButtonArray[0] = DialogAddButton( KillSelectionDialog, "Random", 0 );
+	SameHeroModeButtonArray[1] = DialogAddButton( KillSelectionDialog, "20 Kills [1 vs 1]", 0 );
+	SameHeroModeButtonArray[2] = DialogAddButton( KillSelectionDialog, "40 Kills", 0 );
+	SameHeroModeButtonArray[3] = DialogAddButton( KillSelectionDialog, "60 Kills [2 vs 2]", 0 );
+	SameHeroModeButtonArray[4] = DialogAddButton( KillSelectionDialog, "80 Kills", 0 );
+	SameHeroModeButtonArray[5] = DialogAddButton( KillSelectionDialog, "100 Kills [3 vs 3]", 0 );
+	SameHeroModeButtonArray[6] = DialogAddButton( KillSelectionDialog, "120 Kills", 0 );
+	SameHeroModeButtonArray[7] = DialogAddButton( KillSelectionDialog, "140 Kills [4 vs 4]", 0 );
+	SameHeroModeButtonArray[8] = DialogAddButton( KillSelectionDialog, "Unlimited Kills", 0 );
+	DialogShow( KillSelectionDialog, true );
+}
+
+void ModeSelectionFunction2( )
+{
+	button but = GetClickedButton( );
+
+	if ( but == SameHeroModeButtonArray[10] )
+	{
+		MBArr1[10]++;
+	}
+	else if ( but == SameHeroModeButtonArray[11] )
+	{
+		MBArr1[11]++;
+	}
+}
+
+void ModeSelectionFunction3( )
+{
+	DialogShow( ModeSelectionDialog, false );
+	DialogClear( ModeSelectionDialog );
+	DialogDestroy( ModeSelectionDialog );
+	TimerDialogDisplay( ModeSelectionTD, false );
+	MultiboardDisplay( MainMultiboard, true );
+	DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, "|cFFFFCC00Same u Mode Results:
+	For:|r |c0000ffff" + I2S( MBArr1[10] ) + "|r |cFFFFCC00Against:|r |c0000ffff" + I2S( MBArr1[11] ) + "|r" );
+
+	if ( MBArr1[10] > MBArr1[11] )
+	{
+		SameHeroBoolean = true;
+		DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, "|c0000FF00Same u Mode Enabled!" );
+	}
+	else
+	{
+		DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, "|c00ff0000Same u Mode Disabled!" );
+	}
+
+	TimerStart( KillSelectionTimer, 1.f, false, @KillSelectionAction );
+}
+
+void ModeSelectionFunction1( )
+{
+	timer tmr = CreateTimer( );
+	DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, "|c00FFFF00Hero Selection is disabled
 	To enable it:
-	Choose desirable kills and mode|r");
-    ModeSelectionTD = CreateTimerDialog( tmr );
-    TimerDialogSetTitle(ModeSelectionTD, "|c00ffff00Mode Selection");
-    TimerDialogDisplay(ModeSelectionTD, true);
-    DialogSetMessage(ModeSelectionDialog, "Same Hero Mode");
-    SameHeroModeButtonArray[10] = DialogAddButton(ModeSelectionDialog, "|c0000FF00Enable|r", 0);
-    SameHeroModeButtonArray[11] = DialogAddButton(ModeSelectionDialog, "|c00ff0000Disable|r", 0);
-    DialogShow(ModeSelectionDialog, true);
-    TimerStart( tmr, 5, false, @ModeSelectionFunction3);
-}
-void DecideWinnersAction()
-{
-    int index = 0;
-    while (true)
-    {
-        if (index > 7) break;
-        if (GetPlayerSlotState(Player(index)) == PLAYER_SLOT_STATE_PLAYING)
-        {
-            if (GetPlayerTeam(Player(index)) == I_WinningTeam )
-            {
-                RemovePlayer(Player(index), PLAYER_GAME_RESULT_VICTORY);
-            }
-            else
-            {
-                RemovePlayer(Player(index), PLAYER_GAME_RESULT_DEFEAT);
-            }
-        }
-        index = index + 1;
-    }
-    EndGame(true);
-}
-void GameEndUnitPauseFunction()
-{
-    bool RevInt = false;
-    int index = 0;
-    while (true)
-    {
-        if (index > 7) break;
-        if (GetLocalPlayer() == GetOwningPlayer(MUnitArray[index]))
-        {
-            PanCameraToTimed(GetUnitX(MUnitArray[index]), GetUnitY(MUnitArray[index]), 0);
-        }
-        if (GetPlayerTeam(Player(index)) == 1)
-        {
-            RevInt = true;
-        }
-        SetUnitPosition(MUnitArray[index], SwapAmount( - 800, RevInt), 1536.f);
-        SetUnitFacing(MUnitArray[index], 270.f);
-        SetUnitInvulnerable(MUnitArray[index], true);
-        PauseUnit(MUnitArray[index], true);
-        index = index + 1;
-    }
-}
-void PrepareFinishGameAction(int LocTeam)
-{
-    bool RevInt = true;
-    I_WinningTeam = LocTeam;
-    if (LocTeam == 0)
-    {
-        RevInt = false;
-    }
-    TextTagCreate("|c0000FF00Winners!|r", SwapAmount( - 800, RevInt), 1700.f, 0, 20, 255, 255, 255, 0);
-    TextTagCreate("|c00ff0000Losers!|r", SwapAmount(800, RevInt), 1700.f, 0, 20, 255, 255, 255, 0);
-    TimerStart(CreateTimer(), 1, true, @GameEndUnitPauseFunction);
-    TimerStart(CreateTimer(), 10, false, @DecideWinnersAction);
-}
-bool WinGameEndCondition1()
-{
-    return TeamKills[0] >= KillLimitInteger1 || TeamKills[1] >= KillLimitInteger1;
-}
-void WinGameEndFunction1()
-{
-    if (TeamKills[0] >= KillLimitInteger1)
-    {
-        PrepareFinishGameAction(0);
-    }
-    if (TeamKills[1] >= KillLimitInteger1)
-    {
-        PrepareFinishGameAction(1);
-    }
-}
-void BossKillFunction1()
-{
-    DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 10, PlayerColoredNameArray[GetPlayerId(GetOwningPlayer(GetKillingUnit()))] + " |c008080c0Killed|r " + "|c0000FF00" + GetHeroProperName(GetDyingUnit()));
-    PrepareFinishGameAction(GetPlayerTeam(GetOwningPlayer(GetKillingUnit())));
-}
-void RegisterPlayerLeaveAction()
-{
-    int PlayerID = GetPlayerId(GetTriggerPlayer());
-    int ID = PlayerID + 1;
-    int TeamID = GetPlayerTeam(GetTriggerPlayer());
-    int LocRecievedGold = GetPlayerState(GetTriggerPlayer(), PLAYER_STATE_RESOURCE_GOLD) / (TeamPlayers[TeamID] - 1);
-    if (TeamID == 1)
-    {
-        ID = ID + 1;
-    }
-    MBItem = MultiboardGetItem(MainMultiboard, ID, 0);
-    MultiboardSetItemValue(MBItem, PlayerColorStringArray[PlayerID] + "- Left -|r");
-    MultiboardReleaseItem(MBItem);
-    ID = 0;
-    TotalPlayers = TotalPlayers - 1;
-    TeamPlayers[TeamID] = TeamPlayers[TeamID] - 1;
-    DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 5, PlayerColoredNameArray[PlayerID] + "|r Has left the game!");
-    RemoveUnit(MUnitArray[PlayerID]);
-    RemovePlayer(GetTriggerPlayer(), PLAYER_GAME_RESULT_DEFEAT);
-    while (true)
-    {
-        if (ID > 7) break;
-        if (GetPlayerSlotState(Player(ID)) == PLAYER_SLOT_STATE_PLAYING && IsPlayerAlly(GetTriggerPlayer(), Player(ID)))
-        {
-            SetPlayerState(Player(ID), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(Player(ID), PLAYER_STATE_RESOURCE_GOLD) + LocRecievedGold);
-        }
-        ID = ID + 1;
-    }
-    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Each player in Team " + I2S(TeamID + 1) + " has received |cFFFFCC00" + I2S(LocRecievedGold) + "|r gold from a leaver.");
-    if (TeamPlayers[TeamID] == 0)
-    {
-        if (TeamID == 0)
-        {
-            ID = 1;
-        }
-        else
-        {
-            ID = 0;
-        }
-        PrepareFinishGameAction(ID);
-    }
-}
-void CreepAndIllusionRemoverAction()
-{
-    if (IsUnitType(GetEnteringUnit(), UNIT_TYPE_HERO) == false && IsUnitIllusion(GetEnteringUnit()) == false && IsUnitEnemy(GetEnteringUnit(), GetOwningPlayer(GetFilterUnit())) && GetOwningPlayer(GetEnteringUnit()) == Player(PLAYER_NEUTRAL_AGGRESSIVE))
-    {
-        KillUnit(GetEnteringUnit());
-    }
-}
-void DisableSharedUnitsAct()
-{
-    int IndexA = 0;
-    int IndexB = 0;
-    while (true)
-    {
-        if (IndexA > 11) break;
-        if (Player(IndexA) != Player(IndexB))
-        {
-            SetPlayerAlliance(Player(IndexA), Player(IndexB), ALLIANCE_SHARED_CONTROL, false);
-        }
-        IndexB = IndexB + 1;
-        if (IndexB > 11)
-        {
-            IndexB = 0;
-            IndexA = IndexA + 1;
-        }
-    }
-}
-void MainBossStatBoostAction()
-{
-    if (IsUnitOwnedByPlayer(MainBossUnit1, Player(PLAYER_NEUTRAL_AGGRESSIVE)) && IsUnitType(GetDyingUnit(), UNIT_TYPE_HERO) && IsUnitEnemy(GetDyingUnit(), Player(PLAYER_NEUTRAL_AGGRESSIVE)))
-    {
-        SetHeroStr(MainBossUnit1, GetHeroStr(MainBossUnit1, false) + GetHeroLevel(GetDyingUnit()) * 2, true);
-        SetHeroAgi(MainBossUnit1, GetHeroAgi(MainBossUnit1, false) + GetHeroLevel(GetDyingUnit()) * 2, true);
-        SetHeroInt(MainBossUnit1, GetHeroInt(MainBossUnit1, false) + GetHeroLevel(GetDyingUnit()) * 2, true);
-        SetUnitCurrentLife(MainBossUnit1, GetUnitMaxLife(MainBossUnit1) * GetHeroLevel(GetDyingUnit()) * 0.01f + GetWidgetLife(MainBossUnit1));
-        DestroyEffect(AddSpecialEffect("Characters\\Arcueid\\ArcueidREffect1.mdl", GetUnitX(MainBossUnit1), GetUnitY(MainBossUnit1)));
-        DestroyEffect(AddSpecialEffect("Characters\\Arcueid\\ArcueidREffect2.mdl", GetUnitX(MainBossUnit1), GetUnitY(MainBossUnit1)));
-    }
-}
-bool ShadowScrollItemUsageCondition()
-{
-    return GetItemTypeId(GetManipulatedItem()) == 'I01T' ;
-}
-void ShadowScrollItemUsageAction1()
-{
-    SysItem = CreateItem('I01U' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()));
-    SysUnit = CreateUnit(GetOwningPlayer(GetTriggerUnit()), 'u000' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 270);
-    UnitAddItem(SysUnit, SysItem);
-    UnitUseItemTarget(SysUnit, SysItem, GetTriggerUnit());
-}
-bool RedTabletUsageCondition()
-{
-    return GetItemTypeId(GetManipulatedItem()) == 'I01S' ;
-}
-void RedTabletUsageAction()
-{
-    SysItem = CreateItem('I00M' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()));
-    SysUnit = CreateUnit(GetOwningPlayer(GetTriggerUnit()), 'u000' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 270);
-    UnitAddItem(SysUnit, SysItem);
-    UnitUseItemTarget(SysUnit, SysItem, GetTriggerUnit());
-}
-bool KunaiOfBouldersCondition()
-{
-    return GetSpellAbilityId() == 'A00V' ;
-}
-void KunaiOfBouldersAction()
-{
-    int i = 0;
-    while (true)
-    {
-        if (i > 9) break;
-        GlobalUnit = CreateUnit(GetOwningPlayer(GetTriggerUnit()), 'n002' , GetSpellTargetX() + GetRandomReal( - 125, 125), GetSpellTargetY() + GetRandomReal( - 125, 125), GetRandomReal(0, 360));
-        UnitRemoveAbility(GlobalUnit, 'Aatk' );
-        UnitRemoveAbility(GlobalUnit, 'Amov' );
-        i = i + 1;
-    }
-}
-void TopLeftSpawnNewBossAction()
-{
-    GroupAddUnit( GR_LeftSide, CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), BossIDArray[LeftBosses], - 2200.f, 2800.f, 270));
-    DestroyTimer(GetExpiredTimer());
-}
-void TopRightSpawnNewBossAction()
-{
-    GroupAddUnit( GR_RightSide, CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), BossIDArray[RightBosses], 2200.f, 2800.f, 270));
-    DestroyTimer(GetExpiredTimer());
-}
-bool KilledBossesCountCondition()
-{
-    return IsUnitInGroup(GetDyingUnit(), GR_LeftSide ) || IsUnitInGroup(GetDyingUnit(), GR_RightSide);
-}
-void KilledBossesCountAction()
-{
-    player WhichPlayer = GetOwningPlayer(GetKillingUnit());
-    int ID = GetPlayerId(WhichPlayer);
-    int UnitID = GetUnitTypeId(GetDyingUnit());
-    BossesKilledIntegerArray[ID] = BossesKilledIntegerArray[ID] + 1;
-    DisplayTextToPlayer(WhichPlayer, 0, 0, "|cFFFFCC00Bosses Killed:|r |c00ff8040" + I2S(BossesKilledIntegerArray[ID]) + "|r");
-    SetPlayerState(WhichPlayer, PLAYER_STATE_RESOURCE_LUMBER, GetPlayerState(WhichPlayer, PLAYER_STATE_RESOURCE_LUMBER) + 1);
-    if (BossesKilledIntegerArray[ID] == 8)
-    {
-        DisplayTextToPlayer(GetLocalPlayer(), 0, 0, PlayerColoredNameArray[ID] + "|r has earnt enough kills for -T command");
-        GlobalPlayerArray1[ID] = WhichPlayer;
-    }
-    if (IsUnitInGroup(GetDyingUnit(), GR_LeftSide ))
-    {
-        LeftBosses = LeftBosses + 1;
-        TimerStart(CreateTimer(), 10.f, false, @TopLeftSpawnNewBossAction);
-    }
-    if (IsUnitInGroup(GetDyingUnit(), GR_RightSide))
-    {
-        RightBosses = RightBosses + 1;
-        TimerStart(CreateTimer(), 10.f, false, @TopRightSpawnNewBossAction);
-    }
-}
-void CreepSpawn3Action()
-{
-    player p = Player(PLAYER_NEUTRAL_AGGRESSIVE);
-    int i = 0;
-    if ( B_IsCreepSpawn )
-    {
-        while (true)
-        {
-            if (i == 4) break;
-            if (i < 2)
-            {
-                CreateUnit(p, 'h003' , - 1888.f, - 160.f, 270);
-                CreateUnit(p, 'h004' , - 1888.f, - 864.f, 270);
-                CreateUnit(p, 'h007' , - 1184.f, - 864.f, 270);
-                CreateUnit(p, 'h015' , 384.f, - 896.f, 270);
-                CreateUnit(p, 'h003' , 1888.f, - 160.f, 270);
-                CreateUnit(p, 'h007' , 1184.f, - 864.f, 270);
-                CreateUnit(p, 'h004' , 1888.f, - 896.f, 270);
-            }
-            if (i < 3)
-            {
-                CreateUnit(p, 'h009' , - 1888.f, - 160.f, 270);
-                CreateUnit(p, 'h016' , - 1888.f, - 896.f, 270);
-                CreateUnit(p, 'h001' , - 1184.f, - 896.f, 270);
-                CreateUnit(p, 'h016' , - 384.f, - 160.f, 270);
-                CreateUnit(p, 'h001' , 384.f, - 160.f, 270);
-                CreateUnit(p, 'h009' , - 384.f, - 896.f, 270);
-                CreateUnit(p, 'h009' , 1888.f, - 160.f, 270);
-                CreateUnit(p, 'h001' , 1184.f, - 896.f, 270);
-                CreateUnit(p, 'h016' , 1888.f, - 896.f, 270);
-            }
-            CreateUnit(p, 'h015' , - 1184.f, - 160.f, 270);
-            CreateUnit(p, 'h015' , 1184.f, - 160.f, 270);
-            i = i + 1;
-        }
-    }
-}
-void CreepUpgrade2Action()
-{
-    PauseTimer(CreepSpawnerTimer1);
-    TimerStart(CreepSpawnerTimer1, 90.f, true, @CreepSpawn3Action);
-}
-void CreepSpawn2Action()
-{
-    player p = Player(PLAYER_NEUTRAL_AGGRESSIVE);
-    int i = 0;
-    if ( B_IsCreepSpawn )
-    {
-        CreateUnit(p, 'h009' , - 1888.f, - 160.f, 270);
-        CreateUnit(p, 'h016' , - 1888.f, - 896.f, 270);
-        CreateUnit(p, 'h001' , - 1184.f, - 896.f, 270);
-        CreateUnit(p, 'h009' , 1888.f, - 160.f, 270);
-        CreateUnit(p, 'h001' , 1184.f, - 896.f, 270);
-        CreateUnit(p, 'h016' , 1888.f, - 896.f, 270);
-        while (true)
-        {
-            if (i == 6) break;
-            if (i < 5)
-            {
-                CreateUnit(p, 'h008' , - 1888.f, - 160.f, 270);
-                CreateUnit(p, 'h002' , - 1888.f, - 896.f, 270);
-                CreateUnit(p, 'h000' , - 1184.f, - 896.f, 270);
-                CreateUnit(p, 'h002' , - 384.f, - 160.f, 270);
-                CreateUnit(p, 'h000' , 384.f, - 160.f, 270);
-                CreateUnit(p, 'h014' , 384.f, - 896.f, 270);
-                CreateUnit(p, 'h008' , - 384.f, - 896.f, 270);
-                CreateUnit(p, 'h008' , 1888.f, - 160.f, 270);
-                CreateUnit(p, 'h000' , 1184.f, - 896.f, 270);
-                CreateUnit(p, 'h002' , 1888.f, - 896.f, 270);
-            }
-            CreateUnit(p, 'h014' , - 1184.f, - 160.f, 270);
-            CreateUnit(p, 'h014' , 1184.f, - 160.f, 270);
-            i = i + 1;
-        }
-    }
-}
-void CreepUpgrade1Action()
-{
-    PauseTimer(CreepSpawnerTimer1);
-    TimerStart(CreepUpgradeTimer1, 600.f, false, @CreepUpgrade2Action);
-    TimerStart(CreepSpawnerTimer1, 60.f, true, @CreepSpawn2Action);
-}
-void CreepSpawn1Action()
-{
-    player p = Player(PLAYER_NEUTRAL_AGGRESSIVE);
-    int i = 0;
-    if ( B_IsCreepSpawn )
-    {
-        while (true)
-        {
-            if (i == 4) break;
-            if (i < 2)
-            {
-                CreateUnit(p, 'h011' , - 1888.f, - 896.f, 270);
-                CreateUnit(p, 'h011' , - 384.f, - 896.f, 270);
-                CreateUnit(p, 'h011' , 1888.f, - 896.f, 270);
-            }
-            CreateUnit(p, 'h010' , 384.f, - 896.f, 270);
-            CreateUnit(p, 'h010' , 1184.f, - 896.f, 270);
-            CreateUnit(p, 'h010' , - 1184.f, - 896.f, 270);
-            CreateUnit(p, 'h012' , - 1184.f, - 160.f, 270);
-            CreateUnit(p, 'h012' , 1888.f, - 160.f, 270);
-            CreateUnit(p, 'h012' , 384.f, - 160.f, 270);
-            CreateUnit(p, 'h013' , - 1888.f, - 160.f, 270);
-            CreateUnit(p, 'h013' , - 384.f, - 160.f, 270);
-            CreateUnit(p, 'h013' , 1184.f, - 160.f, 270);
-            i = i + 1;
-        }
-    }
-}
-void UnitCreationAction()
-{
-    TimerStart(CreepUpgradeTimer1, 300.f, false, @CreepUpgrade1Action);
-    TimerStart(CreepSpawnerTimer1, 30.f, true, @CreepSpawn1Action);
-}
-bool UnitCreationWithCircleCond()
-{
-    return IsUnitType(GetEnteringUnit(), UNIT_TYPE_HERO);
-}
-void UnitCreationOnTopLeftAction()
-{
-    int i = 0;
-    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h022' ) <= 160)
-    {
-        DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00CBFF75NPC Spawned");
-        while (true)
-        {
-            if (i > 9) break;
-            CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h022' , GetRandomReal( - 5632.f, - 3136.f), GetRandomReal(1088.f, 3136.f), GetRandomReal(0, 360));
-            i = i + 1;
-        }
-    }
-    else
-    {
-        DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00ff0000Maximum amount of units was reached!");
-    }
-}
-void UnitCreationOnBottomRightAction()
-{
-    int i = 0;
-    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h020' ) <= 30 || CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h023' ) <= 30)
-    {
-        DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00CBFF75NPC Spawned");
-        while (true)
-        {
-            if (i > 1) break;
-            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h020' ) <= 30)
-            {
-                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h020' , GetRandomReal(3200.f, 5664.f), GetRandomReal(1120.f, 3168.f), GetRandomReal(0, 360));
-            }
-            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h023' ) <= 30)
-            {
-                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h023' , GetRandomReal(3200.f, 5664.f), GetRandomReal(1120.f, 3168.f), GetRandomReal(0, 360));
-            }
-            i = i + 1;
-        }
-    }
-    else
-    {
-        DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00ff0000Maximum amount of units was reached!");
-    }
-}
-void UnitCreationOnTopRightAction()
-{
-    int i = 0;
-    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h017' ) <= 160)
-    {
-        DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00CBFF75NPC Spawned");
-        while (true)
-        {
-            if (i > 9) break;
-            CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h017' , GetRandomReal(3072.f, 5632.f), GetRandomReal( - 4160.f, - 2208.f), GetRandomReal(0, 360));
-            i = i + 1;
-        }
-    }
-    else
-    {
-        DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00ff0000Maximum amount of units was reached!");
-    }
-}
-void UnitCreationOnBottomLeftAction()
-{
-    int i = 0;
-    if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h018' ) <= 30 || CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h021' ) <= 30)
-    {
-        DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00CBFF75NPC Spawned");
-        while (true)
-        {
-            if (i > 1) break;
-            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h018' ) <= 30)
-            {
-                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h018' , GetRandomReal( - 5632.f, - 3008.f), GetRandomReal( - 4160.f, - 2176.f), GetRandomReal(0, 360));
-            }
-            if (CountUnitInGroupOfPlayer(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h021' ) <= 30)
-            {
-                CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'h021' , GetRandomReal( - 5632.f, - 3008.f), GetRandomReal( - 4160.f, - 2176.f), GetRandomReal(0, 360));
-            }
-            i = i + 1;
-        }
-    }
-    else
-    {
-        DisplayTextToPlayer(GetOwningPlayer(GetEnteringUnit()), 0, 0, "|c00ff0000Maximum amount of units was reached!");
-    }
-}
-void HeroLevelUpCheck()
-{
-    int index = 1;
-    int LocalStat = 0;
-    unit LocUnit = GetLevelingUnit();
-    int LocalLevel = GetHeroLevel(LocUnit);
-    player LocPlayer = GetOwningPlayer(LocUnit);
-    DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\LevelUp.mdl", LocUnit, "origin"));
-    if (GetPlayerController(LocPlayer) == MAP_CONTROL_COMPUTER)
-    {
-        if (GetAIDifficulty(LocPlayer) == AI_DIFFICULTY_NEWBIE)
-        {
-            LocalStat = 2;
-        }
-        else if (GetAIDifficulty(LocPlayer) == AI_DIFFICULTY_NORMAL)
-        {
-            LocalStat = 3;
-        }
-        else if (GetAIDifficulty(LocPlayer) == AI_DIFFICULTY_INSANE)
-        {
-            LocalStat = 5;
-        }
-        if (LocalLevel >= 5 && LocalLevel < 10)
-        {
-            LocalStat = LocalStat * 2;
-        }
-        else if (LocalLevel >= 10 && LocalLevel < 15)
-        {
-            LocalStat = LocalStat * 3;
-        }
-        else if (LocalLevel >= 15)
-        {
-            LocalStat = LocalStat * 5;
-        }
-        SetPlayerState(LocPlayer, PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(LocPlayer, PLAYER_STATE_RESOURCE_GOLD) + 50 * LocalStat);
-        SetHeroStr(LocUnit, GetHeroStr(LocUnit, false) + LocalStat, true);
-        SetHeroAgi(LocUnit, GetHeroAgi(LocUnit, false) + LocalStat, true);
-        SetHeroInt(LocUnit, GetHeroInt(LocUnit, false) + LocalStat, true);
-        if (LocalLevel == 5)
-        {
-            UnitAddItemById(LocUnit, 'I03U' );
-        }
-        else if (LocalLevel == 8)
-        {
-            UnitAddItemById(LocUnit, 'I03X' );
-        }
-        else if (LocalLevel == 10)
-        {
-            UnitAddItemById(LocUnit, 'I03Z' );
-        }
-        else if (LocalLevel == 13)
-        {
-            UnitAddItemById(LocUnit, 'I00H' );
-        }
-        else if (LocalLevel == 15)
-        {
-            while (true)
-            {
-                if (HeroIDArray[index] == GetUnitTypeId(LocUnit)) break;
-                index = index + 1;
-            }
-            UnitAddItemById(LocUnit, HeroItemIDArray[index]);
-        }
-        else if (LocalLevel == 20)
-        {
-            UnitAddItemById(LocUnit, 'I03V' );
-        }
-        else if (LocalLevel == 21)
-        {
-            UnitAddItemById(LocUnit, 'I03Z' );
-        }
-        else if (LocalLevel == 25)
-        {
-            UnitAddItemById(LocUnit, 'I00X' );
-        }
-        else if (LocalLevel == 27)
-        {
-            UnitAddItemById(LocUnit, 'I00T' );
-        }
-    }
-    else
-    {
-        if (GetUnitLevel(LocUnit) >= 50)
-        {
-            SetHeroStr(LocUnit, GetHeroStr(LocUnit, false) + 3, true);
-            SetHeroAgi(LocUnit, GetHeroAgi(LocUnit, false) + 3, true);
-            SetHeroInt(LocUnit, GetHeroInt(LocUnit, false) + 3, true);
-            SuspendHeroXP(LocUnit, true);
-        }
-    }
-}
-void PressEscToSaveLocationActivationAction()
-{
-    int ID = GetPlayerId(GetTriggerPlayer());
-    if (ESCLocationSaveBooleanArray[ID] == false)
-    {
-        ESCLocationSaveBooleanArray[ID] = true;
-        DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "Push ESC to save current position function is: |c0000ffffActivated|r");
-    }
-    else
-    {
-        ESCLocationSaveBooleanArray[ID] = false;
-        DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "Push ESC to save current position function is: |c00ff0000Deactivated|r");
-    }
-}
-void SaveLocationAction()
-{
-    int ID = GetPlayerId(GetTriggerPlayer());
-    DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffCurrent location was saved!");
-    RemoveLocation(TeleportationLocationArray[ID]);
-    TeleportationLocationArray[ID] = GetUnitLoc(MUnitArray[ID]);
-}
-void ESCToSaveAction()
-{
-    int ID = GetPlayerId(GetTriggerPlayer());
-    if (ESCLocationSaveBooleanArray[ID] == true)
-    {
-        DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffCurrent location was saved!");
-        RemoveLocation(TeleportationLocationArray[ID]);
-        TeleportationLocationArray[ID] = GetUnitLoc(MUnitArray[ID]);
-    }
-}
-bool AntiTeleportationStoneCondition()
-{
-    return GetSpellAbilityId() == 'A01W' ;
-}
-void AntiTeleportationStoneAction()
-{
-    if (GetUnitTypeId(GetSpellTargetUnit()) == 'H02M' )
-    {
-        UnitRemoveAbility(GetSpellTargetUnit(), 'B003' );
-        DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffInvalid Target!");
-    }
-}
-bool ScrollOfTeleportationCondition()
-{
-    return GetItemTypeId(GetManipulatedItem()) == 'I003' ;
-}
-void ScrollOfTeleportationAction()
-{
-    if (GetUnitAbilityLevel(GetTriggerUnit(), 'B003' ) > 0 || GetUnitAbilityLevel(GetTriggerUnit(), 'B005' ) > 0)
-    {
-        DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffUnable to teleport!");
-    }
-    else
-    {
-        DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffYou have been teleported to saved position");
-        DestroyEffect(AddSpecialEffect("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit())));
-        SetUnitPositionLoc(GetTriggerUnit(), TeleportationLocationArray[GetPlayerId(GetTriggerPlayer())]);
-        DestroyEffect(AddSpecialEffect("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit())));
-        if (GetLocalPlayer() == GetOwningPlayer(GetTriggerUnit()))
-        {
-            PanCameraToTimed(GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
-        }
-    }
-}
-bool TeleportationCommandCondition()
-{
-    return GetTriggerPlayer() == GlobalPlayerArray1[GetPlayerId(GetTriggerPlayer())];
-}
-void CheckTeleCooldown()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = LoadInteger(GameHashTable, hid, 0);
-    if (TeleportationIDIntegerArray[ID] > 0)
-    {
-        TeleportationIDIntegerArray[ID] = TeleportationIDIntegerArray[ID] - 1;
-    }
-    else
-    {
-        PauseTimer(GetExpiredTimer());
-        FlushChildHashtable(GameHashTable, hid);
-        DestroyTimer(GetExpiredTimer());
-    }
-}
-void TeleportationCommandAction()
-{
-    timer SystemsLocalTimer = CreateTimer();
-    int hid = GetHandleId(SystemsLocalTimer);
-    int ID = GetPlayerId(GetTriggerPlayer());
-    if (GetUnitAbilityLevel(MUnitArray[ID], 'B00A' ) > 0 || GetUnitAbilityLevel(MUnitArray[ID], 'B005' ) > 0 || IsUnitPaused(MUnitArray[ID]) == true)
-    {
-        DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffUnable to teleport!");
-    }
-    else
-    {
-        if (TeleportationIDIntegerArray[ID] == 0)
-        {
-            SaveInteger(GameHashTable, hid, 0, ID);
-            TeleportationIDIntegerArray[ID] = 30;
-            DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffYou have been teleported to saved position");
-            DestroyEffect(AddSpecialEffect("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(MUnitArray[ID]), GetUnitY(MUnitArray[ID])));
-            SetUnitPositionLoc(MUnitArray[ID], TeleportationLocationArray[ID]);
-            DestroyEffect(AddSpecialEffect("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(MUnitArray[ID]), GetUnitY(MUnitArray[ID])));
-            if (GetLocalPlayer() == GetOwningPlayer(MUnitArray[ID]))
-            {
-                PanCameraToTimed(GetUnitX(MUnitArray[ID]), GetUnitY(MUnitArray[ID]), 0);
-            }
-            TimerStart(SystemsLocalTimer, 1, true, @CheckTeleCooldown);
-        }
-        else
-        {
-            DestroyTimer(SystemsLocalTimer);
-            DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c00ffff00Teleportation Cooldown: " + I2S(TeleportationIDIntegerArray[ID]) + " seconds|r|c00ff0000!|r");
-        }
-    }
-}
-void DisplayHealthByTextAction()
-{
-    int ID = GetPlayerId(GetTriggerPlayer());
-    if (HealthDisplayBooleanArray[ID] == false)
-    {
-        HealthDisplayBooleanArray[ID] = true;
-        DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "Health display by text is: |c0000ffffOn|r");
-    }
-    else
-    {
-        HealthDisplayBooleanArray[ID] = false;
-        DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "Health display by text is: |c00ff0000Off|r");
-    }
-}
-void HealthDisplayReaderAction()
-{
-    unit u = GetTriggerUnit();
-    int MaxHP = R2I(GetUnitMaxLife(u));
-    if (HealthDisplayBooleanArray[GetPlayerId(GetTriggerPlayer())] && MaxHP >= 10000 && GetOwningPlayer(u) != Player(PLAYER_NEUTRAL_PASSIVE) && GetUnitTypeId(u) != 'n000' )
-    {
-        if (IsUnitType(u, UNIT_TYPE_HERO))
-        {
-            DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "|c0000ffff" + GetHeroProperName(u) + "|r has: |cFFFFCC00[" + I2S(MaxHP) + "]|r |c0000ffffHP|r");
-        }
-        else
-        {
-            DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "|c0000ffff" + GetUnitName(u) + "|r has: |cFFFFCC00[" + I2S(MaxHP) + "]|r |c0000ffffHP|r");
-        }
-    }
-}
-void PersonalItemAction1()
-{
-    int i = 0;
-    unit Hero = GetTriggerUnit();
-    player LocalPlayer = GetOwningPlayer(Hero);
-    int ID = GetPlayerId(LocalPlayer);
-    while (true)
-    {
-        if (HeroIDArray[i] == GetUnitTypeId(Hero)) break;
-        i = i + 1;
-    }
-    if (GetItemTypeId(GetManipulatedItem()) == 'I02R' )
-    {
-        RemoveItem(GetManipulatedItem());
-        if (GetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD) >= 10000)
-        {
-            if (CountItemsOfTypeFromUnitRW(Hero, HeroItemIDArray[i]) < 1)
-            {
-                UnitAddItemById(Hero, HeroItemIDArray[i]);
-                SetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD) - 10000);
-                if (CountItemsOfTypeFromUnitRW(DummyUnitDamageArr[ID], HeroItemIDArray[i]) < 1)
-                {
-                    UnitAddItemById(DummyUnitDamageArr[ID], HeroItemIDArray[i]);
-                }
-            }
-        }
-    }
-    if (CountItemsOfTypeFromUnitRW(Hero, HeroItemIDArray[i]) > 1)
-    {
-        RemoveItem(GetManipulatedItem());
-        SetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(LocalPlayer, PLAYER_STATE_RESOURCE_GOLD) + 10000);
-    }
-}
-void ItemOwnerSettingAction()
-{
-    if (GetItemPlayer(GetManipulatedItem()) == Player(15))
-    {
-        SetItemPlayer(GetManipulatedItem(), GetOwningPlayer(GetTriggerUnit()), false);
-    }
-    else if (GetItemPlayer(GetManipulatedItem()) != GetOwningPlayer(GetTriggerUnit()))
-    {
-        UnitRemoveItem(GetTriggerUnit(), GetManipulatedItem());
-        DisplayTextToPlayer(GetOwningPlayer(GetTriggerUnit()), 0, 0, "|c00ffff00That is not your Item!|r");
-    }
-}
-void ItemCombinationAction()
-{
-    unit hero = GetTriggerUnit();
-    if (GetItemTypeId(GetManipulatedItem()) == 'I03U' )
-    {
-        if (CountItemsOfTypeFromUnitRW(hero, 'I03U' ) > 1)
-        {
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03U' ));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03U' ));
-            UnitAddItemById(hero, 'I00Y' );
-        }
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I03X' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03Z' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03U' ) > 0)
-    {
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03U' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03Z' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03X' ));
-        UnitAddItemById(hero, 'I00X' );
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I03V' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03Z' ) > 0)
-    {
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03V' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03Z' ));
-        UnitAddItemById(hero, 'I00R' );
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I03X' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03Y' ) > 0)
-    {
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03Y' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03X' ));
-        UnitAddItemById(hero, 'I00S' );
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I03Y' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03V' ) > 0)
-    {
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03Y' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03V' ));
-        UnitAddItemById(hero, 'I00Z' );
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I03X' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I03W' ) > 0)
-    {
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03X' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I03W' ));
-        UnitAddItemById(hero, 'I00U' );
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I00Q' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I00K' ) > 0)
-    {
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00Q' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00K' ));
-        UnitAddItemById(hero, 'I00R' );
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I00Q' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I00N' ) > 0)
-    {
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00Q' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00N' ));
-        UnitAddItemById(hero, 'I00S' );
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I00O' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I00I' ) > 0)
-    {
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00O' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00I' ));
-        UnitAddItemById(hero, 'I00U' );
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I00N' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I00K' ) > 0)
-    {
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00N' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00K' ));
-        UnitAddItemById(hero, 'I00Z' );
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I02Q' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I00J' ) > 0 && GetPlayerState(GetOwningPlayer(hero), PLAYER_STATE_RESOURCE_GOLD) >= 3800)
-    {
-        SetPlayerState(GetOwningPlayer(hero), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(GetOwningPlayer(hero), PLAYER_STATE_RESOURCE_GOLD) - 3800);
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I02Q' ));
-        RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I00J' ));
-        UnitAddItemById(hero, 'I00T' );
-    }
-    else if (CountItemsOfTypeFromUnitRW(hero, 'I01K' ) > 0 && CountItemsOfTypeFromUnitRW(hero, 'I01S' ) > 0)
-    {
-        if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01S' )) == 1 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01K' )) == 1)
-        {
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01S' ));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01K' ));
-            UnitAddItemById(hero, 'I01T' );
-        }
-        else if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01S' )) == 2 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01K' )) == 1)
-        {
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01S' ));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01K' ));
-            UnitAddItemById(hero, 'I01T' );
-            UnitAddItemById(hero, 'I01S' );
-        }
-        else if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01S' )) == 1 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01K' )) == 2)
-        {
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01S' ));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01K' ));
-            UnitAddItemById(hero, 'I01T' );
-            UnitAddItemById(hero, 'I01K' );
-        }
-        else if (GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01S' )) == 2 && GetItemCharges(GetItemOfTypeFromUnitRW(hero, 'I01K' )) == 2)
-        {
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01S' ));
-            RemoveItem(GetItemOfTypeFromUnitRW(hero, 'I01K' ));
-            UnitAddItemById(hero, 'I01T' );
-            UnitAddItemById(hero, 'I01T' );
-        }
-    }
-}
-bool StrTomeUsageCondition()
-{
-    return GetItemTypeId(GetManipulatedItem()) == 'I04E';
-}
-void StrTomeAction()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocID = LoadInteger(GameHashTable, hid, 1);
-    unit LocUnit = LoadUnitHandle(GameHashTable, hid, iCaster);
-    if (GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) >= 1000)
-    {
-        SetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) - 1000);
-        SetHeroStr(LocUnit, GetHeroStr(LocUnit, false) + 10, true);
-    }
-    else
-    {
-        PauseTimer(GetExpiredTimer());
-        FlushChildHashtable(GameHashTable, hid);
-        DestroyTimer(GetExpiredTimer());
-    }
-}
-void StrTomeUsageAction()
-{
-    timer ItemsLocalTimer1 = CreateTimer();
-    int hid = GetHandleId(ItemsLocalTimer1);
-    SaveInteger(GameHashTable, hid, 1, GetPlayerId(GetTriggerPlayer()));
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    TimerStart(ItemsLocalTimer1, .01f, true, @StrTomeAction);
-}
-bool AgiTomeUsageCondition()
-{
-    return GetItemTypeId(GetManipulatedItem()) == 'I04D';
-}
-void AgiTomeAction()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocID = LoadInteger(GameHashTable, hid, 2);
-    unit LocUnit = LoadUnitHandle(GameHashTable, hid, iCaster);
-    if (GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) >= 1000)
-    {
-        SetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) - 1000);
-        SetHeroAgi(LocUnit, GetHeroAgi(LocUnit, false) + 10, true);
-    }
-    else
-    {
-        PauseTimer(GetExpiredTimer());
-        FlushChildHashtable(GameHashTable, hid);
-        DestroyTimer(GetExpiredTimer());
-    }
-}
-void AgiTomeUsageAction()
-{
-    timer ItemsLocalTimer1 = CreateTimer();
-    int hid = GetHandleId(ItemsLocalTimer1);
-    SaveInteger(GameHashTable, hid, 2, GetPlayerId(GetTriggerPlayer()));
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    TimerStart(ItemsLocalTimer1, .01f, true, @AgiTomeAction);
-}
-bool IntTomeUsageCondition()
-{
-    return GetItemTypeId(GetManipulatedItem()) == 'I00C';
-}
-void IntTomeAction()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocID = LoadInteger(GameHashTable, hid, 3);
-    unit LocUnit = LoadUnitHandle(GameHashTable, hid, iCaster);
-    if (GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) >= 1000)
-    {
-        SetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD, GetPlayerState(Player(LocID), PLAYER_STATE_RESOURCE_GOLD) - 1000);
-        SetHeroInt(LocUnit, GetHeroInt(LocUnit, false) + 10, true);
-    }
-    else
-    {
-        PauseTimer(GetExpiredTimer());
-        FlushChildHashtable(GameHashTable, hid);
-        DestroyTimer(GetExpiredTimer());
-    }
-}
-void IntTomeUsageAction()
-{
-    timer ItemsLocalTimer1 = CreateTimer();
-    int hid = GetHandleId(ItemsLocalTimer1);
-    SaveInteger(GameHashTable, hid, 3, GetPlayerId(GetTriggerPlayer()));
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    TimerStart(ItemsLocalTimer1, .01f, true, @IntTomeAction);
-}
-void MapItemRemovalAction()
-{
-    float ItemX = GetItemX(GetManipulatedItem());
-    float ItemY = GetItemY(GetManipulatedItem());
-    if (GetRectMinX( worldBounds ) <= ItemX && ItemX <= GetRectMaxX( worldBounds ) && GetRectMinY( worldBounds ) <= ItemY && ItemY <= GetRectMaxY( worldBounds ))
-    {
-        if (GetWidgetLife(GetManipulatedItem()) <= 0)
-        {
-            RemoveItem(GetManipulatedItem());
-        }
-    }
-}
-void HeroAbilityUnlockAction()
-{
-    player OwningPlayer = GetOwningPlayer(GetLevelingUnit());
-    int Level = GetUnitLevel(GetLevelingUnit());
-    if (Level >= 2)
-    {
-        SetPlayerAbilityAvailable(OwningPlayer, 'A04C', true);
-    }
-    if (Level >= 3)
-    {
-        SetPlayerAbilityAvailable(OwningPlayer, 'A02N', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A02V', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03M', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03D', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A039', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A04H', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A032', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03U', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A040', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A01Y', true);
-    }
-    if (Level >= 4)
-    {
-        SetPlayerAbilityAvailable(OwningPlayer, 'A04B', true);
-    }
-    if (Level >= 5)
-    {
-        SetPlayerAbilityAvailable(OwningPlayer, 'A049', true);
-    }
-    if (Level >= 6)
-    {
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03N', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A04I', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03S', true);
-    }
-    if (Level >= 8)
-    {
-        SetPlayerAbilityAvailable(OwningPlayer, 'A041', true);
-    }
-    if (Level >= 10)
-    {
-        SetPlayerAbilityAvailable(OwningPlayer, 'A02O', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A02W', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03O', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03G', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03A', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A04J', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A034', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03V', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A042', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A026', true);
-    }
-    if (Level >= 15)
-    {
-        SetPlayerAbilityAvailable(OwningPlayer, 'A02Q', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A02Y', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03P', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03H', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03B', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A036', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03W', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A04D', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A043', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A027', true);
-    }
-    if (Level >= 20)
-    {
-        SetPlayerAbilityAvailable(OwningPlayer, 'A02R', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A02Z', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03I', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03C', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A04K', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A037', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A03X', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A04E', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A044', true);
-        SetPlayerAbilityAvailable(OwningPlayer, 'A02A', true);
-    }
-}
-bool DummyUnitRemovalCondition()
-{
-    return GetUnitTypeId(GetEnteringUnit()) == 'hdes';
-}
-void DummyUnitRemovalAction()
-{
-    RemoveUnit(GetEnteringUnit());
-}
-void DisplayYourSavedPositionAction()
-{
-    int ID = GetPlayerId(GetTriggerPlayer());
-    DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffDisplaying the saved position");
-    if (GetLocalPlayer() == GetTriggerPlayer())
-    {
-        PingMinimapEx(GetLocationX(TeleportationLocationArray[ID]), GetLocationY(TeleportationLocationArray[ID]), 5, 0, 100, 0, false);
-    }
-}
-void DisplayYourTeammatesSavedPositionAction()
-{
-    DisplayTimedTextToPlayer(GetTriggerPlayer(), .0f, .0f, 5.f, "|c0000ffffDisplaying the saved position");
-    if (GetPlayerTeam(GetTriggerPlayer()) == 0)
-    {
-        if (GetPlayerSlotState(Player(0)) == PLAYER_SLOT_STATE_PLAYING)
-        {
-            if (GetLocalPlayer() == GetTriggerPlayer())
-            {
-                PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(0))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(0))]), 5, 100, 0, 0, false);
-            }
-        }
-        if (GetPlayerSlotState(Player(1)) == PLAYER_SLOT_STATE_PLAYING)
-        {
-            if (GetLocalPlayer() == GetTriggerPlayer())
-            {
-                PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(1))]), GetLocationY(TeleportationLocationArray[(GetPlayerId(Player(1)))]), 5, 0, 0, 100, false);
-            }
-        }
-        if (GetPlayerSlotState(Player(2)) == PLAYER_SLOT_STATE_PLAYING)
-        {
-            if (GetLocalPlayer() == GetTriggerPlayer())
-            {
-                PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(2))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(2))]), 5, 0, 100, 100, false);
-            }
-        }
-        if (GetPlayerSlotState(Player(3)) == PLAYER_SLOT_STATE_PLAYING)
-        {
-            if (GetLocalPlayer() == GetTriggerPlayer())
-            {
-                PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(3))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(3))]), 5, 43, 14, 51, false);
-            }
-        }
-    }
-    else
-    {
-        if (GetPlayerSlotState(Player(4)) == PLAYER_SLOT_STATE_PLAYING)
-        {
-            if (GetLocalPlayer() == GetTriggerPlayer())
-            {
-                PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(4))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(4))]), 5, 100, 100, 0, false);
-            }
-        }
-        if (GetPlayerSlotState(Player(5)) == PLAYER_SLOT_STATE_PLAYING)
-        {
-            if (GetLocalPlayer() == GetTriggerPlayer())
-            {
-                PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(5))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(5))]), 5, 83, 37, 10, false);
-            }
-        }
-        if (GetPlayerSlotState(Player(6)) == PLAYER_SLOT_STATE_PLAYING)
-        {
-            if (GetLocalPlayer() == GetTriggerPlayer())
-            {
-                PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(6))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(6))]), 5, 0, 100, 0, false);
-            }
-        }
-        if (GetPlayerSlotState(Player(7)) == PLAYER_SLOT_STATE_PLAYING)
-        {
-            if (GetLocalPlayer() == GetTriggerPlayer())
-            {
-                PingMinimapEx(GetLocationX(TeleportationLocationArray[GetPlayerId(Player(7))]), GetLocationY(TeleportationLocationArray[GetPlayerId(Player(7))]), 5, 100, 50, 50, false);
-            }
-        }
-    }
-}
-bool KawarimiUseCondition()
-{
-    return GetItemTypeId(GetManipulatedItem()) == 'I00V' ;
-}
-void KawarimiUseAction()
-{
-    int ID = GetPlayerId(GetOwningPlayer(GetTriggerUnit()));
-    unit KawarimiUnit = CreateUnit(Player(ID), 'n000' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 270);
-    KawarimiTriggerUnitArray[ID] = GetTriggerUnit();
-    SetUnitInvulnerable(KawarimiTriggerUnitArray[ID], true);
-    PauseUnit(KawarimiTriggerUnitArray[ID], true);
-    ShowUnit(KawarimiTriggerUnitArray[ID], false);
-    UnitApplyTimedLife(KawarimiUnit, 'BOmi' , 3);
-    DestroyEffect(AddSpecialEffect("Abilities\\Spells\\Human\\Polymorph\\PolyMorphTarget.mdl", GetUnitX(KawarimiUnit), GetUnitY(KawarimiUnit)));
-}
-bool KawarimiBreakCondition()
-{
-    return GetUnitTypeId(GetDyingUnit()) == 'n000' ;
-}
-void KawarimiBreakAction()
-{
-    int ID = GetPlayerId(GetOwningPlayer(GetDyingUnit()));
-    SetUnitInvulnerable(KawarimiTriggerUnitArray[ID], false);
-    ShowUnit(KawarimiTriggerUnitArray[ID], true);
-    PauseUnit(KawarimiTriggerUnitArray[ID], false);
-    CreateNUnitsAtLocACF(1, 'n001' , GetOwningPlayer(KawarimiTriggerUnitArray[ID]), GetUnitLoc(KawarimiTriggerUnitArray[ID]), 270);
-    UnitApplyTimedLife(GlobalUnit, 'BOmi' , 1);
-    IssueImmediateOrder(GlobalUnit, "stomp");
-    DestroyEffect(AddSpecialEffect("Abilities\\Spells\\Human\\ThunderClap\\ThunderClapCaster.mdl", GetUnitX(GlobalUnit), GetUnitY(GlobalUnit)));
-    if (GetLocalPlayer() == Player(ID))
-    {
-        ClearSelection();
-        SelectUnit(KawarimiTriggerUnitArray[ID], true);
-    }
-}
-void EnableNotificationAction()
-{
-    DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "|c0000FF00Notifications have been enabled!");
-    NotificationEnabledIntArray[GetPlayerId(GetTriggerPlayer())] = 1;
-}
-void DisableNotificationAction()
-{
-    DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "|c00ff0000Notifications have been disabled!");
-    NotificationEnabledIntArray[GetPlayerId(GetTriggerPlayer())] = 0;
-}
-void ClearMessagesAction()
-{
-    if (GetLocalPlayer() == GetTriggerPlayer())
-    {
-        ClearTextMessages();
-    }
-}
-void ClearAllData(int hid)
-{
-    PauseTimer(GetExpiredTimer());
-    if (IsUnitPaused(LoadUnitHandle(GameHashTable, hid, iCaster)))
-    {
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-        IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-    }
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 0, 2000);
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
-    SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 0, 2000);
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-    ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    PauseTimer(LoadTimerHandle(GameHashTable, hid, 105));
-    KillUnit(LoadUnitHandle(GameHashTable, hid, 106));
-    SetUnitInvulnerable(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-    DestroyEffect(LoadEffectHandle(GameHashTable, hid, 108));
-    SetUnitVertexColor(LoadUnitHandle(GameHashTable, hid, iCaster), 255, 255, 255, 255);
-    SaveUnitHandle(GameHashTable, hid, 106, nil);
-    SaveUnitHandle(GameHashTable, hid, iCaster, nil);
-    SaveUnitHandle(GameHashTable, hid, iTarget, nil);
-    FlushChildHashtable(GameHashTable, hid);
-    DestroyTimer(GetExpiredTimer());
-}
-bool StopSpell(int hid, int LocType)
-{
-    if (LocType == 0)
-    {
-        if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0)
-        {
-            ClearAllData(hid);
-            return true;
-        }
-    }
-    else
-    {
-        if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0)
-        {
-            ClearAllData(hid);
-            return true;
-        }
-    }
-    return false;
-}
-void ReinforceResetT(int hid)
-{
-    StopSound(ReinforceSounds[5], false, false);
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04K' );
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04K' );
-    KillUnit(LoadUnitHandle(GameHashTable, hid, iTarget));
-    ClearAllData(hid);
-}
-bool CloakOfFlamesDamage()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 30 + 10 * GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster));
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0 && IsUnitInvisible(GetFilterUnit(), Player(ID)))
-    {
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-        DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Other\\ImmolationRed\\ImmolationRedDamage.mdl", GetFilterUnit(), "chest"));
-    }
-    return true;
-}
-void CloakOfFlamesAction()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    if (UnitHasItemById(LoadUnitHandle(GameHashTable, hid, iCaster), 'I00P' ))
-    {
-        GroupEnumUnitsInRange(GroupEnum, GetUnitX(LoadUnitHandle(GameHashTable, hid, iCaster)), GetUnitY(LoadUnitHandle(GameHashTable, hid, iCaster)), 300, Filter(@CloakOfFlamesDamage));
-    }
-    else
-    {
-        PauseTimer(GetExpiredTimer());
-        FlushChildHashtable(GameHashTable, hid);
-        DestroyTimer(GetExpiredTimer());
-    }
-}
-void CloakOfFlamesPickUp()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (CountItemsOfTypeFromUnitRW(GetTriggerUnit(), 'I00P' ) == 1)
-    {
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        TimerStart(tmr, 1, true, @CloakOfFlamesAction);
-    }
-    else
-    {
-        DestroyTimer(tmr);
-    }
-}
-bool NanayaShikiSpellDFunction1()
-{
-    return GetSpellAbilityId() == 'A02P' ;
-}
-void NanayaShikiSpellDFunction2()
-{
-    PlaySoundWithVolumeACF(NanayaShikiSounds[5], 90, 0);
-}
-bool NanayaShikiSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A02M' ;
-}
-bool NanayaShikiSpellQFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
-        LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 109), LoadLocationHandle(GameHashTable, hid, 103)), 200, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        DestroyEffect(AddSpecialEffect("GeneralEffects\\BloodEffect1.mdx", GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit())));
-        if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' ) > 0)
-        {
-            LocDamage = LocDamage * 1.5f;
-            StunUnitACF(GetFilterUnit(), 1);
-        }
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-    }
-    return true;
-}
-void NanayaShikiSpellQFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 30)
-        {
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .1f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@NanayaShikiSpellQFunction2));
-            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' );
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw six");
-            ClearAllData(hid);
-        }
-    }
-}
-void NanayaShikiSpellQFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell slam one");
-        PlaySoundWithVolumeACF(NanayaShikiSounds[0], 100, 0);
-        TimerStart(tmr, .01f, true, @NanayaShikiSpellQFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool NanayaShikiSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A02N' ;
-}
-bool NanayaShikiSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    int LocCount = LoadInteger(GameHashTable, hid, 110);
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 5 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.033f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        IssueImmediateOrder(GetFilterUnit(), "stop");
-        if (LocCount == 5 || LocCount == 15 || LocCount == 25)
-        {
-            DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
-        }
-        if (LocCount == 29)
-        {
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", GetFilterUnit(), "chest"));
-        }
-        if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' ) > 0)
-        {
-            LocDamage = LocDamage * 1.5f;
-        }
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-    }
-    return true;
-}
-void NanayaShikiSpellWFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 110, LoadInteger(GameHashTable, hid, 110) + 1);
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 350, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-        GlobalUnit = CreateUnitAtLoc(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00P' , LoadLocationHandle(GameHashTable, hid, 102), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)) + GetRandomReal( - 45, 45));
-        SetUnitScale(GlobalUnit, 2, 2, 2);
-        SetUnitVertexColor(GlobalUnit, 255, 100, 255, 255);
-        GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 350, Filter(@NanayaShikiSpellWFunction2));
-        if (LoadInteger(GameHashTable, hid, 110) >= 30)
-        {
-            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' );
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "stand");
-            ClearAllData(hid);
-        }
-        else
-        {
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-    }
-}
-void NanayaShikiSpellWFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        PlaySoundWithVolumeACF(NanayaShikiSounds[1], 100, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell two");
-        SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-        TimerStart(tmr, .025f, true, @NanayaShikiSpellWFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool NanayaShikiSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A02O' ;
-}
-bool NanayaShikiSpellEFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-    }
-    return true;
-}
-void NanayaShikiSpellEFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-    if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' ) > 0)
-    {
-        if (StopSpell(hid, 0) == false && LocTime < 125)
-        {
-            if (LocTime == 25)
-            {
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 150, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-                SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-                SetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)));
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell two alternate");
-                DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl", LoadLocationHandle(GameHashTable, hid, 102)));
-                DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl", LoadLocationHandle(GameHashTable, hid, 107)));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-            }
-            if (LocTime == 50)
-            {
-                PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell slam one");
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
-                CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                SetUnitScaleAndTime(GlobalUnit, 2.5f, .7f);
-                CreateNUnitsAtLocACF(1, 'u00G' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-                CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                SetUnitScale(GlobalUnit, 2, 2, 2);
-                while (true)
-                {
-                    if (i > 5) break;
-                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                    SetUnitScale(GlobalUnit, 2, 2, 2);
-                    i = i + 1;
-                }
-                DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A04U' , false);
-                SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 800, 4000);
-                LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 300, .4f, .01f, false, false, "origin", "");
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            }
-            if (LocTime == 75)
-            {
-                UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A04U' , false);
-                SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 600, 4000);
-                PlaySoundWithVolumeACF(NanayaShikiSounds[3], 100, 0);
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 200, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
-                PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw three");
-                SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-                SetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-            }
-        }
-        if (LocTime == 125)
-        {
-            LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-            PlaySoundWithVolumeACF(NanayaShikiSounds[2], 100, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
-            SetUnitFlyHeight(GlobalUnit, 800, 99999);
-            CreateNUnitsAtLocACF(1, 'u00G' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 180);
-            SetUnitScaleAndTime(GlobalUnit, 2.5f, 2.f);
-            SetUnitFlyHeight(GlobalUnit, 800, 99999);
-            SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 0, 2000);
-            SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 0, 99999);
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 400, .4f, .01f, false, false, "origin", "");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 150)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            CreateNUnitsAtLocACF(1, 'u00D' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            i = 1;
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw two");
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 500, Filter(@NanayaShikiSpellEFunction2));
-            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'B001' );
-            ClearAllData(hid);
-        }
-    }
-    else
-    {
-        if (StopSpell(hid, 0) == false)
-        {
-            if (LocTime == 50)
-            {
-                DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
-                SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 300, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-                SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-                SetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 45);
-                SetUnitScale(GlobalUnit, 2, 2, 2);
-                CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 45);
-                SetUnitScale(GlobalUnit, 2, 2, 2);
-                PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw six");
-                DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl", LoadLocationHandle(GameHashTable, hid, 102)));
-                DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl", LoadLocationHandle(GameHashTable, hid, 107)));
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                ClearAllData(hid);
-            }
-        }
-    }
-}
-void NanayaShikiSpellEFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(NanayaShikiSounds[4], 90, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell slam one");
-    TimerStart(tmr, .01f, true, @NanayaShikiSpellEFunction3);
-}
-bool NanayaShikiSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A02Q' ;
-}
-void NanayaShikiSpellRFunction2()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    float LocDamage = 4000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 25)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 2.5f, .7f);
-            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScale(GlobalUnit, 2, 2, 2);
-                i = i + 1;
-            }
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw four");
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)), 300, 1, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 600, 1, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 125)
-        {
-            PlaySoundWithVolumeACF(NanayaShikiSounds[7], 100, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 2.5f, .7f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw five");
-            DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 200, 1, .015f, 400);
-            i = 1;
-            while (true)
-            {
-                if (i > 15) break;
-                CreateNUnitsAtLocACF(1, 'u00K' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                DisplaceUnitWithArgs(GlobalUnit, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 200, 1 + .1f * I2R(i), .02f, 400);
-                UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1);
-                SetUnitAnimation(GlobalUnit, "spell throw five");
-                SetUnitVertexColor(GlobalUnit, 255, 255, 255, (255 - (15 * i)));
-                i = i + 1;
-            }
-        }
-        if (LocTime == 225)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[2], 80, 0);
-            PlaySoundWithVolumeACF(NanayaShikiSounds[6], 100, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 150, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw six");
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-            SetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 250, .8f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(3, 'u00J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            i = 1;
-            while (true)
-            {
-                if (i > 8) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            i = 1;
-            while (true)
-            {
-                if (i > 4) break;
-                CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), ((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) + Pow( - 1, I2R(i)) * 30));
-                SetUnitScaleAndTime(GlobalUnit, 3.f, .5f);
-                i = i + 1;
-            }
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-        if (LocTime == 305)
-        {
-            ClearAllData(hid);
-        }
-    }
-}
-void NanayaShikiSpellRFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(NanayaShikiSounds[8], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A02P' );
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A02P' );
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 200, .25f, .015f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel one");
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-    TimerStart(tmr, .01f, true, @NanayaShikiSpellRFunction2);
-}
-bool NanayaShikiSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A02R' ;
-}
-void NanayaShikiSpellTFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 6000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 400 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-    if (StopSpell(hid, 0) == false)
-    {
-        if (IsCounted == true)
-        {
-            SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        }
-        if (LocTime == 50)
-        {
-            PlaySoundWithVolumeACF(NanayaShikiSounds[9], 100, 0);
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), .25f);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell one alternate");
-        }
-        if (LocTime == 90)
-        {
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 0);
-            CreateNUnitsAtLocACF(1, 'u00N' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
-            SetUnitPathing(GlobalUnit, false);
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            SaveBoolean(GameHashTable, hid, 10, false);
-        }
-        if (IsCounted == false)
-        {
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
-            SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107)) * .1f, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 103))));
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 109));
-            SetUnitPathing(LoadUnitHandle(GameHashTable, hid, 106), false);
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, 106), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 109))) <= 75)
-            {
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                SaveLocationHandle(GameHashTable, hid, 114, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 150, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
-                RemoveUnit(LoadUnitHandle(GameHashTable, hid, 106));
-                SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-                UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A04U' , false);
-                SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 200, 99999);
-                SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel three");
-                SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103));
-                CreateNUnitsAtLocACF(1, 'u00M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 114), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                UnitApplyTimedLife(GlobalUnit, 'BTLF' , .8f);
-                SetUnitAnimation(GlobalUnit, "spell slam three");
-                SetUnitVertexColor(GlobalUnit, 255, 255, 255, 180);
-                DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl", LoadLocationHandle(GameHashTable, hid, 102)));
-                DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl", LoadLocationHandle(GameHashTable, hid, 114)));
-                DestroyEffect(AddSpecialEffectLoc("GeneralSounds\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-                DestroyEffect(AddSpecialEffectLoc("GeneralSounds\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 114)));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-                SaveBoolean(GameHashTable, hid, 10, true);
-            }
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-        }
-        if (LocTime == 130)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 0, 99999);
-            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 114), LoadLocationHandle(GameHashTable, hid, 103)), 300, .4f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(3, 'u00J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 45);
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            CreateNUnitsAtLocACF(1, 'u00A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 45);
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralSounds\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell throw six");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 114));
-        }
-        if (LocTime == 170)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-            ClearAllData(hid);
-        }
-    }
-}
-void NanayaShikiSpellTFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveBoolean(GameHashTable, hid, 10, true);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A02P' );
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A02P' );
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "stand");
-    TimerStart(tmr, .01f, true, @NanayaShikiSpellTFunction2);
-}
-
-void HeroInit1()
-{
-    trigger t;
-    NanayaShikiSounds.resize( 10 );
-    NanayaShikiSounds[0] = CreateSound("Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellQ.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    NanayaShikiSounds[1] = CreateSound("Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellW.wav", false, false, false, 10, 10, "DefaultEAXON");
-    NanayaShikiSounds[2] = CreateSound("Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellE2.wav", false, false, false, 10, 10, "DefaultEAXON");
-    NanayaShikiSounds[3] = CreateSound("Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellE1.wav", false, false, false, 10, 10, "DefaultEAXON");
-    NanayaShikiSounds[4] = CreateSound("Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellR2.wav", false, false, false, 10, 10, "DefaultEAXON");
-    NanayaShikiSounds[5] = CreateSound("Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellR1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    NanayaShikiSounds[6] = CreateSound("Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellD.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    NanayaShikiSounds[7] = CreateSound("Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellT2.wav", false, false, false, 10, 10, "DefaultEAXON");
-    NanayaShikiSounds[8] = CreateSound("Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellT1.wav", false, false, false, 10, 10, "DefaultEAXON");
-    NanayaShikiSounds[9] = CreateSound("Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellT3.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@NanayaShikiSpellQFunction1));
-    TriggerAddAction(t, @NanayaShikiSpellQFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@NanayaShikiSpellWFunction1));
-    TriggerAddAction(t, @NanayaShikiSpellWFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@NanayaShikiSpellEFunction1));
-    TriggerAddAction(t, @NanayaShikiSpellEFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@NanayaShikiSpellDFunction1));
-    TriggerAddAction(t, @NanayaShikiSpellDFunction2);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@NanayaShikiSpellRFunction1));
-    TriggerAddAction(t, @NanayaShikiSpellRFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@NanayaShikiSpellTFunction1));
-    TriggerAddAction(t, @NanayaShikiSpellTFunction3);
-}
-bool ToonoShikiSpellDFunction1()
-{
-    return GetSpellAbilityId() == 'A02X' ;
-}
-void ToonoShikiSpellDFunction6()
-{
-    PlaySoundWithVolumeACF(ToonoShikiSounds[0], 100, 0);
-}
-bool ToonoShikiSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A02U' ;
-}
-bool ToonoShikiSpellQFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
-        LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 109), LoadLocationHandle(GameHashTable, hid, 103)), 200, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        DestroyEffect(AddSpecialEffect("GeneralEffects\\BloodEffect1.mdx", GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit())));
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-    }
-    return true;
-}
-void ToonoShikiSpellQFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 30)
-        {
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .1f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@ToonoShikiSpellQFunction2));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell four");
-            ClearAllData(hid);
-        }
-    }
-}
-void ToonoShikiSpellQFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell three");
-        PlaySoundWithVolumeACF(NanayaShikiSounds[0], 100, 0);
-        TimerStart(tmr, .01f, true, @ToonoShikiSpellQFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool ToonoShikiSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A02V' ;
-}
-bool ToonoShikiSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    int LocCount = LoadInteger(GameHashTable, hid, 110);
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 5 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.033f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        IssueImmediateOrder(GetFilterUnit(), "stop");
-        if (LocCount == 5 || LocCount == 15 || LocCount == 25)
-        {
-            DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
-        }
-        if (LocCount == 29)
-        {
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", GetFilterUnit(), "chest"));
-        }
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-    }
-    return true;
-}
-void ToonoShikiSpellWFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 110, LoadInteger(GameHashTable, hid, 110) + 1);
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 350, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-        GlobalUnit = CreateUnitAtLoc(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00P' , LoadLocationHandle(GameHashTable, hid, 102), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)) + GetRandomReal( - 45, 45));
-        SetUnitScale(GlobalUnit, 2, 2, 2);
-        SetUnitVertexColor(GlobalUnit, 200, 200, 255, 255);
-        GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 350, Filter(@ToonoShikiSpellWFunction2));
-        if (LoadInteger(GameHashTable, hid, 110) >= 30)
-        {
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "stand");
-            ClearAllData(hid);
-        }
-        else
-        {
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-    }
-}
-void ToonoShikiSpellWFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        PlaySoundWithVolumeACF(ToonoShikiSounds[1], 100, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell two");
-        SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-        TimerStart(tmr, .025f, true, @ToonoShikiSpellWFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool ToonoShikiSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A02W' ;
-}
-void ToonoShikiSpellEFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    float LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20)
-        {
-            PlaySoundWithVolumeACF(ToonoShikiSounds[2], 100, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell five");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 70)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[2], 60, 0);
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)) - 180, 300, .25f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            CreateNUnitsAtLocACF(1, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), (((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) + 45)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            CreateNUnitsAtLocACF(1, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), (((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) - 45)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 90)
-        {
-            ClearAllData(hid);
-        }
-    }
-}
-void ToonoShikiSpellEFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(ToonoShikiSounds[3], 100, 0);
-    SaveInteger(GameHashTable, hid, 0, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2.5f);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel three");
-    GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00E' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
-    SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
-    LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 50, .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-    DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl", LoadLocationHandle(GameHashTable, hid, 102)));
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-    TimerStart(tmr, .01f, true, @ToonoShikiSpellEFunction2);
-}
-bool ToonoShikiSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A02Y' ;
-}
-bool ToonoShikiSpellRFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 40 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-    }
-    return true;
-}
-void ToonoShikiSpellRFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 0;
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-    if (StopSpell(hid, 0) == false && LocTime < 160)
-    {
-        if (LocTime == 20)
-        {
-            LocDamage = 325 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 32.5f + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.20f;
-            PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.25f, 1.5f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.25f, .7f);
-            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, 2.f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScale(GlobalUnit, 1.5f, 1.5f, 1.5f);
-                i = i + 1;
-            }
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 150, .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 40)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel three");
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl", LoadLocationHandle(GameHashTable, hid, 102)));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 250, .1f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 60)
-        {
-            PlaySoundWithVolumeACF(ToonoShikiSounds[5], 100, 0);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel one");
-        }
-        if (LocTime == 110)
-        {
-            LocDamage = 750 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 60 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.25f;
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 3);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.25f, 1.5f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, .7f);
-            CreateNUnitsAtLocACF(1, 'u00G' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, 2.f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            i = 1;
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScale(GlobalUnit, 1.5f, 1.5f, 1.5f);
-                i = i + 1;
-            }
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A04U' , false);
-            SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 800, 2000);
-            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A04U' , false);
-            SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 800, 2000);
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, .4f, .01f, false, false, "origin", "");
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, .4f, .01f, false, false, "origin", "");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-    }
-    if (LocTime == 160)
-    {
-        LocDamage = 750 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 60 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.25f;
-        PlaySoundWithVolumeACF(ToonoShikiSounds[6], 100, 0);
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-        SetUnitScaleAndTime(GlobalUnit, 1.25f, 1.5f);
-        SetUnitFlyHeight(GlobalUnit, 900, 99999);
-        CreateNUnitsAtLocACF(1, 'u00G' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 180);
-        SetUnitScaleAndTime(GlobalUnit, 1.5f, 2.f);
-        SetUnitFlyHeight(GlobalUnit, 900, 99999);
-        SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 0, 3000);
-        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
-        SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 0, 3000);
-        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
-        LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)), 200, .25f, .01f, false, false, "origin", "");
-        LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, .25f, .01f, false, false, "origin", "");
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel four");
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-    }
-    if (LocTime == 200)
-    {
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        CreateNUnitsAtLocACF(1, 'u00R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-        SetUnitScale(GlobalUnit, 2, 2, 2);
-        i = 1;
-        while (true)
-        {
-            if (i > 8) break;
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, GetRandomReal(.5f, 2));
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-            SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
-            i = i + 1;
-        }
-        GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 600, Filter(@ToonoShikiSpellRFunction2));
-        ClearAllData(hid);
-    }
-}
-void ToonoShikiSpellRFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveInteger(GameHashTable, hid, 0, 0);
-    PlaySoundWithVolumeACF(ToonoShikiSounds[4], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 250, .1f, .015f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel five");
-    TimerStart(tmr, .01f, true, @ToonoShikiSpellRFunction3);
-}
-bool ToonoShikiSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A02Z' ;
-}
-void ToonoShikiSpellTFunction2()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    float LocDamage = 3000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 90)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[2], 80, 0);
-            PlaySoundWithVolumeACF(ToonoShikiSounds[7], 100, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 200, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-            SetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 250, .4f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(3, 'u00J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            while (true)
-            {
-                if (i > 8) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 1.5f, GetRandomReal(.5f, 2));
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 1.5f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            i = 1;
-            while (true)
-            {
-                if (i > 17) break;
-                CreateNUnitsAtLocACF(1, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                DisplaceUnitWithArgs(GlobalUnit, GetUnitFacing(GlobalUnit), GetRandomReal(200, 800), .1f, .01f, 0);
-                SetUnitScaleAndTime(GlobalUnit, 2.f, .5f);
-                i = i + 1;
-            }
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-            SaveReal(GameHashTable, hid, 110, 0);
-        }
-        if (LocTime == 130)
-        {
-            ClearAllData(hid);
-        }
-    }
-}
-void ToonoShikiSpellTFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveInteger(GameHashTable, hid, 0, 0);
-    PlaySoundWithVolumeACF(ToonoShikiSounds[3], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell one");
-    GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00E' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
-    SetUnitTimeScale(GlobalUnit, 1.5f);
-    GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00E' , GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), 0);
-    SetUnitScale(GlobalUnit, 1.5f, 1.5f, 1.5f);
-    TimerStart(tmr, .01f, true, @ToonoShikiSpellTFunction2);
-}
-
-void HeroInit2()
-{
-    trigger t;
-
-    ToonoShikiSounds.resize( 9 );
-    ToonoShikiSounds[0] = CreateSound("Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundV1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ToonoShikiSounds[1] = CreateSound("Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundW1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ToonoShikiSounds[2] = CreateSound("Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundE2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ToonoShikiSounds[3] = CreateSound("Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundE3.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ToonoShikiSounds[4] = CreateSound("Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundR1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ToonoShikiSounds[5] = CreateSound("Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundR2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ToonoShikiSounds[6] = CreateSound("Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundR3.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ToonoShikiSounds[7] = CreateSound("Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundT1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ToonoShikiSounds[8] = CreateSound("Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundT2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ToonoShikiSpellQFunction1));
-    TriggerAddAction(t, @ToonoShikiSpellQFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ToonoShikiSpellWFunction1));
-    TriggerAddAction(t, @ToonoShikiSpellWFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ToonoShikiSpellEFunction1));
-    TriggerAddAction(t, @ToonoShikiSpellEFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ToonoShikiSpellDFunction1));
-    TriggerAddAction(t, @ToonoShikiSpellDFunction6);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ToonoShikiSpellRFunction1));
-    TriggerAddAction(t, @ToonoShikiSpellRFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ToonoShikiSpellTFunction1));
-    TriggerAddAction(t, @ToonoShikiSpellTFunction3);
-}
-
-bool RyougiShikiSpellDFunction1()
-{
-    return GetSpellAbilityId() == 'A035' ;
-}
-void RyougiShikiSpellDFunction6()
-{
-    PlaySoundWithVolumeACF(RyougiShikiSounds[0], 60, 0);
-}
-bool RyougiShikiSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A033' ;
-}
-bool RyougiShikiSpellQFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 240 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 80 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-        SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(GetFilterUnit()));
-        DisplaceUnitWithArgs(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 107)), 300, .5f, .01f, 150);
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-    }
-    return true;
-}
-void RyougiShikiSpellQFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[0], 50, 0);
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 200, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(5, 'u00T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 300, Filter(@RyougiShikiSpellQFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void RyougiShikiSpellQFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(RyougiShikiSounds[2], 80, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel four");
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.5f);
-    TimerStart(tmr, .01f, true, @RyougiShikiSpellQFunction3);
-}
-bool RyougiShikiSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A032' ;
-}
-bool RyougiShikiSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
-        LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 109)), 150, .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-    }
-    return true;
-}
-void RyougiShikiSpellWFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 40)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[0], 50, 0);
-            UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A033' );
-            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A033' );
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 200, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(5, 'u00T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@RyougiShikiSpellWFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void RyougiShikiSpellWFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        PlaySoundWithVolumeACF(RyougiShikiSounds[1], 100, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-        LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .4f, .01f, false, true, "origin", "");
-        SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Channel Slam");
-        TimerStart(tmr, .01f, true, @RyougiShikiSpellWFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool RyougiShikiSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A034' ;
-}
-bool RyougiShikiSpellEFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-    }
-    return true;
-}
-void RyougiShikiSpellEFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 50)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[0], 50, 0);
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            CreateNUnitsAtLocACF(1, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 600, Filter(@RyougiShikiSpellEFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void RyougiShikiSpellEFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        PlaySoundWithVolumeACF(RyougiShikiSounds[3], 100, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.75f);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel two");
-        LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .4f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        TimerStart(tmr, .01f, true, @RyougiShikiSpellEFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool RyougiShikiSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A036' ;
-}
-void RyougiShikiSpellRFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * .50f;
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 25)
-        {
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 100, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel five");
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-            CreateNUnitsAtLocACF(5, 'u00U' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            SetUnitScale(GlobalUnit, 4, 4, 4);
-        }
-        if (LocTime == 75)
-        {
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell slam one");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-        if (LocTime == 135)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[0], 50, 0);
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            CreateNUnitsAtLocACF(3, 'u00J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            ClearAllData(hid);
-        }
-    }
-}
-void RyougiShikiSpellRFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveInteger(GameHashTable, hid, 0, 0);
-    PlaySoundWithVolumeACF(RyougiShikiSounds[6], 80, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    TimerStart(tmr, .01f, true, @RyougiShikiSpellRFunction2);
-}
-bool RyougiShikiSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A037' ;
-}
-void RyougiShikiSpellTFunction5()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    int LocCount = LoadInteger(GameHashTable, hid, 1);
-    float LocDamage = 1500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 150 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
-    if (StopSpell(hid, 1) == false)
-    {
-        if (LoadBoolean(GameHashTable, hid, 10) == false)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 40, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-            SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl", LoadLocationHandle(GameHashTable, hid, 102)));
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 600)
-            {
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                CreateNUnitsAtLocACF(2, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                SetUnitScale(GlobalUnit, 1.75f, 1.75f, 1.75f);
-                PlaySoundWithVolumeACF(RyougiShikiSounds[4], 100, 0);
-                SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 250, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-                LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 109)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 109)), .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel four");
-                SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 109), 0);
-                CreateNUnitsAtLocACF(3, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), .5f);
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-                SaveBoolean(GameHashTable, hid, 10, true);
-            }
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-        else
-        {
-            if (LoadInteger(GameHashTable, hid, 2) < 31)
-            {
-                SaveInteger(GameHashTable, hid, 1, LocCount + 1);
-                if (LocCount == 25)
-                {
-                    SaveInteger(GameHashTable, hid, 1, 1);
-                }
-                SaveInteger(GameHashTable, hid, 2, LoadInteger(GameHashTable, hid, 2) + 1);
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                CreateNUnitsAtLocACF(3, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 9 * (LoadInteger(GameHashTable, hid, 2)));
-                PlaySoundWithVolumeACF(RyougiShikiSounds[5], 100, 0);
-            }
-            else
-            {
-                SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-            }
-            if (LoadInteger(GameHashTable, hid, 2) == 30)
-            {
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 600, 1.1f, .01f, 250);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell");
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            }
-            if (LocTime == 60)
-            {
-                LocDamage = 1500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 150 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
-                PlaySoundWithVolumeACF(GeneralSounds[0], 70, 0);
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-                DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                CreateNUnitsAtLocACF(3, 'u00J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                CreateNUnitsAtLocACF(3, 'u02O' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                SetUnitScale(GlobalUnit, 4, 4, 4);
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            }
-            if (LocTime == 110)
-            {
-                ClearAllData(hid);
-            }
-        }
-    }
-}
-void RyougiShikiSpellTFunction6()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveBoolean(GameHashTable, hid, 10, false);
-    SaveInteger(GameHashTable, hid, 0, 1);
-    SaveInteger(GameHashTable, hid, 1, 1);
-    SaveInteger(GameHashTable, hid, 2, 1);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel three");
-    PlaySoundWithVolumeACF(RyougiShikiSounds[0], 100, 0);
-    TimerStart(tmr, .01f, true, @RyougiShikiSpellTFunction5);
-}
-void HeroInit3()
-{
-    trigger t;
-
-    RyougiShikiSounds.resize( 7 );
-    RyougiShikiSounds[0] = CreateSound("Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellDSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    RyougiShikiSounds[1] = CreateSound("Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellQSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    RyougiShikiSounds[2] = CreateSound("Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellWSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    RyougiShikiSounds[3] = CreateSound("Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellESound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    RyougiShikiSounds[4] = CreateSound("Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellRSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    RyougiShikiSounds[5] = CreateSound("Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellRSound2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    RyougiShikiSounds[6] = CreateSound("Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellTSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@RyougiShikiSpellDFunction1));
-    TriggerAddAction(t, @RyougiShikiSpellDFunction6);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@RyougiShikiSpellQFunction1));
-    TriggerAddAction(t, @RyougiShikiSpellQFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@RyougiShikiSpellWFunction1));
-    TriggerAddAction(t, @RyougiShikiSpellWFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@RyougiShikiSpellEFunction1));
-    TriggerAddAction(t, @RyougiShikiSpellEFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@RyougiShikiSpellRFunction1));
-    TriggerAddAction(t, @RyougiShikiSpellRFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@RyougiShikiSpellTFunction1));
-    TriggerAddAction(t, @RyougiShikiSpellTFunction6);
-}
-
-bool SaberAlterSpellDFunction1()
-{
-    return GetSpellAbilityId() == 'A03S' ;
-}
-bool SaberAlterSpellDFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        DisplaceUnitWithArgs(GetFilterUnit(), AngleBetweenUnits(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit()), 200, .5f, .01f, 400);
-    }
-    return true;
-}
-void SaberAlterSpellDFunction3()
-{
-    float i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u01P' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-                SetUnitScaleAndTime(GlobalUnit, .2f * i, .6f + .1f * i);
-                i = i + 1;
-            }
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 400, Filter(@SaberAlterSpellDFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void SaberAlterSpellDFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(SaberAlterSounds[0], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Morph");
-    TimerStart(tmr, .01f, true, @SaberAlterSpellDFunction3);
-}
-bool SaberAlterSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A03T' ;
-}
-bool SaberAlterSpellQFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
-        LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 109)), 200, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-    }
-    return true;
-}
-void SaberAlterSpellQFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 10)
-        {
-            PlaySoundWithVolumeACF(SaberAlterSounds[2], 100, 0);
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .1f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, 'u01Q' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@SaberAlterSpellQFunction2));
-        }
-        if (LocTime == 30)
-        {
-            ClearAllData(hid);
-        }
-    }
-}
-void SaberAlterSpellQFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.5f);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Slam");
-        PlaySoundWithVolumeACF(SaberAlterSounds[1], 100, 0);
-        TimerStart(tmr, .01f, true, @SaberAlterSpellQFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool SaberAlterSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A03U' ;
-}
-bool SaberAlterSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 150 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-    }
-    return true;
-}
-void SaberAlterSpellWFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 40)
-        {
-            PlaySoundWithVolumeACF(SaberAlterSounds[4], 100, 0);
-            PlaySoundWithVolumeACF(SaberAlterSounds[5], 100, 0);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\LightningStrike1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, 'u01T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            while (true)
-            {
-                if (i > 4) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 3.f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 300, Filter(@SaberAlterSpellWFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void SaberAlterSpellWFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        PlaySoundWithVolumeACF(SaberAlterSounds[3], 100, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Two");
-        CreateNUnitsAtLocACF(1, 'u01T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-        DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .4f, .01f, 600);
-        TimerStart(tmr, .01f, true, @SaberAlterSpellWFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool SaberAlterSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A03V' ;
-}
-bool SaberAlterSpellEFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false)
-    {
-        StunUnitACF(GetFilterUnit(), 1);
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        DisplaceUnitWithArgs(GetFilterUnit(), 0, 0, 1, .01f, 400);
-        GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 111), GetFilterUnit());
-    }
-    return true;
-}
-void SaberAlterSpellEFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-    }
-    else
-    {
-        RemoveUnit(LoadUnitHandle(GameHashTable, hid, iTarget));
-    }
-    if (LocTime == 60)
-    {
-        PlaySoundWithVolumeACF(SaberAlterSounds[7], 100, 0.5f);
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-        IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-    }
-    if (LocTime > 60)
-    {
-        SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 150);
-        SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-        DestroyEffect(AddSpecialEffectLoc("Characters\\SaberAlter\\ShadowBurstBigger.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
-        SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iTarget), LoadLocationHandle(GameHashTable, hid, 107));
-        GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 300, Filter(@SaberAlterSpellEFunction2));
-        if (LoadReal(GameHashTable, hid, 110) >= 1500.f || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0)
-        {
-            RemoveUnit(LoadUnitHandle(GameHashTable, hid, iTarget));
-            DestroyGroup(LoadGroupHandle(GameHashTable, hid, 111));
-            ClearAllData(hid);
-        }
-        else
-        {
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-    }
-}
-void SaberAlterSpellEFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(SaberAlterSounds[6], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-    SaveGroupHandle(GameHashTable, hid, 111, CreateGroup());
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Five");
-    CreateNUnitsAtLocACF(1, 'u02H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-    SaveUnitHandle(GameHashTable, hid, iTarget, GlobalUnit);
-    TimerStart(tmr, .01f, true, @SaberAlterSpellEFunction3);
-}
-bool SaberAlterSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A03W' ;
-}
-bool SaberAlterSpellRLastSlash()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 30 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.25f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        DisplaceUnitWithArgs(GetFilterUnit(), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)), 300, .35f, .01f, 0);
-        DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", GetFilterUnit(), "origin"));
-    }
-    return true;
-}
-bool SaberAlterSpellRFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 30 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.25f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        DisplaceUnitWithArgs(GetFilterUnit(), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)), 100, .35f, .01f, 300);
-        DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
-    }
-    return true;
-}
-void SaberAlterSpellRFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 10 || LocTime == 50 || LocTime == 90)
-        {
-            if (LocTime == 50)
-            {
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Six");
-            }
-            else
-            {
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Three");
-            }
-            PlaySoundWithVolumeACF(SaberAlterSounds[9], 100, 0.50f);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 50, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(5, 'u01R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            if (IsTerrainPathable(GetLocationX(LoadLocationHandle(GameHashTable, hid, 103)), GetLocationY(LoadLocationHandle(GameHashTable, hid, 103)), PATHING_TYPE_WALKABILITY) == false)
-            {
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-                SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 100, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-                LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)), 100, .4f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            }
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 300, Filter(@SaberAlterSpellRFunction2));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 120)
-        {
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Slam");
-        }
-        if (LocTime == 150)
-        {
-            PlaySoundWithVolumeACF(SaberAlterSounds[9], 100, 0.50f);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 50, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            CreateNUnitsAtLocACF(1, 'u01Q' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            if (IsTerrainPathable(GetLocationX(LoadLocationHandle(GameHashTable, hid, 103)), GetLocationY(LoadLocationHandle(GameHashTable, hid, 103)), PATHING_TYPE_WALKABILITY) == false)
-            {
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-                SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 300, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-                LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            }
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 300, Filter(@SaberAlterSpellRLastSlash));
-            ClearAllData(hid);
-        }
-    }
-}
-void SaberAlterSpellRFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(SaberAlterSounds[8], 100, 0);
-    PlaySoundWithVolumeACF(SaberAlterSounds[9], 100, 0.50f);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    TimerStart(tmr, .01f, true, @SaberAlterSpellRFunction3);
-}
-bool SaberAlterSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A03X' ;
-}
-bool SaberAlterSpellTFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false)
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 111), GetFilterUnit());
-    }
-    return true;
-}
-void SaberAlterSpellTFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 100)
-        {
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Channel Two");
-            PlaySoundWithVolumeACF(SaberAlterSounds[11], 100, 0);
-            PlaySoundWithVolumeACF(SaberAlterSounds[12], 100, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            CreateNUnitsAtLocACF(1, 'u01S' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-        }
-        if (LocTime >= 100)
-        {
-            SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 100);
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            SaveReal(GameHashTable, hid, 112, (LoadReal(GameHashTable, hid, 112) + 1));
-            if (LoadReal(GameHashTable, hid, 112) >= 4)
-            {
-                CreateNUnitsAtLocACF(1, 'u00D' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 360));
-                SetUnitScale(GlobalUnit, 3, 3, 3);
-                SaveReal(GameHashTable, hid, 112, 0);
-            }
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 500, Filter(@SaberAlterSpellTFunction2));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-            if (LoadReal(GameHashTable, hid, 110) >= 3000)
-            {
-                DestroyGroup(LoadGroupHandle(GameHashTable, hid, 111));
-                ClearAllData(hid);
-            }
-        }
-    }
-}
-void SaberAlterSpellTFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveInteger(GameHashTable, hid, 0, 0);
-    PlaySoundWithVolumeACF(SaberAlterSounds[10], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-    SaveGroupHandle(GameHashTable, hid, 111, CreateGroup());
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Channel One");
-    DestroyEffect(AddSpecialEffectTarget("Characters\\SaberAlter\\ShadowBurst.mdx", LoadUnitHandle(GameHashTable, hid, iCaster), "weapon"));
-    CreateNUnitsAtLocACF(5, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
-    SetUnitScale(GlobalUnit, 2, 2, 2);
-    CreateNUnitsAtLocACF(2, 'u01T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-    SetUnitTimeScale(GlobalUnit, .5f);
-    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-    TimerStart(tmr, .01f, true, @SaberAlterSpellTFunction3);
-}
-void HeroInit4()
-{
-    trigger t;
-
-    SaberAlterSounds.resize( 13 );
-    SaberAlterSounds[0] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterC1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[1] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterQ1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[2] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterQ2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[3] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterW1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[4] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterW2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[5] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterW3.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[6] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterE1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[7] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterE2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[8] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterR1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[9] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterR2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[10] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterT1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[11] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterT2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberAlterSounds[12] = CreateSound("Characters\\SaberAlter\\Sounds\\SaberAlterT3.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberAlterSpellDFunction1));
-    TriggerAddAction(t, @SaberAlterSpellDFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberAlterSpellQFunction1));
-    TriggerAddAction(t, @SaberAlterSpellQFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberAlterSpellWFunction1));
-    TriggerAddAction(t, @SaberAlterSpellWFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberAlterSpellEFunction1));
-    TriggerAddAction(t, @SaberAlterSpellEFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberAlterSpellRFunction1));
-    TriggerAddAction(t, @SaberAlterSpellRFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberAlterSpellTFunction1));
-    TriggerAddAction(t, @SaberAlterSpellTFunction4);
-}
-
-bool SaberNeroSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A038' ;
-}
-bool SaberNeroSpellQFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
-        LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 109)), 200, .3f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-    }
-    return true;
-}
-void SaberNeroSpellQFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 50)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 200, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(2, 'u00X' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@SaberNeroSpellQFunction2));
-        }
-        if (LocTime == 60)
-        {
-            ClearAllData(hid);
-        }
-    }
-}
-void SaberNeroSpellQFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        PlaySoundWithVolumeACF(SaberNeroSounds[0], 100, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-        LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .5f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell two");
-        SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.5f);
-        TimerStart(tmr, .01f, true, @SaberNeroSpellQFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool SaberNeroSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A039' ;
-}
-bool SaberNeroSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        StunUnitACF(GetFilterUnit(), 1);
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        SaveLocationHandle(GameHashTable, hid, 113, GetUnitLoc(GetFilterUnit()));
-        LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 113)), 200, .25f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 113));
-    }
-    return true;
-}
-void SaberNeroSpellWFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 40)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\LightningStrike1.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            CreateNUnitsAtLocACF(1, 'u00R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 270);
-            SetUnitScale(GlobalUnit, 4, 4, 4);
-            while (true)
-            {
-                if (i > 8) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 3.f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 450, Filter(@SaberNeroSpellWFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void SaberNeroSpellWFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(SaberNeroSounds[1], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack slam");
-    TimerStart(tmr, .01f, true, @SaberNeroSpellWFunction3);
-}
-bool SaberNeroSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A03A' ;
-}
-bool SaberNeroSpellEFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-    }
-    return true;
-}
-void SaberNeroSpellEFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 10;
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 35 || LocTime == 70 || LocTime == 105 || LocTime == 140)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            CreateNUnitsAtLocACF(1, 'u019' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\RedAftershock.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(AddSpecialEffectTarget("Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 170)
-        {
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 200, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(1, 'u00Y' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            CreateNUnitsAtLocACF(1, 'u00Z' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            CreateNUnitsAtLocACF(1, 'u010' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            while (true)
-            {
-                if (i > 8) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 3.f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@SaberNeroSpellEFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void SaberNeroSpellEFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(SaberNeroSounds[2], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
-    LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 150), .1f, .015f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.5f);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Three");
-    TimerStart(tmr, .01f, true, @SaberNeroSpellEFunction3);
-}
-bool SaberNeroSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A03B' ;
-}
-bool SaberNeroSpellRUnitDrag1()
-{
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster))))
-    {
-        SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 107));
-    }
-    return true;
-}
-bool SaberNeroSpellRUnitDrag2()
-{
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster))))
-    {
-        SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 109));
-    }
-    return true;
-}
-bool SaberNeroSpellRFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 2000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 125 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 2);
-        DisplaceUnitWithArgs(GetFilterUnit(), AngleBetweenUnits(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit()), 1000, 1, .01f, 1000);
-    }
-    return true;
-}
-void SaberNeroSpellRFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime < 80)
-        {
-            SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) - 10);
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), LoadReal(GameHashTable, hid, 110), LoadReal(GameHashTable, hid, 110)));
-            SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), LoadReal(GameHashTable, hid, 110), LoadReal(GameHashTable, hid, 110) + 180));
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 300, Filter(@SaberNeroSpellRUnitDrag1));
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 109), 300, Filter(@SaberNeroSpellRUnitDrag2));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Other\\Doom\\DoomDeath.mdl", LoadLocationHandle(GameHashTable, hid, 107)));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Other\\Doom\\DoomDeath.mdl", LoadLocationHandle(GameHashTable, hid, 109)));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-        }
-        if (LocTime == 80)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel one");
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) / 3, 1, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        }
-        if (LocTime == 130)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .6f), .6f, .01f, 600);
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack slam");
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-            CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-        }
-        if (LocTime == 185)
-        {
-            CreateNUnitsAtLocACF(1, 'u00R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            SetUnitScale(GlobalUnit, 6, 6, 6);
-            while (true)
-            {
-                if (i > 8) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 5.f, .6f);
-                i = i + 1;
-            }
-            i = 1;
-            while (true)
-            {
-                if (i > 12) break;
-                SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 200, 30 * I2R(i)));
-                CreateNUnitsAtLocACF(1, 'u01A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), 0);
-                UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1);
-                SetUnitAnimation(GlobalUnit, "birth");
-                SetUnitVertexColor(GlobalUnit, 255, 100, 0, 255);
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-                SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 400, 30 * I2R(i)));
-                CreateNUnitsAtLocACF(1, 'u01A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), 0);
-                UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1);
-                SetUnitAnimation(GlobalUnit, "birth");
-                SetUnitVertexColor(GlobalUnit, 255, 100, 0, 255);
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-                SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 600, 30 * I2R(i)));
-                CreateNUnitsAtLocACF(1, 'u01A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), 0);
-                UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1);
-                SetUnitAnimation(GlobalUnit, "birth");
-                SetUnitVertexColor(GlobalUnit, 255, 100, 0, 255);
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-                i = i + 1;
-            }
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 800, Filter(@SaberNeroSpellRFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void SaberNeroSpellRFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(SaberNeroSounds[3], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-    SaveReal(GameHashTable, hid, 110, 800);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell One");
-    TimerStart(tmr, .01f, true, @SaberNeroSpellRFunction3);
-}
-bool SaberNeroSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A03C' ;
-}
-void SaberNeroSpellTFunction2()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 20;
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false)
-    {
-        if (IsCounted == false)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-            SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Fly Slam");
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\RedAftershock.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 250)
-            {
-                PlaySoundWithVolumeACF(SaberNeroSounds[4], 100, 0);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Three");
-                SaveBoolean(GameHashTable, hid, 10, true);
-            }
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-        else
-        {
-            SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-            if (LocTime == 30 || LocTime == 60 || LocTime == 90 || LocTime == 120)
-            {
-                SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-                CreateNUnitsAtLocACF(1, 'u019' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\RedAftershock.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                DestroyEffect(AddSpecialEffectTarget("Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-                RemoveLocation(LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 103));
-            }
-            if (LocTime == 170)
-            {
-                SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\LightningStrike1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                while (true)
-                {
-                    if (i > 8) break;
-                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                    SetUnitScaleAndTime(GlobalUnit, 3.f, GetRandomReal(.5f, 2));
-                    i = i + 1;
-                }
-                DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iTarget), 0, 0, .9f, .01f, 600);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Five");
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            }
-            if (LocTime == 250)
-            {
-                PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell One");
-                PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                i = 1;
-                while (true)
-                {
-                    if (i > 10) break;
-                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
-                    SetUnitScaleAndTime(GlobalUnit, 3.f, 1.5f);
-                    i = i + 1;
-                }
-                CreateNUnitsAtLocACF(3, 'u00X' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 500, 1, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            }
-            if (LocTime == 330)
-            {
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack Slam");
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                SetUnitScaleAndTime(GlobalUnit, 2.f, .8f);
-                CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-                i = 1;
-                while (true)
-                {
-                    if (i > 5) break;
-                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
-                    SetUnitScaleAndTime(GlobalUnit, 2.f, .8f);
-                    i = i + 1;
-                }
-                DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 950, .8f, .01f, 600);
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            }
-            if (LocTime == 410)
-            {
-                LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 180 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                PlaySoundWithVolumeACF(GeneralSounds[2], 80, 0);
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                CreateNUnitsAtLocACF(1, 'u00R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-                SetUnitScale(GlobalUnit, 4, 4, 4);
-                i = 1;
-                while (true)
-                {
-                    if (i > 10) break;
-                    CreateNUnitsAtLocACF(1, 'u01C' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 36.f * I2R(i));
-                    SetUnitScaleAndTime(GlobalUnit, .5f * I2R(i), 1.5f - .1f * I2R(i));
-                    SetUnitVertexColor(GlobalUnit, 255, 100, 0, 255);
-                    i = i + 1;
-                }
-                i = 1;
-                while (true)
-                {
-                    if (i > 10) break;
-                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                    SetUnitScaleAndTime(GlobalUnit, 3.f, 1.5f);
-                    i = i + 1;
-                }
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-                ClearAllData(hid);
-            }
-        }
-    }
-}
-void SaberNeroSpellTFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveBoolean(GameHashTable, hid, 10, false);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.5f);
-    SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-    TimerStart(tmr, .01f, true, @SaberNeroSpellTFunction2);
-}
-void HeroInit5()
-{
-    trigger t;
-
-    SaberNeroSounds.resize( 5 );
-    SaberNeroSounds[0] = CreateSound("Characters\\SaberNero\\Sounds\\SaberNeroSoundQ1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberNeroSounds[1] = CreateSound("Characters\\SaberNero\\Sounds\\SaberNeroSoundW1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberNeroSounds[2] = CreateSound("Characters\\SaberNero\\Sounds\\SaberNeroSoundE1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberNeroSounds[3] = CreateSound("Characters\\SaberNero\\Sounds\\SaberNeroSoundR2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    SaberNeroSounds[4] = CreateSound("Characters\\SaberNero\\Sounds\\SaberNeroSoundT1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberNeroSpellQFunction1));
-    TriggerAddAction(t, @SaberNeroSpellQFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberNeroSpellWFunction1));
-    TriggerAddAction(t, @SaberNeroSpellWFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberNeroSpellEFunction1));
-    TriggerAddAction(t, @SaberNeroSpellEFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberNeroSpellRFunction1));
-    TriggerAddAction(t, @SaberNeroSpellRFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@SaberNeroSpellTFunction1));
-    TriggerAddAction(t, @SaberNeroSpellTFunction3);
-}
-bool KuchikiByakuyaSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A03E' ;
-}
-bool KuchikiByakuyaSpellQFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false)
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 111), GetFilterUnit());
-    }
-    return true;
-}
-void KuchikiByakuyaSpellQFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    float LocDistance = LoadReal(GameHashTable, hid, 30);
-    float LocFacing = LoadReal(GameHashTable, hid, 31);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 25)
-        {
-            PlaySoundWithVolumeACF(KuchikiByakuyaSounds[1], 90, 0);
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-        }
-        if (LocTime > 25)
-        {
-            if (IsUnitType(LoadUnitHandle(GameHashTable, hid, 106), UNIT_TYPE_DEAD) != true)
-            {
-                SaveLocationHandle(GameHashTable, hid, 115, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
-                SaveLocationHandle(GameHashTable, hid, 116, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 115), 20, LocFacing));
-                SaveReal(GameHashTable, hid, 30, LocDistance - 25);
-                SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 116));
-                GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 115), 250, Filter(@KuchikiByakuyaSpellQFunction2));
-                if (LocDistance <= 25)
-                {
-                    KillUnit(LoadUnitHandle(GameHashTable, hid, 106));
-                }
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 115));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 116));
-            }
-            else
-            {
-                DestroyGroup(LoadGroupHandle(GameHashTable, hid, 111));
-                ClearAllData(hid);
-            }
-        }
-    }
-    else
-    {
-        DestroyGroup(LoadGroupHandle(GameHashTable, hid, 111));
-    }
-}
-void KuchikiByakuyaSpellQFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(KuchikiByakuyaSounds[2], 90, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-    SaveGroupHandle(GameHashTable, hid, 111, CreateGroup());
-    SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 150, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-    SaveReal(GameHashTable, hid, 30, 1250);
-    SaveReal(GameHashTable, hid, 31, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-    CreateNUnitsAtLocACF(1, 'u01E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 103)));
-    SetUnitPathing(LoadUnitHandle(GameHashTable, hid, 106), false);
-    SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell");
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-    TimerStart(tmr, .01f, true, @KuchikiByakuyaSpellQFunction3);
-}
-bool KuchikiByakuyaSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A03D' ;
-}
-void KuchikiByakuyaSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    float LocDamage = 245 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 65 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 5 || LocTime == 10 || LocTime == 15 || LocTime == 20 || LocTime == 25 || LocTime == 30 || LocTime == 35 || LocTime == 40)
-        {
-            SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 100, 45 * (LocTime / 5)));
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iTarget), LoadLocationHandle(GameHashTable, hid, 102));
-            CreateNUnitsAtLocACF(1, 'u01D' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)));
-            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .9f - I2R(LocTime * 2) / 100);
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            SetUnitFlyHeight(GlobalUnit, 200, 20000);
-        }
-        if (LocTime == 50)
-        {
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            CreateNUnitsAtLocACF(1, 'u01E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-            SetUnitPathing(GlobalUnit, false);
-            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "origin"));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Deadspirit Asuna.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-        }
-        if (LocTime == 80)
-        {
-            ClearAllData(hid);
-        }
-    }
-}
-void KuchikiByakuyaSpellWFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(KuchikiByakuyaSounds[3], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel one");
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-    IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-    TimerStart(tmr, .01f, true, @KuchikiByakuyaSpellWFunction2);
-}
-bool KuchikiByakuyaSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A03G' ;
-}
-bool KuchikiByakuyaSpellEFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 3 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.05f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
-        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u02T' , GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit()), 0);
-        UnitShareVision(GetFilterUnit(), Player(PLAYER_NEUTRAL_PASSIVE), true);
-        IssueTargetOrder(GlobalUnit, "slow", GetFilterUnit());
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-    }
-    return true;
-}
-bool KuchikiByakuyaSpellEFunctionFinalDamage1()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 40 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.50f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
-        StunUnitACF(GetFilterUnit(), 1);
-        SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(GetFilterUnit()));
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107)), 300, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-    }
-    return true;
-}
-void KuchikiByakuyaSpellEFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20 || LocTime == 40 || LocTime == 60 || LocTime == 80 || LocTime == 100 || LocTime == 120 || LocTime == 140 || LocTime == 160 || LocTime == 180 || LocTime == 200)
-        {
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 450, Filter(@KuchikiByakuyaSpellEFunction2));
-        }
-        if (LocTime == 200)
-        {
-            CreateNUnitsAtLocACF(1, 'u01H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            SetUnitScaleAndTime(GlobalUnit, 2.f, .8f);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, 'u01I' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 450, Filter(@KuchikiByakuyaSpellEFunctionFinalDamage1));
-            ClearAllData(hid);
-        }
-    }
-}
-void KuchikiByakuyaSpellEFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(KuchikiByakuyaSounds[4], 90, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Slam");
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-    IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    CreateNUnitsAtLocACF(1, 'u01J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
-    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
-    CreateNUnitsAtLocACF(1, 'u01J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
-    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
-    CreateNUnitsAtLocACF(1, 'u01J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
-    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
-    CreateNUnitsAtLocACF(1, 'u01J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
-    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
-    CreateNUnitsAtLocACF(1, 'u01J' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 360);
-    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 2);
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-    TimerStart(tmr, .01f, true, @KuchikiByakuyaSpellEFunction3);
-}
-bool KuchikiByakuyaSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A03H' ;
-}
-void KuchikiByakuyaSpellRKillDummy()
-{
-    KillUnit(GetEnumUnit());
-}
-void KuchikiByakuyaSpellRCreateSFX()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    SaveLocationHandle(GameHashTable, hid, 117, GetUnitLoc(GetEnumUnit()));
-    CreateNUnitsAtLocACF(1, 'u01I' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 117), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
-    UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1.5f);
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 117));
-}
-void KuchikiByakuyaSpellRTransparency()
-{
-    SetUnitVertexColor(GetEnumUnit(), 255, 255, 255, 255 - R2I(LoadReal(GameHashTable, GetHandleId(GetExpiredTimer()), 118)));
-}
-void KuchikiByakuyaSpellRFunction2()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 4 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.02f;
-    float LocCount = LoadReal(GameHashTable, hid, 1);
-    if (StopSpell(hid, 0) == false)
-    {
-        if (IsCounted == true)
-        {
-            SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        }
-        else
-        {
-            SaveReal(GameHashTable, hid, 118, LoadReal(GameHashTable, hid, 118) + 7);
-            ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @KuchikiByakuyaSpellRTransparency);
-            if (LoadReal(GameHashTable, hid, 118) >= 255)
-            {
-                SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @KuchikiByakuyaSpellRKillDummy);
-                CreateNUnitsAtLocACF(1, 'u01L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-                SetUnitTimeScale(GlobalUnit, 3);
-                SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
-                SaveBoolean(GameHashTable, hid, 10, true);
-            }
-        }
-        if (LocTime == 30)
-        {
-            PlaySoundWithVolumeACF(KuchikiByakuyaSounds[6], 100, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            CreateNUnitsAtLocACF(1, 'u02S' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-            SetUnitAnimation(GlobalUnit, "Morph Alternate");
-            SetUnitTimeScale(GlobalUnit, .75f);
-            UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1.5f);
-            SaveReal(GameHashTable, hid, 110, 0);
-        }
-        if (LocTime == 130)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 500, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90));
-            SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 500, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 90));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
-            GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 107)));
-            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
-            GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 109)));
-        }
-        if (LocTime == 140 || LocTime == 150 || LocTime == 160 || LocTime == 170)
-        {
-            SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 115, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), 300 * LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            SaveLocationHandle(GameHashTable, hid, 116, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 109), 300 * LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            SaveLocationHandle(GameHashTable, hid, 120, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), 300 * LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
-            SaveLocationHandle(GameHashTable, hid, 121, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 109), 300 * LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
-            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 115), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
-            GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 115)));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 115)));
-            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 116), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
-            GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 116)));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 116)));
-            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 120), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
-            GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 120)));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 120)));
-            CreateNUnitsAtLocACF(1, 'u01M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 121), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
-            GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 121)));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Items\\AIil\\AIilTarget.mdl", LoadLocationHandle(GameHashTable, hid, 121)));
-            if (LocTime == 170)
-            {
-                PlaySoundWithVolumeACF(KuchikiByakuyaSounds[5], 100, 0);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell two");
-                ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @KuchikiByakuyaSpellRCreateSFX);
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-                SaveReal(GameHashTable, hid, 110, 0);
-                SaveBoolean(GameHashTable, hid, 10, false);
-            }
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 115));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 116));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 120));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 121));
-        }
-        if (LocTime == 250)
-        {
-            PlaySoundWithVolumeACF(KuchikiByakuyaSounds[4], 100, 0);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster), "spell channel one");
-            SetUnitFacing(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 106), GetUnitFacing(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 106)) + 1.5f);
-        }
-        if (LocTime >= 250 && LocTime <= 400)
-        {
-            SaveReal(GameHashTable, hid, 1, LocCount + 1);
-            if (LocCount == 2)
-            {
-                SaveReal(GameHashTable, hid, 1, 0);
-                DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                while (true)
-                {
-                    if (i > 4) break;
-                    SaveLocationHandle(GameHashTable, hid, 122, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 1600, GetRandomReal(0, 360)));
-                    CreateNUnitsAtLocACF(1, 'u01K' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 122), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 122), LoadLocationHandle(GameHashTable, hid, 103)));
-                    UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
-                    SetUnitFlyHeight(GlobalUnit, 250, 99999);
-                    SetUnitScale(GlobalUnit, 3, 3, 3);
-                    DisplaceUnitWithArgs(GlobalUnit, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 122), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 122), LoadLocationHandle(GameHashTable, hid, 103)) - 50, .4f, .01f, 0);
-                    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 122));
-                    i = i + 1;
-                }
-            }
-        }
-        if (LocTime == 400)
-        {
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            PlaySoundWithVolumeACF(KuchikiByakuyaSounds[2], 100, 0);
-            DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Deadspirit Asuna.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            ClearAllData(hid);
-        }
-    }
-    else
-    {
-        ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @KuchikiByakuyaSpellRKillDummy);
-        DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
-    }
-}
-void KuchikiByakuyaSpellRFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveBoolean(GameHashTable, hid, 10, true);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    SaveGroupHandle(GameHashTable, hid, 119, CreateGroup());
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "morph");
-    SaveLocationHandle(GameHashTable, hid, iCaster, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 102)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    TimerStart(tmr, .01f, true, @KuchikiByakuyaSpellRFunction2);
-}
-bool KuchikiByakuyaSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A03I' ;
-}
-void KuchikiByakuyaSpellTFunction2()
-{
-    float i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    float LocDamage = 3000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 40)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 400, .4f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 80)
-        {
-            PlaySoundWithVolumeACF(KuchikiByakuyaSounds[8], 100, 0);
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell three");
-        }
-        if (LocTime == 120)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell four");
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 2.f, .8f);
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 400), .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 170)
-        {
-            PlaySoundWithVolumeACF(KuchikiByakuyaSounds[7], 100, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell one");
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 2.f, .8f);
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 180)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            CreateNUnitsAtLocACF(2, 'u00U' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 4, 4, 4);
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            CreateNUnitsAtLocACF(1, 'u01I' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 400, .6f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 250)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[0], 60, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            i = 1;
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u01H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-                SetUnitScaleAndTime(GlobalUnit, .5f * i, .3f + i);
-                i = i + 1;
-            }
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Spark_Pink.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\Deadspirit Asuna.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "origin"));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, 'u01I' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            ClearAllData(hid);
-        }
-    }
-}
-void KuchikiByakuyaSpellTFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(KuchikiByakuyaSounds[9], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack Alternate One");
-    TimerStart(tmr, .01f, true, @KuchikiByakuyaSpellTFunction2);
-}
-void HeroInit6()
-{
-    trigger t;
-
-    KuchikiByakuyaSounds.resize( 10 );
-    KuchikiByakuyaSounds[0] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellDSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    KuchikiByakuyaSounds[1] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellQSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    KuchikiByakuyaSounds[2] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellQSound2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    KuchikiByakuyaSounds[3] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellWSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    KuchikiByakuyaSounds[4] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellESound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    KuchikiByakuyaSounds[5] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellRSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    KuchikiByakuyaSounds[6] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellRSound2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    KuchikiByakuyaSounds[7] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellTSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    KuchikiByakuyaSounds[8] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellTSound2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    KuchikiByakuyaSounds[9] = CreateSound("Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellTSound3.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@KuchikiByakuyaSpellWFunction1));
-    TriggerAddAction(t, @KuchikiByakuyaSpellWFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@KuchikiByakuyaSpellQFunction1));
-    TriggerAddAction(t, @KuchikiByakuyaSpellQFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@KuchikiByakuyaSpellEFunction1));
-    TriggerAddAction(t, @KuchikiByakuyaSpellEFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@KuchikiByakuyaSpellRFunction1));
-    TriggerAddAction(t, @KuchikiByakuyaSpellRFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@KuchikiByakuyaSpellTFunction1));
-    TriggerAddAction(t, @KuchikiByakuyaSpellTFunction3);
-}
-
-bool AkameSpellDFunction1()
-{
-    return GetSpellAbilityId() == 'A03K'  || GetSpellAbilityId() == 'A052' ;
-}
-void AkameSpellDFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20)
-        {
-            DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadReal(GameHashTable, hid, 0), .2f, .01f, 0);
-        }
-        if (LocTime == 30)
-        {
-            ClearAllData(hid);
-        }
-    }
-}
-void AkameSpellDFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    float LocDistance = - 400;
-    if (GetSpellAbilityId() == 'A052' )
-    {
-        LocDistance = - 350;
-        SetPlayerAbilityAvailable(GetOwningPlayer(GetTriggerUnit()), 'A03L' , true);
-        SetPlayerAbilityAvailable(GetOwningPlayer(GetTriggerUnit()), 'A052' , false);
-    }
-    PlaySoundWithVolumeACF(AkameSounds[0], 80, 0);
-    SetUnitTimeScale(GetTriggerUnit(), 2);
-    SetUnitFacing(GetTriggerUnit(), AngleBetweenPointsRW(GetUnitLoc(GetTriggerUnit()), GetSpellTargetLoc()));
-    PauseUnit(GetTriggerUnit(), true);
-    SetUnitInvulnerable(GetTriggerUnit(), true);
-    SetUnitAnimation(GetTriggerUnit(), "spell two");
-    SaveReal(GameHashTable, hid, 0, LocDistance);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    TimerStart(tmr, .01f, true, @AkameSpellDFunction2);
-}
-bool AkameSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A03L' ;
-}
-bool AkameSpellQFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DestroyEffect(AddSpecialEffect("GeneralEffects\\BloodEffect1.mdx", GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit())));
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-    }
-    return true;
-}
-void AkameSpellQFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20)
-        {
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03L' , false);
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A052' , true);
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            PlaySoundWithVolumeACF(AkameSounds[1], 60, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 200, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            CreateNUnitsAtLocACF(3, 'u02P' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 30);
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, .8f);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@AkameSpellQFunction2));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-        }
-        if (LocTime == 220)
-        {
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03L' , true);
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A052' , false);
-            ClearAllData(hid);
-        }
-    }
-}
-void AkameSpellQFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Four");
-    TimerStart(tmr, .01f, true, @AkameSpellQFunction3);
-}
-bool AkameSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A03M' ;
-}
-void AkameSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 200 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveInteger(GameHashTable, hid, 110, LoadInteger(GameHashTable, hid, 110) - 10);
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) / 20, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-        SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-        SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
-        SetUnitVertexColor(LoadUnitHandle(GameHashTable, hid, iCaster), 255, 255, 255, LoadInteger(GameHashTable, hid, 110));
-        if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 150)
-        {
-            PlaySoundWithVolumeACF(AkameSounds[2], 90, 0);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(5, 'u00T' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack");
-            ClearAllData(hid);
-        }
-        else
-        {
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-    }
-}
-void AkameSpellWFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Channel");
-    SaveInteger(GameHashTable, hid, 110, 255);
-    SaveEffectHandle(GameHashTable, hid, 108, AddSpecialEffectTarget("Abilities\\Weapons\\PhoenixMissile\\Phoenix_Missile.mdl", LoadUnitHandle(GameHashTable, hid, iCaster), "weapon"));
-    DestroyEffect(AddSpecialEffect("GeneralEffects\\BlackBlink.mdx", GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit())));
-    TimerStart(tmr, .01f, true, @AkameSpellWFunction2);
-}
-bool AkameSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A03N' ;
-}
-bool AkameSpellEFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 300 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(GetFilterUnit()));
-        LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 109), LoadLocationHandle(GameHashTable, hid, 103)), 200, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-    }
-    return true;
-}
-void AkameSpellEFunction4()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 30)
-        {
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) * .5f, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .1f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, 'u02P' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 3, 3, 3);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 450, Filter(@AkameSpellEFunction3));
-            ClearAllData(hid);
-        }
-    }
-}
-void AkameSpellEFunction5()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Four");
-        PlaySoundWithVolumeACF(AkameSounds[3], 100, 0);
-        TimerStart(tmr, .01f, true, @AkameSpellEFunction4);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool AkameSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A03O' ;
-}
-void AkameSpellRFunction10()
-{
-    float LocDamage;
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    int LocCount = LoadInteger(GameHashTable, hid, 1);
-    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-    if (StopSpell(hid, 1) == false)
-    {
-        if (IsCounted == true)
-        {
-            SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        }
-        else
-        {
-            SaveInteger(GameHashTable, hid, 1, LocCount + 1);
-        }
-        if (LocTime == 40)
-        {
-            LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 30;
-            PlaySoundWithVolumeACF(AkameSounds[0], 80, 0);
-            PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 400, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell two");
-            DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)), 400, 1, .01f, 0);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 140)
-        {
-            SaveBoolean(GameHashTable, hid, 10, false);
-            PlaySoundWithVolumeACF(AkameSounds[5], 80, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-        }
-        if (IsCounted == false)
-        {
-            if (LocCount == 2)
-            {
-                SaveInteger(GameHashTable, hid, 1, 1);
-                SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
-                if (LoadReal(GameHashTable, hid, 110) < 20)
-                {
-                    LocDamage = 25 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster));
-                    DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-                    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                    if (LoadReal(GameHashTable, hid, 110) < 16)
-                    {
-                        DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-                        SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 150, LoadReal(GameHashTable, hid, 110) * 24));
-                    }
-                    DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
-                    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-                    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-                }
-                else
-                {
-                    SaveBoolean(GameHashTable, hid, 10, true);
-                    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-                    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-                    SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 500, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
-                    ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                    if (GetLocalPlayer() == GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))
-                    {
-                        ClearSelection();
-                        SelectUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                    }
-                    SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-                    SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
-                    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), .1f);
-                    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack");
-                    DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
-                    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-                    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-                    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-                    SaveEffectHandle(GameHashTable, hid, 108, AddSpecialEffectTarget("Abilities\\Weapons\\PhoenixMissile\\Phoenix_Missile.mdl", LoadUnitHandle(GameHashTable, hid, iCaster), "weapon"));
-                }
-            }
-        }
-        if (LocTime == 190)
-        {
-            PlaySoundWithVolumeACF(AkameSounds[2], 90, 0);
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-        }
-        if (LocTime == 210)
-        {
-            PlaySoundWithVolumeACF(AkameSounds[4], 90, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 500, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 200, .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(3, 'u02P' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 4, 4, 4);
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "origin"));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 260)
-        {
-            LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            PlaySoundWithVolumeACF(GeneralSounds[0], 60, 0);
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(LoadEffectHandle(GameHashTable, hid, 108));
-            ClearAllData(hid);
-        }
-    }
-}
-void AkameSpellRFunction11()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveBoolean(GameHashTable, hid, 10, true);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 150, .6f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell three");
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-    TimerStart(tmr, .01f, true, @AkameSpellRFunction10);
-}
-bool AkameSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A03P' ;
-}
-void AkameSpellTFunction2()
-{
-    float i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    float LocDamage;
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 50)
-        {
-            LocDamage = 500 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50;
-            PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            CreateNUnitsAtLocACF(1, 'u01B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 2, 2, 2);
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 600, 1, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 75)
-        {
-            PlaySoundWithVolumeACF(AkameSounds[6], 80, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 600, .8f, .01f, 400);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 155)
-        {
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.75f);
-            PlaySoundWithVolumeACF(AkameSounds[1], 80, 0);
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 205)
-        {
-            LocDamage = 1000 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            PlaySoundWithVolumeACF(GeneralSounds[0], 60, 0);
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            ClearAllData(hid);
-        }
-    }
-}
-void AkameSpellTFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 150, .6f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell three");
-    StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
-    SaveEffectHandle(GameHashTable, hid, 108, AddSpecialEffectTarget("Abilities\\Weapons\\PhoenixMissile\\Phoenix_Missile.mdl", LoadUnitHandle(GameHashTable, hid, iCaster), "weapon"));
-    TimerStart(tmr, .01f, true, @AkameSpellTFunction2);
-}
-void HeroInit7()
-{
-    trigger t;
-
-    AkameSounds.resize( 7 );
-    AkameSounds[0] = CreateSound("Characters\\Akame\\Sounds\\AkameSpellDSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkameSounds[1] = CreateSound("Characters\\Akame\\Sounds\\AkameSpellQSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkameSounds[2] = CreateSound("Characters\\Akame\\Sounds\\AkameSpellWSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkameSounds[3] = CreateSound("Characters\\Akame\\Sounds\\AkameSpellESound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkameSounds[4] = CreateSound("Characters\\Akame\\Sounds\\AkameSpellRSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkameSounds[5] = CreateSound("Characters\\Akame\\Sounds\\AkameSpellRSound2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkameSounds[6] = CreateSound("Characters\\Akame\\Sounds\\AkameSpellTSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkameSpellDFunction1));
-    TriggerAddAction(t, @AkameSpellDFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkameSpellQFunction1));
-    TriggerAddAction(t, @AkameSpellQFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkameSpellWFunction1));
-    TriggerAddAction(t, @AkameSpellWFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkameSpellEFunction1));
-    TriggerAddAction(t, @AkameSpellEFunction5);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkameSpellRFunction1));
-    TriggerAddAction(t, @AkameSpellRFunction11);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkameSpellTFunction1));
-    TriggerAddAction(t, @AkameSpellTFunction3);
-}
-
-void ResetScathachQ(int hid)
-{
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A040' , true);
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Y' , false);
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Z' , false);
-}
-bool ScathachSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A040' ;
-}
-void ScathachSpellQFunction2()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 100 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0 && GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) > 0)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20)
-        {
-            if (GetUnitLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) >= 5)
-            {
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A040' , false);
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Y' , true);
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Z' , false);
-            }
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 250, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 107)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 107)), .35f, .02f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 2.5f, .7f);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-        if (LocTime == 55)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScale(GlobalUnit, 2, 2, 2);
-                i = i + 1;
-            }
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-    }
-    if (LocTime == 300 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) <= 0)
-    {
-        ResetScathachQ(hid);
-        ClearAllData(hid);
-    }
-}
-void ScathachSpellQFunction3()
-{
-    int i = 1;
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(ScathachSounds[2], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack");
-    while (true)
-    {
-        if (i > 5) break;
-        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
-        SetUnitScale(GlobalUnit, 2, 2, 2);
-        i = i + 1;
-    }
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-    TimerStart(tmr, .01f, true, @ScathachSpellQFunction2);
-}
-bool ScathachSpellQSecondFunction1()
-{
-    return GetSpellAbilityId() == 'A03Y' ;
-}
-void ScathachSpellQSecondFunction2()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 50 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0 && GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) > 0)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 10)
-        {
-            if (GetUnitLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) >= 8)
-            {
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A040' , false);
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Y' , false);
-                SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A03Z' , true);
-            }
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, .25f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 2.5f, 2.5f, 2.5f);
-            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScale(GlobalUnit, 2, 2, 2);
-                i = i + 1;
-            }
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 35)
-        {
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-        }
-    }
-    if (LocTime == 300 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) <= 0 || GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iTarget)) <= 0)
-    {
-        ResetScathachQ(hid);
-        ClearAllData(hid);
-    }
-}
-void ScathachSpellQSecondFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    PlaySoundWithVolumeACF(ScathachSounds[1], 100, 0);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 250), .1f, .02f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Three");
-    TimerStart(tmr, .01f, true, @ScathachSpellQSecondFunction2);
-}
-bool ScathachSpellQThirdFunction1()
-{
-    return GetSpellAbilityId() == 'A03Z' ;
-}
-void ScathachSpellQThirdFunction2()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 100 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20)
-        {
-            ResetScathachQ(hid);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack");
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-        }
-        if (LocTime == 45)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, .5f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScale(GlobalUnit, 2, 2, 2);
-                i = i + 1;
-            }
-            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, 2.5f, 2.5f, 2.5f);
-            ClearAllData(hid);
-        }
-    }
-}
-void ScathachSpellQThirdFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    PlaySoundWithVolumeACF(ScathachSounds[0], 100, 0);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Three");
-    LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 250), .2f, .02f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-    TimerStart(tmr, .01f, true, @ScathachSpellQThirdFunction2);
-}
-bool ScathachSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A041' ;
-}
-bool ScathachSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 2);
-    }
-    return true;
-}
-void ScathachSpellWFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 50)
-        {
-            PlaySoundWithVolumeACF(ScathachSounds[2], 100, 0);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@ScathachSpellWFunction2));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\LightningStrike1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\SlamEffect.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            DestroyEffect(LoadEffectHandle(GameHashTable, hid, 108));
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            ClearAllData(hid);
-        }
-    }
-}
-void ScathachSpellWFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        PlaySoundWithVolumeACF(ScathachSounds[3], 100, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Throw");
-        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), (((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))) + 0)));
-        DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .5f, .01f, 600);
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-        SaveEffectHandle(GameHashTable, hid, 108, AddSpecialEffectTarget("Abilities\\Weapons\\PhoenixMissile\\Phoenix_Missile.mdl", LoadUnitHandle(GameHashTable, hid, iCaster), "weapon"));
-        TimerStart(tmr, .01f, true, @ScathachSpellWFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-void ScathachSpellEFunctionRemoveUnits()
-{
-    KillUnit(GetEnumUnit());
-}
-bool ScathachSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A042' ;
-}
-void ScathachSpellEFunctionDisplaceDummy()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    SaveLocationHandle(GameHashTable, hid, 123, GetUnitLoc(GetEnumUnit()));
-    SaveLocationHandle(GameHashTable, hid, 124, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 123), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-    SetUnitPositionLoc(GetEnumUnit(), LoadLocationHandle(GameHashTable, hid, 124));
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 123));
-    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 124));
-}
-bool ScathachSpellEFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 75 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-    }
-    return true;
-}
-void ScathachSpellEFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0)
-    {
-        if (IsCounted == true)
-        {
-            SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        }
-        else
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-            ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @ScathachSpellEFunctionDisplaceDummy);
-            SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 150)
-            {
-                ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @ScathachSpellEFunctionRemoveUnits);
-                PlaySoundWithVolumeACF(ScathachSounds[5], 100, 0);
-                PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Seven");
-                DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
-                SaveBoolean(GameHashTable, hid, 10, true);
-            }
-            else
-            {
-                RemoveLocation(LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 102));
-                RemoveLocation(LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 103));
-                RemoveLocation(LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 107));
-            }
-        }
-        if (LocTime == 45)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 500, .4f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 2.f, 3.f);
-                i = i + 1;
-            }
-            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 3.f, 2.f);
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, 2.5f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, 'u01Y' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell four");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 85)
-        {
-            PlaySoundWithVolumeACF(ScathachSounds[6], 100, 0);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-            SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            CreateNUnitsAtLocACF(1, 'u01Z' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime >= 85)
-        {
-            SaveLocationHandle(GameHashTable, hid, 109, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
-            SaveLocationHandle(GameHashTable, hid, 115, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 116, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 109), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 109), LoadLocationHandle(GameHashTable, hid, 115))));
-            SetUnitPathing(LoadUnitHandle(GameHashTable, hid, 106), false);
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 116));
-            SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 115), 0);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 109)));
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 115), LoadLocationHandle(GameHashTable, hid, 116))) <= 100)
-            {
-                KillUnit(LoadUnitHandle(GameHashTable, hid, 106));
-                GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 109), 600, Filter(@ScathachSpellEFunction2));
-                i = 1;
-                while (true)
-                {
-                    if (i > 10) break;
-                    SaveLocationHandle(GameHashTable, hid, 125, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
-                    CreateNUnitsAtLocACF(1, 'u01Y' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 125), 36 * i);
-                    RemoveLocation(LoadLocationHandle(GameHashTable, hid, 125));
-                    i = i + 1;
-                }
-                DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
-                ClearAllData(hid);
-            }
-            else
-            {
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 115));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 116));
-            }
-        }
-    }
-    else
-    {
-        ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @ScathachSpellEFunctionRemoveUnits);
-        DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
-        ClearAllData(hid);
-    }
-}
-void ScathachSpellEFunction4()
-{
-    float i = 1;
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveBoolean(GameHashTable, hid, 10, false);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    SaveGroupHandle(GameHashTable, hid, 119, CreateGroup());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Channel");
-    while (true)
-    {
-        if (i > 10) break;
-        SaveLocationHandle(GameHashTable, hid, 123, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        SaveLocationHandle(GameHashTable, hid, 124, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 123), 80.f * i, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 123), LoadLocationHandle(GameHashTable, hid, 103)) - 160));
-        CreateNUnitsAtLocACF(1, 'u020' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 124), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 123), LoadLocationHandle(GameHashTable, hid, 103)));
-        GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 123));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 124));
-        SaveLocationHandle(GameHashTable, hid, 123, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 124, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 123), 80.f * i, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 123), LoadLocationHandle(GameHashTable, hid, 103)) + 160));
-        CreateNUnitsAtLocACF(1, 'u020' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 124), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 123), LoadLocationHandle(GameHashTable, hid, 103)));
-        GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 123));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 124));
-        i = i + 1;
-    }
-    TimerStart(tmr, .01f, true, @ScathachSpellEFunction3);
-}
-bool ScathachSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A043' ;
-}
-void ScathachSpellRFunction2()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.17f;
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 1)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            while (true)
-            {
-                if (i > 3) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 1.25f, 3.f);
-                i = i + 1;
-            }
-            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, 2.f);
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, .5f, 2.5f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Three");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 25 || LocTime == 50 || LocTime == 75 || LocTime == 100)
-        {
-            SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 107)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 107)), .2f, .01f, false, true, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            SetUnitAnimationWithRarity(LoadUnitHandle(GameHashTable, hid, iCaster), "attack", RARITY_RARE);
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 50, .25f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            while (true)
-            {
-                if (i > 3) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 1.25f, 3.f);
-                i = i + 1;
-            }
-            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 2.f, 2.f);
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, .5f, 2.5f);
-            CreateNUnitsAtLocACF(1, 'u00H' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-        if (LocTime == 125)
-        {
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Seven");
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            CreateNUnitsAtLocACF(1, 'u01Y' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 50, .25f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            ClearAllData(hid);
-        }
-    }
-}
-void ScathachSpellRFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(ScathachSounds[4], 80, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    SaveReal(GameHashTable, hid, 110, 0);
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) - 150, .2f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack");
-    TimerStart(tmr, .01f, true, @ScathachSpellRFunction2);
-}
-bool ScathachSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A044' ;
-}
-bool ScathachSpellTLinearMovementAction()
-{
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster))))
-    {
-        SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 109));
-    }
-    return true;
-}
-bool ScathachSpellTAoEDamageAction()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 300 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-    }
-    return true;
-}
-void ScathachSpellTFunction2()
-{
-    float i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime <= 100)
-        {
-            SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            SetUnitScale(LoadUnitHandle(GameHashTable, hid, 106), 1 + LoadReal(GameHashTable, hid, 110) / 50, 1 + LoadReal(GameHashTable, hid, 110) / 50, 1 + LoadReal(GameHashTable, hid, 110) / 50);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-        }
-        if (LocTime == 100)
-        {
-            PlaySoundWithVolumeACF(ScathachSounds[7], 100, 0);
-            PauseTimer(LoadTimerHandle(GameHashTable, hid, 105));
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            while (true)
-            {
-                if (i > 8) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 1.f + i / 5.f, 1.25f);
-                SetUnitVertexColor(GlobalUnit, 255, 255, 255, 75);
-                i = i + 1;
-            }
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-            DestroyEffect(LoadEffectHandle(GameHashTable, hid, 108));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Four");
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            SaveReal(GameHashTable, hid, 110, 0);
-        }
-        if (LocTime >= 100)
-        {
-            SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
-            SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), 50, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 103))));
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 109));
-            SetUnitPathing(LoadUnitHandle(GameHashTable, hid, 106), false);
-            SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 400, Filter(@ScathachSpellTLinearMovementAction));
-            if (DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 109)) <= 100)
-            {
-                PlaySoundWithVolumeACF(GeneralSounds[2], 80, 0);
-                GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 450, Filter(@ScathachSpellTAoEDamageAction));
-                i = 1;
-                while (true)
-                {
-                    if (i > 8) break;
-                    CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                    SetUnitScaleAndTime(GlobalUnit, 1.f + i / 5.f, 1.25f);
-                    SetUnitVertexColor(GlobalUnit, 255, 255, 255, 75);
-                    i = i + 1;
-                }
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-                ClearAllData(hid);
-            }
-        }
-    }
-}
-void ScathachSpellTFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(ScathachSounds[0], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell Three");
-    CreateNUnitsAtLocACF(1, 'u021' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-    SetUnitVertexColor(GlobalUnit, 128, 0, 0, 100);
-    SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
-    TimerStart(tmr, .01f, true, @ScathachSpellTFunction2);
-}
-void HeroInit8()
-{
-    trigger t;
-
-    ScathachSounds.resize( 8 );
-    ScathachSounds[0] = CreateSound("Characters\\Scathach\\Sounds\\ScathachSpellQFirstSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ScathachSounds[1] = CreateSound("Characters\\Scathach\\Sounds\\ScathachSpellQSecondSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ScathachSounds[2] = CreateSound("Characters\\Scathach\\Sounds\\ScathachSpellQThirdSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ScathachSounds[3] = CreateSound("Characters\\Scathach\\Sounds\\ScathachSpellWSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ScathachSounds[4] = CreateSound("Characters\\Scathach\\Sounds\\ScathachSpellESound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ScathachSounds[5] = CreateSound("Characters\\Scathach\\Sounds\\ScathachSpellRSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ScathachSounds[6] = CreateSound("Characters\\Scathach\\Sounds\\ScathachSpellRSound2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ScathachSounds[7] = CreateSound("Characters\\Scathach\\Sounds\\ScathachSpellTSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ScathachSpellQFunction1));
-    TriggerAddAction(t, @ScathachSpellQFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ScathachSpellQSecondFunction1));
-    TriggerAddAction(t, @ScathachSpellQSecondFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ScathachSpellQThirdFunction1));
-    TriggerAddAction(t, @ScathachSpellQThirdFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ScathachSpellWFunction1));
-    TriggerAddAction(t, @ScathachSpellWFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ScathachSpellRFunction1));
-    TriggerAddAction(t, @ScathachSpellRFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ScathachSpellEFunction1));
-    TriggerAddAction(t, @ScathachSpellEFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ScathachSpellTFunction1));
-    TriggerAddAction(t, @ScathachSpellTFunction3);
-}
-
-bool AkainuSpellDFunction1()
-{
-    return GetSpellAbilityId() == 'A049' ;
-}
-bool AkainuSpellDFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 12.5f + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.1f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        DestroyEffect(AddSpecialEffectTarget("Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl", GetFilterUnit(), "chest"));
-    }
-    return true;
-}
-void AkainuSpellDFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    if (GetUnitAbilityLevel(LoadUnitHandle(GameHashTable, hid, iCaster), 'B04H' ) > 0)
-    {
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 300, Filter(@AkainuSpellDFunction2));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-    }
-    else
-    {
-        ClearAllData(hid);
-    }
-}
-void AkainuSpellDFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(AkainuSounds[0], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveEffectHandle(GameHashTable, hid, 108, AddSpecialEffectTarget("GeneralEffects\\lavaspray.mdx", LoadUnitHandle(GameHashTable, hid, iCaster), "head"));
-    TimerStart(tmr, .5f, true, @AkainuSpellDFunction3);
-}
-bool AkainuSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A04A' ;
-}
-bool AkainuSpellQFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 150 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-    }
-    return true;
-}
-void AkainuSpellQFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 200 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.5f;
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 20, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-        SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-        SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-        SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
-        if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 100)
-        {
-            PlaySoundWithVolumeACF(AkainuSounds[4], 90, 0);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell two");
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-            CreateNUnitsAtLocACF(1, 'u025' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + 90);
-            KillUnit(GlobalUnit);
-            CreateNUnitsAtLocACF(1, 'u026' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            while (true)
-            {
-                if (i > 3) break;
-                SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 150, 120 * i));
-                CreateNUnitsAtLocACF(1, 'u027' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), 0);
-                KillUnit(GlobalUnit);
-                CreateNUnitsAtLocACF(1, 'u028' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), 120 * i);
-                SetUnitScaleAndTime(GlobalUnit, .5f, 1.5f);
-                KillUnit(GlobalUnit);
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-                i = i + 1;
-            }
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 2);
-            LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 300, .4f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 300, Filter(@AkainuSpellQFunction2));
-            ClearAllData(hid);
-        }
-        else
-        {
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-    }
-}
-void AkainuSpellQFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(AkainuSounds[5], 90, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell three");
-    TimerStart(tmr, .01f, true, @AkainuSpellQFunction3);
-}
-bool AkainuSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A04C' ;
-}
-bool AkainuSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-    }
-    return true;
-}
-void AkainuSpellWFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 50)
-        {
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\LightningStrike1.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            CreateNUnitsAtLocACF(1, 'u00R' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 270);
-            SetUnitScale(GlobalUnit, 1.5f, 1.5f, 1.5f);
-            while (true)
-            {
-                if (i > 4) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.25f);
-                CreateNUnitsAtLocACF(1, 'u028' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 90 * i);
-                SetUnitScaleAndTime(GlobalUnit, .5f, 1.5f);
-                KillUnit(GlobalUnit);
-                i = i + 1;
-            }
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 350, Filter(@AkainuSpellWFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void AkainuSpellWFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        PlaySoundWithVolumeACF(AkainuSounds[3], 90, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell one");
-        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-        DisplaceUnitWithArgs(LoadUnitHandle(GameHashTable, hid, iCaster), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), .5f, .01f, 600);
-        TimerStart(tmr, .01f, true, @AkainuSpellWFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-bool AkainuSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A04B' ;
-}
-void AkainuSpellEFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20)
-        {
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-            CreateNUnitsAtLocACF(1, 'u029' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SaveUnitHandle(GameHashTable, hid, 106, GlobalUnit);
-            SetUnitPathing(GlobalUnit, false);
-            CreateNUnitsAtLocACF(1, 'u028' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScale(GlobalUnit, .5f, .5f, .5f);
-            SaveUnitHandle(GameHashTable, hid, 126, GlobalUnit);
-            SetUnitPathing(GlobalUnit, false);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime > 20)
-        {
-            SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, 106)));
-            SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), 40, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 107), LoadLocationHandle(GameHashTable, hid, 103))));
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, 106), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            SetUnitPathing(LoadUnitHandle(GameHashTable, hid, 106), false);
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 106), LoadLocationHandle(GameHashTable, hid, 109));
-            SetUnitFacing1(LoadUnitHandle(GameHashTable, hid, 126), LoadUnitHandle(GameHashTable, hid, iTarget), 0);
-            SetUnitPathing(LoadUnitHandle(GameHashTable, hid, 126), false);
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, 126), LoadLocationHandle(GameHashTable, hid, 109));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl", LoadLocationHandle(GameHashTable, hid, 107)));
-            if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 109))) <= 300)
-            {
-                KillUnit(LoadUnitHandle(GameHashTable, hid, 106));
-                KillUnit(LoadUnitHandle(GameHashTable, hid, 126));
-                DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\BloodEffect1.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-                DestroyEffect(AddSpecialEffectTarget("GeneralEffects\\QQQQQ.mdx", LoadUnitHandle(GameHashTable, hid, iTarget), "chest"));
-                CreateNUnitsAtLocACF(1, 'u026' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107)));
-                CreateNUnitsAtLocACF(1, 'u025' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107)) + 90);
-                KillUnit(GlobalUnit);
-                DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            }
-            else
-            {
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-            }
-        }
-        if (LocTime == 50)
-        {
-            ClearAllData(hid);
-        }
-    }
-}
-void AkainuSpellEFunction3()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(AkainuSounds[2], 90, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack");
-    TimerStart(tmr, .01f, true, @AkainuSpellEFunction2);
-}
-bool AkainuSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A04D' ;
-}
-bool AkainuSpellRFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))) && IsUnitInGroup(GetFilterUnit(), LoadGroupHandle(GameHashTable, hid, 111)) == false)
-    {
-        StunUnitACF(GetFilterUnit(), 1);
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 111), GetFilterUnit());
-    }
-    return true;
-}
-void AkainuSpellRFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20)
-        {
-            SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1);
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 127, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 300, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            CreateNUnitsAtLocACF(1, 'u02A' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 127), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 127));
-            PlaySoundWithVolumeACF(AkainuSounds[5], 60, 0);
-            PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            IssueImmediateOrder(LoadUnitHandle(GameHashTable, hid, iCaster), "stop");
-        }
-        if (LocTime > 20)
-        {
-            SaveReal(GameHashTable, hid, 110, (LoadReal(GameHashTable, hid, 110) + 100));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), LoadReal(GameHashTable, hid, 110), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-            while (true)
-            {
-                if (i > 2) break;
-                SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 107), GetRandomReal(0, 500), GetRandomReal(0, 360)));
-                DestroyEffect(AddSpecialEffectLoc("abilities\\weapons\\catapult\\catapultmissile.mdl", LoadLocationHandle(GameHashTable, hid, 109)));
-                CreateNUnitsAtLocACF(1, 'u028' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), GetRandomReal(0, 360));
-                SetUnitScale(GlobalUnit, .5f, .5f, .5f);
-                KillUnit(GlobalUnit);
-                RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-                i = i + 1;
-            }
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 500, Filter(@AkainuSpellRFunction2));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-            if (LoadReal(GameHashTable, hid, 110) >= 1500)
-            {
-                DestroyGroup(LoadGroupHandle(GameHashTable, hid, 111));
-                ClearAllData(hid);
-            }
-        }
-    }
-}
-void AkainuSpellRFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(AkainuSounds[1], 90, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-    SaveGroupHandle(GameHashTable, hid, 111, CreateGroup());
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack");
-    TimerStart(tmr, .01f, true, @AkainuSpellRFunction3);
-}
-bool AkainuSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A04E' ;
-}
-bool AkainuSpellTFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 25 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * 0.05f;
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-    }
-    return true;
-}
-void AkainuSpellTFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    int LocCount = LoadInteger(GameHashTable, hid, 1);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        SaveReal(GameHashTable, hid, 110, LoadReal(GameHashTable, hid, 110) + 1);
-        SaveReal(GameHashTable, hid, 118, LoadReal(GameHashTable, hid, 118) + 1);
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        if (LoadReal(GameHashTable, hid, 118) == 1)
-        {
-            SaveReal(GameHashTable, hid, 5, - 90);
-        }
-        else
-        {
-            SaveReal(GameHashTable, hid, 5, 90);
-            SaveReal(GameHashTable, hid, 118, 0);
-        }
-        if (LoadReal(GameHashTable, hid, 110) < 50)
-        {
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 70, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)) + LoadReal(GameHashTable, hid, 5)));
-            CreateNUnitsAtLocACF(1, 'u02C' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 107), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            ShowUnit(GlobalUnit, false);
-            SetUnitScale(GlobalUnit, .5f, .5f, .5f);
-            SetUnitAnimation(GlobalUnit, "stand");
-            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .5f);
-            SetUnitFlyHeight(GlobalUnit, 4400, 6000);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-        if (LocTime > 10)
-        {
-            SaveInteger(GameHashTable, hid, 1, LocCount + 1);
-            SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 550), GetRandomReal(0, 360)));
-            CreateNUnitsAtLocACF(1, 'u02B' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 109), GetRandomReal(0, 360));
-            SetUnitScale(GlobalUnit, .65f, .65f, .65f);
-            UnitApplyTimedLife(GlobalUnit, 'BTLF' , .35f);
-            if (LocCount > 7)
-            {
-                GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 109), 500, Filter(@AkainuSpellTFunction2));
-            }
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-        }
-        if (LoadReal(GameHashTable, hid, 110) == 70)
-        {
-            ClearAllData(hid);
-        }
-    }
-}
-void AkainuSpellTFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(AkainuSounds[6], 90, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell");
-    TimerStart(tmr, .05f, true, @AkainuSpellTFunction3);
-}
-void HeroInit9()
-{
-    trigger t;
-
-    AkainuSounds.resize( 7 );
-    AkainuSounds[0] = CreateSound("Characters\\Akainu\\Sounds\\AkainuSpellDSound.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkainuSounds[1] = CreateSound("Characters\\Akainu\\Sounds\\AkainuSpellQSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkainuSounds[2] = CreateSound("Characters\\Akainu\\Sounds\\AkainuSpellWSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkainuSounds[3] = CreateSound("Characters\\Akainu\\Sounds\\AkainuSpellESound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkainuSounds[4] = CreateSound("Characters\\Akainu\\Sounds\\AkainuSpellRSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkainuSounds[5] = CreateSound("Characters\\Akainu\\Sounds\\AkainuSpellRSound2.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    AkainuSounds[6] = CreateSound("Characters\\Akainu\\Sounds\\AkainuSpellTSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkainuSpellDFunction1));
-    TriggerAddAction(t, @AkainuSpellDFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkainuSpellQFunction1));
-    TriggerAddAction(t, @AkainuSpellQFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkainuSpellWFunction1));
-    TriggerAddAction(t, @AkainuSpellWFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkainuSpellEFunction1));
-    TriggerAddAction(t, @AkainuSpellEFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkainuSpellRFunction1));
-    TriggerAddAction(t, @AkainuSpellRFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@AkainuSpellTFunction1));
-    TriggerAddAction(t, @AkainuSpellTFunction4);
-}
-bool ReinforceSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A04G' ;
-}
-bool ReinforceSpellQUnitDisplacement()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(GetFilterUnit()));
-        SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), 10, ((AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102))) + (60))));
-        SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, hid, 107));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-    }
-    return true;
-}
-bool ReinforceSpellQFunction2()
-{
-    timer tmr = GetExpiredTimer();
-    int hid = GetHandleId( tmr );
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 2);
-        SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(GetFilterUnit()));
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-        DisplaceUnitWithArgs(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 200, 1, .01f, 0);
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-    }
-    return true;
-}
-
-void ReinforceSpellQFunction3()
-{
-    timer tmr = GetExpiredTimer();
-    int hid = GetHandleId( tmr );
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 400., Filter(@ReinforceSpellQUnitDisplacement));
-        if (LocTime == 100)
-        {
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 400, Filter(@ReinforceSpellQFunction2));
-            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 270);
-            SetUnitScaleAndTime(GlobalUnit, 5.f, 2.f);
-            CreateNUnitsAtLocACF(1, 'u02D' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-            SetUnitTimeScale(GlobalUnit, .8f);
-            ClearAllData(hid);
-            DestroyTimer( tmr );
-        }
-    }
-}
-void ReinforceSpellQFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-
-    PlaySoundWithVolumeACF(ReinforceSounds[1], 60, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 102, GetSpellTargetLoc());
-    SaveReal(GameHashTable, hid, 10, 0);
-    CreateNUnitsAtLocACF(1, 'u009' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 270);
-    CreateNUnitsAtLocACF(1, 'u02F' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-    TimerStart(tmr, .01f, true, @ReinforceSpellQFunction3);
-}
-bool ReinforceSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A04H' ;
-}
-void ReinforceSpellWDummyFacing()
-{
-    SetUnitFacing1(GetEnumUnit(), LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iTarget), 0);
-}
-void ReinforceSpellWDummyMovement()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    SetUnitFlyHeight(GetEnumUnit(), 0, 99999);
-    SetUnitPositionLoc(GetEnumUnit(), LoadLocationHandle(GameHashTable, hid, 102));
-    SetUnitFacing(GetEnumUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 102)));
-}
-void ReinforceSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        ForGroup(LoadGroupHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 119), @ReinforceSpellWDummyFacing);
-        if (LocTime == 100)
-        {
-            PauseTimer(LoadTimerHandle(GameHashTable, hid, 105));
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\26.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            ForGroup(LoadGroupHandle(GameHashTable, hid, 119), @ReinforceSpellWDummyMovement);
-            DestroyGroup(LoadGroupHandle(GameHashTable, hid, 119));
-            StunUnitACF(LoadUnitHandle(GameHashTable, hid, iTarget), 1);
-            DamageTargetACF(DummyUnitDamageArr[ID], LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            ClearAllData(hid);
-        }
-    }
-}
-void ReinforceSpellWFunction3()
-{
-    float i = 1;
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(ReinforceSounds[2], 60, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    SaveGroupHandle(GameHashTable, hid, 119, CreateGroup());
-    while (true)
-    {
-        if (i > 20) break;
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(100, 1000), 36 * i));
-        CreateNUnitsAtLocACF(1, 'u02N' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)));
-        GroupAddUnit(LoadGroupHandle(GameHashTable, hid, 119), GlobalUnit);
-        CreateNUnitsAtLocACF(1, 'u02G' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 102)));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-        i = i + 1;
-    }
-    TimerStart(tmr, .01f, true, @ReinforceSpellWFunction2);
-}
-bool ReinforceSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A04I' ;
-}
-bool ReinforceSpellEFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 60 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'u02T' , GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit()), 0);
-        UnitShareVision(GetFilterUnit(), Player(PLAYER_NEUTRAL_PASSIVE), true);
-        IssueTargetOrder(GlobalUnit, "slow", GetFilterUnit());
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-    }
-    return true;
-}
-void ReinforceSpellEFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 100)
-        {
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            DestroyEffect(AddSpecialEffectLoc("Characters\\Reinforce\\ApocalypseStomp.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-            CreateNUnitsAtLocACF(1, 'u00Z' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-            GlobalUnit = CreateUnitAtLoc(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u00E' , LoadLocationHandle(GameHashTable, hid, 102), 0);
-            SetUnitScaleAndTime(GlobalUnit, 2.5f, .75f);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 450, Filter(@ReinforceSpellEFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void ReinforceSpellEFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(ReinforceSounds[3], 60, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 102, GetSpellTargetLoc());
-    TimerStart(tmr, .01f, true, @ReinforceSpellEFunction3);
-}
-bool ReinforceSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A04J' ;
-}
-bool ReinforceSpellRFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 150 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-    }
-    return true;
-}
-void ReinforceSpellRFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    if (StopSpell(hid, 1) == false)
-    {
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 20, AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103))));
-        SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 107));
-        SetUnitFacing2(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103), 0);
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\NewDirtEx.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-        if (R2I(DistanceBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 107))) <= 150)
-        {
-            CreateNUnitsAtLocACF(1, 'u00L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitTimeScale(GlobalUnit, 2);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@ReinforceSpellRFunction2));
-            ClearAllData(hid);
-        }
-        else
-        {
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-        }
-    }
-}
-void ReinforceSpellRFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(ReinforceSounds[0], 60, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitPathing(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "walk");
-    TimerStart(tmr, .01f, true, @ReinforceSpellRFunction3);
-}
-bool ReinforceSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A04K' ;
-}
-bool ReinforceSpellTUnitDisplacer1()
-{
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster))))
-    {
-        SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 107));
-    }
-    return true;
-}
-bool ReinforceSpellTUnitDisplacer2()
-{
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, GetHandleId(GetExpiredTimer()), iCaster))))
-    {
-        SetUnitPositionLoc(GetFilterUnit(), LoadLocationHandle(GameHashTable, GetHandleId(GetExpiredTimer()), 109));
-    }
-    return true;
-}
-bool ReinforceSpellTFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int ID = GetPlayerId(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 400 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 104, GetUnitLoc(GetFilterUnit()));
-        DamageTargetACF(DummyUnitDamageArr[ID], GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-        LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 103), LoadLocationHandle(GameHashTable, hid, 104)), 300, 1, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 104));
-    }
-    return true;
-}
-void ReinforceSpellTFunction3()
-{
-    float i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    bool IsCounted = LoadBoolean(GameHashTable, hid, 10);
-    if (GetUnitCurrentLife(LoadUnitHandle(GameHashTable, hid, iCaster)) > 0)
-    {
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        if (IsCounted == true)
-        {
-            SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        }
-        else
-        {
-            SaveReal(GameHashTable, hid, 110, (LoadReal(GameHashTable, hid, 110) - 16));
-            SaveLocationHandle(GameHashTable, hid, 107, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), LoadReal(GameHashTable, hid, 110), (((LoadReal(GameHashTable, hid, 110))) * (1))));
-            SaveLocationHandle(GameHashTable, hid, 109, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 103), LoadReal(GameHashTable, hid, 110), (((((LoadReal(GameHashTable, hid, 110))) * (1))) + (180))));
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 107), 450, Filter(@ReinforceSpellTUnitDisplacer1));
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 109), 450, Filter(@ReinforceSpellTUnitDisplacer2));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Undead\\DeathandDecay\\DeathandDecayTarget.mdl", LoadLocationHandle(GameHashTable, hid, 107)));
-            DestroyEffect(AddSpecialEffectLoc("Abilities\\Spells\\Undead\\DeathandDecay\\DeathandDecayTarget.mdl", LoadLocationHandle(GameHashTable, hid, 109)));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 109));
-            if (LoadReal(GameHashTable, hid, 110) <= 0)
-            {
-                SaveBoolean(GameHashTable, hid, 10, true);
-                SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack slam");
-            }
-        }
-        if (LocTime == 20)
-        {
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "attack slam");
-            CreateNUnitsAtLocACF(1, 'u02M' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            SaveUnitHandle(GameHashTable, hid, iTarget, GlobalUnit);
-            SetUnitAnimation(GlobalUnit, "birth");
-        }
-        if (LocTime == 70)
-        {
-            SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-            SaveLocationHandle(GameHashTable, hid, 113, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 130, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel");
-            while (true)
-            {
-                if (i > 5) break;
-                CreateNUnitsAtLocACF(1, 'u02L' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-                SetUnitScaleAndTime(GlobalUnit, i, .05f * i);
-                UnitApplyTimedLife(GlobalUnit, 'BTLF' , 1.8f);
-                i = i + 1;
-            }
-            CreateNUnitsAtLocACF(1, 'u02E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 113), 0);
-            SetUnitFlyHeight(GlobalUnit, 30, 99999);
-            UnitApplyTimedLife(GlobalUnit, 'BTLF' , 3.6f);
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-            RemoveLocation(LoadLocationHandle(GameHashTable, hid, 113));
-        }
-        if (LocTime == 230)
-        {
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell slam");
-        }
-        if (LocTime == 250)
-        {
-            CreateNUnitsAtLocACF(1, 'u02K' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            SetUnitScale(GlobalUnit, 10, 10, 10);
-            CreateNUnitsAtLocACF(1, 'u00Z' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            SetUnitScale(GlobalUnit, 10, 10, 10);
-            CreateNUnitsAtLocACF(1, 'u010' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            SetUnitScale(GlobalUnit, 3.5f, 3.5f, 3.5f);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 900, Filter(@ReinforceSpellTFunction2));
-            KillUnit(LoadUnitHandle(GameHashTable, hid, iTarget));
-            ClearAllData(hid);
-        }
-    }
-    else
-    {
-        ReinforceResetT(hid);
-    }
-}
-void ReinforceSpellTFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    SaveBoolean(GameHashTable, hid, 10, false);
-    PlaySoundWithVolumeACF(ReinforceSounds[5], 80, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-    SaveReal(GameHashTable, hid, 110, 800);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "spell channel");
-    TimerStart(tmr, .01f, true, @ReinforceSpellTFunction3);
-}
-void HeroInit10()
-{
-    trigger t;
-
-    ReinforceSounds.resize( 6 );
-    ReinforceSounds[0] = CreateSound("Characters\\Reinforce\\Sounds\\ReinforceSpellCSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ReinforceSounds[1] = CreateSound("Characters\\Reinforce\\Sounds\\ReinforceSpellQSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ReinforceSounds[2] = CreateSound("Characters\\Reinforce\\Sounds\\ReinforceSpellWSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ReinforceSounds[3] = CreateSound("Characters\\Reinforce\\Sounds\\ReinforceSpellESound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ReinforceSounds[4] = CreateSound("Characters\\Reinforce\\Sounds\\ReinforceSpellRSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ReinforceSounds[5] = CreateSound("Characters\\Reinforce\\Sounds\\ReinforceSpellTSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ReinforceSpellQFunction1));
-    TriggerAddAction(t, @ReinforceSpellQFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ReinforceSpellWFunction1));
-    TriggerAddAction(t, @ReinforceSpellWFunction3);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ReinforceSpellEFunction1));
-    TriggerAddAction(t, @ReinforceSpellEFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ReinforceSpellRFunction1));
-    TriggerAddAction(t, @ReinforceSpellRFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ReinforceSpellTFunction1));
-    TriggerAddAction(t, @ReinforceSpellTFunction4);
-}
-bool ArcueidSpellQFunction1()
-{
-    return GetSpellAbilityId() == 'A01N' ;
-}
-bool ArcueidSpellQFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 250 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 70 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 107, GetUnitLoc(GetFilterUnit()));
-        DisplaceUnitWithArgs(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 107)), - 300, .5f, .01f, 250);
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BloodEffect1.mdx", LoadLocationHandle(GameHashTable, hid, 107)));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 107));
-    }
-    return true;
-}
-void ArcueidSpellQFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 20)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[0], 50, 0);
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 300, Filter(@ArcueidSpellQFunction2));
-            ClearAllData(hid);
-        }
-    }
-}
-void ArcueidSpellQFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(ArcueidSounds[0], 100, 0);
-    SaveInteger(GameHashTable, hid, 0, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, CreateLocationACF(LoadLocationHandle(GameHashTable, hid, 102), 300, GetUnitFacing(LoadUnitHandle(GameHashTable, hid, iCaster))));
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 2);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell One");
-    TimerStart(tmr, .01f, true, @ArcueidSpellQFunction3);
-}
-bool ArcueidSpellWFunction1()
-{
-    return GetSpellAbilityId() == 'A01Y' ;
-}
-bool ArcueidSpellWFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = 350 + GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 60 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        SaveLocationHandle(GameHashTable, hid, 113, GetUnitLoc(GetFilterUnit()));
-        LinearDisplacement(GetFilterUnit(), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 113)), 200, .15f, .01f, false, false, "origin", "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl");
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 113));
-    }
-    return true;
-}
-void ArcueidSpellWFunction3()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    int i = 1;
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 10)
-        {
-            while (true)
-            {
-                if (i == 5) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), GetRandomReal(0, 360));
-                SetUnitScaleAndTime(GlobalUnit, GetRandomReal(1.5f, 2), 1.5f);
-                SetUnitVertexColor(GlobalUnit, 255, 255, 255, 185);
-                i = i + 1;
-            }
-        }
-        if (LocTime == 25)
-        {
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 102), 450, Filter(@ArcueidSpellWFunction2));
-        }
-        if (LocTime == 40)
-        {
-            ClearAllData(hid);
-        }
-    }
-}
-void ArcueidSpellWFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(ArcueidSounds[1], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveInteger(GameHashTable, hid, 0, 0);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.75f);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Five");
-    TimerStart(tmr, .01f, true, @ArcueidSpellWFunction3);
-}
-bool ArcueidSpellEFunction1()
-{
-    return GetSpellAbilityId() == 'A026' ;
-}
-bool ArcueidSpellEFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 100 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-    }
-    return true;
-}
-void ArcueidSpellEFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 15)
-        {
-            ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-        }
-        if (LocTime == 25)
-        {
-            PlaySoundWithVolumeACF(GeneralSounds[3], 60, 0);
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103));
-            ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            if (GetLocalPlayer() == GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))
-            {
-                ClearSelection();
-                SelectUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            }
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@ArcueidSpellEFunction2));
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\SlamEffect.mdx", LoadLocationHandle(GameHashTable, hid, 103)));
-            while (true)
-            {
-                if (i == 3) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-                SetUnitScaleAndTime(GlobalUnit, GetRandomReal(1.5f, 2.f), 1.5f);
-                SetUnitVertexColor(GlobalUnit, 255, 255, 255, 185);
-                i = i + 1;
-            }
-            ClearAllData(hid);
-        }
-    }
-}
-void ArcueidSpellEFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        PlaySoundWithVolumeACF(ArcueidSounds[2], 100, 0);
-        SaveInteger(GameHashTable, hid, 0, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack Two");
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-        TimerStart(tmr, .01f, true, @ArcueidSpellEFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-
-bool ArcueidSpellRFunction1()
-{
-    return GetSpellAbilityId() == 'A027' ;
-}
-
-bool ArcueidSpellRFunction2()
-{
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        StunUnitACF(GetFilterUnit(), 1);
-    }
-    return true;
-}
-
-void ArcueidSpellRFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    float LocDamage;
-
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 15)
-        {
-            LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 150 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * .5f;
-            PlaySoundWithVolumeACF(GeneralSounds[1], 60, 0);
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-            SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
-            SetUnitVertexColor(GlobalUnit, 255, 255, 255, 185);
-            DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A04U' , false);
-            SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 600, 4000);
-        }
-        if (LocTime == 25)
-        {
-            DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-        }
-        if (LocTime == 30)
-        {
-            UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
-            SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'A04U' , false);
-            SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 700, 4000);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack Two");
-        }
-    }
-    if (LocTime == 60)
-    {
-        LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 50 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true) * .5f;
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), LoadUnitHandle(GameHashTable, hid, iTarget), LocDamage);
-        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)));
-        SetUnitScaleAndTime(GlobalUnit, 1.5f, 1.5f);
-        SetUnitVertexColor(GlobalUnit, 255, 255, 255, 185);
-        SetUnitFlyHeight(GlobalUnit, 800, 99999);
-        SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iTarget), 0, 2000);
-        SetUnitFlyHeight(LoadUnitHandle(GameHashTable, hid, iCaster), 0, 99999);
-        LinearDisplacement(LoadUnitHandle(GameHashTable, hid, iTarget), AngleBetweenPointsRW(LoadLocationHandle(GameHashTable, hid, 102), LoadLocationHandle(GameHashTable, hid, 103)), 250, .2f, .01f, false, false, "origin", "");
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 102));
-        RemoveLocation(LoadLocationHandle(GameHashTable, hid, 103));
-    }
-
-    if (LocTime == 80)
-    {
-        SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-        CreateNUnitsAtLocACF(1, 'u00D' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), GetRandomReal(0, 360));
-        SetUnitScale(GlobalUnit, 1.5f, 1.5f, 1.5f);
-        while (true)
-        {
-            if (i == 3) break;
-            CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-            SetUnitScaleAndTime(GlobalUnit, GetRandomReal(1.5f, 2.f), 1.5f);
-            SetUnitVertexColor(GlobalUnit, 255, 255, 255, 185);
-            i = i + 1;
-        }
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A04U' );
-        UnitRemoveAbility(LoadUnitHandle(GameHashTable, hid, iCaster), 'A04U' );
-        GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 400, Filter(@ArcueidSpellRFunction2));
-        ClearAllData(hid);
-    }
-}
-
-void ArcueidSpellRFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    PlaySoundWithVolumeACF(ArcueidSounds[3], 100, 0);
-    SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-    SaveUnitHandle(GameHashTable, hid, iTarget, GetSpellTargetUnit());
-    SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-    SaveLocationHandle(GameHashTable, hid, 103, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iTarget)));
-    UnitAddAbility(LoadUnitHandle(GameHashTable, hid, iTarget), 'A054' );
-    SetPlayerAbilityAvailable(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iTarget)), 'A054' , false);
-    PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    SetUnitTimeScale(LoadUnitHandle(GameHashTable, hid, iCaster), 1.75f);
-    SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Attack Slam");
-    TimerStart(tmr, .01f, true, @ArcueidSpellRFunction3);
-}
-
-bool ArcueidSpellTFunction1()
-{
-    return GetSpellAbilityId() == 'A02A' ;
-}
-
-bool ArcueidSpellTFunction2()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    float LocDamage = GetHeroLevel(LoadUnitHandle(GameHashTable, hid, iCaster)) * 200 + GetHeroInt(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-    if (IsUnitEnemy(GetFilterUnit(), GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster))))
-    {
-        while (true)
-        {
-            if (i == 3) break;
-            GlobalUnit = CreateUnit(GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), 'u011' , GetUnitX(GetFilterUnit()), GetUnitY(GetFilterUnit()), i * GetRandomInt(60, 90));
-            UnitAddAbility(GlobalUnit, 'A04U' );
-            SetUnitFlyHeight(GlobalUnit, GetUnitFlyHeight(GetFilterUnit()) + 50, 9999);
-            SetUnitScaleAndTime(GlobalUnit, .75f, .75f);
-            i = i + 1;
-        }
-        DamageTargetACF(LoadUnitHandle(GameHashTable, hid, iCaster), GetFilterUnit(), LocDamage);
-        DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "chest"));
-        DestroyEffect(AddSpecialEffectTarget("Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", GetFilterUnit(), "head"));
-    }
-    return true;
-}
-
-void ArcueidSpellTFunction3()
-{
-    int i = 1;
-    int hid = GetHandleId(GetExpiredTimer());
-    int LocTime = LoadInteger(GameHashTable, hid, 0);
-    if (StopSpell(hid, 0) == false)
-    {
-        SaveInteger(GameHashTable, hid, 0, LocTime + 1);
-        if (LocTime == 25)
-        {
-            ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), false);
-            SetUnitPositionLoc(LoadUnitHandle(GameHashTable, hid, iCaster), LoadLocationHandle(GameHashTable, hid, 103));
-        }
-        if (LocTime == 45)
-        {
-            GroupEnumUnitsInRangeOfLoc(GroupEnum, LoadLocationHandle(GameHashTable, hid, 103), 600, Filter(@ArcueidSpellTFunction2));
-        }
-        if (LocTime == 50)
-        {
-            ShowUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Stand");
-            if (GetLocalPlayer() == GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)))
-            {
-                ClearSelection();
-                SelectUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-            }
-            while (true)
-            {
-                if (i == 3) break;
-                CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 103), 0);
-                SetUnitScaleAndTime(GlobalUnit, 2.f, GetRandomReal(.5f, 2));
-                i = i + 1;
-            }
-            ClearAllData(hid);
-        }
-    }
-}
-
-void ArcueidSpellTFunction4()
-{
-    timer tmr = CreateTimer();
-    int hid = GetHandleId(tmr);
-    if (IsTerrainPathable(GetSpellTargetX(), GetSpellTargetY(), PATHING_TYPE_WALKABILITY) == false)
-    {
-        PlaySoundWithVolumeACF(ArcueidSounds[4], 100, 0);
-        SaveInteger(GameHashTable, hid, 0, 0);
-        SaveUnitHandle(GameHashTable, hid, iCaster, GetTriggerUnit());
-        SaveLocationHandle(GameHashTable, hid, 102, GetUnitLoc(LoadUnitHandle(GameHashTable, hid, iCaster)));
-        SaveLocationHandle(GameHashTable, hid, 103, GetSpellTargetLoc());
-        PauseUnit(LoadUnitHandle(GameHashTable, hid, iCaster), true);
-        CreateNUnitsAtLocACF(1, 'u00E' , GetOwningPlayer(LoadUnitHandle(GameHashTable, hid, iCaster)), LoadLocationHandle(GameHashTable, hid, 102), 0);
-        SetUnitAnimation(LoadUnitHandle(GameHashTable, hid, iCaster), "Spell Six");
-        DestroyEffect(AddSpecialEffectLoc("GeneralEffects\\BlackBlink.mdx", LoadLocationHandle(GameHashTable, hid, 102)));
-        TimerStart(tmr, .01f, true, @ArcueidSpellTFunction3);
-    }
-    else
-    {
-        IssueImmediateOrder(GetTriggerUnit(), "stop");
-        DestroyTimer(tmr);
-    }
-}
-
-void HeroInit11()
-{
-    trigger t;
-
-    ArcueidSounds.resize( 5 );
-    ArcueidSounds[0] = CreateSound("Characters\\Arcueid\\Sounds\\ArcueidSpellQSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ArcueidSounds[1] = CreateSound("Characters\\Arcueid\\Sounds\\ArcueidSpellWSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ArcueidSounds[2] = CreateSound("Characters\\Arcueid\\Sounds\\ArcueidSpellESound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ArcueidSounds[3] = CreateSound("Characters\\Arcueid\\Sounds\\ArcueidSpellRSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    ArcueidSounds[4] = CreateSound("Characters\\Arcueid\\Sounds\\ArcueidSpellTSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ArcueidSpellQFunction1));
-    TriggerAddAction(t, @ArcueidSpellQFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ArcueidSpellWFunction1));
-    TriggerAddAction(t, @ArcueidSpellWFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ArcueidSpellEFunction1));
-    TriggerAddAction(t, @ArcueidSpellEFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ArcueidSpellRFunction1));
-    TriggerAddAction(t, @ArcueidSpellRFunction4);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(t, Condition(@ArcueidSpellTFunction1));
-    TriggerAddAction(t, @ArcueidSpellTFunction4);
-}
-
-void HeroInit( int id )
-{
-    switch( id )
-    {
-        case 1:
-        HeroInit1( );
-        break;
-        case 2:
-        HeroInit2( );
-        break;
-        case 3:
-        HeroInit3( );
-        break;
-        case 4:
-        HeroInit4( );
-        break;
-        case 5:
-        HeroInit5( );
-        break;
-        case 6:
-        HeroInit6( );
-        break;
-        case 7:
-        HeroInit7( );
-        break;
-        case 8:
-        HeroInit8( );
-        break;
-        case 9:
-        HeroInit9( );
-        break;
-        case 10:
-        HeroInit10( );
-        break;
-        case 11:
-        HeroInit11( );
-        break;
-    }
-}
-
-void DefaultCommandsTriggers()
-{
-    trigger t;
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-save", true);
-    TriggerAddAction(t, @SaveLocationAction);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyPlayerEventRW(t, EVENT_PLAYER_END_CINEMATIC);
-    TriggerAddAction(t, @ESCToSaveAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-t", true);
-    TriggerAddCondition(t, Condition(@TeleportationCommandCondition));
-    TriggerAddAction(t, @TeleportationCommandAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-combinations", true);
-    TriggerAddAction(t, @ItemCombinationsCommandAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-1", true);
-    TriggerAddAction(t, @DisplayHealthByTextAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-2", true);
-    TriggerAddAction(t, @PressEscToSaveLocationActivationAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-3", true);
-    TriggerAddAction(t, @DisplayYourSavedPositionAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-4", true);
-    TriggerAddAction(t, @DisplayYourTeammatesSavedPositionAction);
-
-    t = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(t, EVENT_PLAYER_UNIT_SELECTED);
-    TriggerAddAction(t, @HealthDisplayReaderAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-commands", true);
-    TriggerAddAction(t, @DisplayCommandsAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-TestCommands", true);
-    TriggerAddAction(t, @TestCommandsDisplayAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-Contacts", true);
-    TriggerAddAction(t, @MapInfoAndContactsActions);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-non", true);
-    TriggerAddAction(t, @EnableNotificationAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-noff", true);
-    TriggerAddAction(t, @DisableNotificationAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-clear", true);
-    TriggerAddAction(t, @ClearMessagesAction);
-}
-
-void CreateLocalTimers()
-{
-    TimerStart(CreateTimer(), 30.f, true, @CommandsNotificationAction);
-}
-
-void GameTriggers()
-{
-    int i = 0;
-    TR_SelectionMode = CreateTrigger();
-    TriggerRegisterDialogEvent(TR_SelectionMode, ModeSelectionDialog);
-    TriggerAddAction(TR_SelectionMode, @ModeSelectionFunction2);
-    while (true)
-    {
-        if (i > 7) break;
-        if (GetPlayerController(Player(i)) == MAP_CONTROL_USER && GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING)
-        {
-            TotalPlayers = TotalPlayers + 1;
-            if (GetPlayerTeam(Player(i)) == 0)
-            {
-                TeamPlayers[0]++;
-            }
-            else
-            {
-                TeamPlayers[1]++;
-            }
-        }
-        i = i + 1;
-    }
-    i = 0;
-    GameTrigArr[0] = CreateTrigger();
-    while (true)
-    {
-        if (i > 9) break;
-        TriggerRegisterPlayerAllianceChange(GameTrigArr[0], Player(i), ALLIANCE_SHARED_CONTROL);
-        i = i + 1;
-    }
-    TriggerAddAction(GameTrigArr[0], @DisableSharedUnitsAct);
-    GameTrigArr[1] = CreateTrigger();
-    TriggerRegisterTimerEvent(GameTrigArr[1], 0, false);
-    TriggerAddAction(GameTrigArr[1], @MultiBoardCreationFunction1);
-    GameTrigArr[4] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[4], EVENT_PLAYER_UNIT_DEATH);
-    TriggerAddCondition(GameTrigArr[4], Condition(@RegisterHeroDeathCondition));
-    TriggerAddAction(GameTrigArr[4], @RegisterHeroDeathAction);
-    GameTrigArr[5] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[5], EVENT_PLAYER_UNIT_DEATH);
-    TriggerAddCondition(GameTrigArr[5], Condition(@WinGameEndCondition1));
-    TriggerAddAction(GameTrigArr[5], @WinGameEndFunction1);
-    GameTrigArr[6] = CreateTrigger();
-    TriggerRegisterAnyPlayerEventRW(GameTrigArr[6], EVENT_PLAYER_LEAVE);
-    TriggerAddAction(GameTrigArr[6], @RegisterPlayerLeaveAction);
-    GameTrigArr[7] = CreateTrigger();
-    DisableTrigger(GameTrigArr[7]);
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[7], EVENT_PLAYER_UNIT_SELECTED);
-    TriggerAddAction(GameTrigArr[7], @HeroSelectionAction);
-    GameTrigArr[8] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[8], EVENT_PLAYER_HERO_LEVEL);
-    TriggerAddAction(GameTrigArr[8], @HeroLevelUpCheck);
-    GameTrigArr[9] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[9], EVENT_PLAYER_UNIT_DEATH);
-    TriggerAddAction(GameTrigArr[9], @MainBossStatBoostAction);
-    GameTrigArr[10] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[10], EVENT_PLAYER_UNIT_PICKUP_ITEM);
-    TriggerAddCondition(GameTrigArr[10], Condition(@CombineItemsCondition));
-    TriggerAddAction(GameTrigArr[10], @CombineItemsAction);
-    GameTrigArr[11] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[11], EVENT_PLAYER_UNIT_DROP_ITEM);
-    TriggerAddAction(GameTrigArr[11], @MapItemRemovalAction);
-    GameTrigArr[12] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[12], EVENT_PLAYER_HERO_LEVEL);
-    TriggerAddAction(GameTrigArr[12], @HeroAbilityUnlockAction);
-    GameTrigArr[13] = CreateTrigger();
-    TriggerRegisterUnitEvent(GameTrigArr[13], MainBossUnit1, EVENT_UNIT_DEATH);
-    TriggerAddAction(GameTrigArr[13], @BossKillFunction1);
-    GameTrigArr[14] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[14], EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddAction(GameTrigArr[14], @AbilityTextTagCreationAction);
-    GameTrigArr[15] = CreateTrigger();
-    TriggerRegisterDialogEvent(GameTrigArr[15], KillSelectionDialog);
-    TriggerAddAction(GameTrigArr[15], @KillSelectionDialogAction);
-    GameTrigArr[16] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[16], EVENT_PLAYER_UNIT_PICKUP_ITEM);
-    TriggerAddAction(GameTrigArr[16], @CloakOfFlamesPickUp);
-    GameTrigArr[17] = CreateTrigger();
-    TriggerRegisterPlayerUnitEvent(GameTrigArr[17], Player(PLAYER_NEUTRAL_AGGRESSIVE), EVENT_PLAYER_UNIT_DEATH, nil);
-    TriggerAddCondition(GameTrigArr[17], Condition(@KilledBossesCountCondition));
-    TriggerAddAction(GameTrigArr[17], @KilledBossesCountAction);
-    GameTrigArr[18] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[18], EVENT_PLAYER_UNIT_PICKUP_ITEM);
-    TriggerAddAction(GameTrigArr[18], @ItemOwnerSettingAction);
-    GameTrigArr[19] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[19], EVENT_PLAYER_UNIT_PICKUP_ITEM);
-    TriggerAddAction(GameTrigArr[19], @PersonalItemAction1);
-    GameTrigArr[20] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[20], EVENT_PLAYER_UNIT_PICKUP_ITEM);
-    TriggerAddCondition(GameTrigArr[20], Condition(@StrTomeUsageCondition));
-    TriggerAddAction(GameTrigArr[20], @StrTomeUsageAction);
-    GameTrigArr[21] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[21], EVENT_PLAYER_UNIT_PICKUP_ITEM);
-    TriggerAddCondition(GameTrigArr[21], Condition(@AgiTomeUsageCondition));
-    TriggerAddAction(GameTrigArr[21], @AgiTomeUsageAction);
-    GameTrigArr[22] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[22], EVENT_PLAYER_UNIT_PICKUP_ITEM);
-    TriggerAddCondition(GameTrigArr[22], Condition(@IntTomeUsageCondition));
-    TriggerAddAction(GameTrigArr[22], @IntTomeUsageAction);
-    GameTrigArr[23] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[23], EVENT_PLAYER_UNIT_USE_ITEM);
-    TriggerAddCondition(GameTrigArr[23], Condition(@ShadowScrollItemUsageCondition));
-    TriggerAddAction(GameTrigArr[23], @ShadowScrollItemUsageAction1);
-    GameTrigArr[24] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[24], EVENT_PLAYER_UNIT_USE_ITEM);
-    TriggerAddCondition(GameTrigArr[24], Condition(@RedTabletUsageCondition));
-    TriggerAddAction(GameTrigArr[24], @RedTabletUsageAction);
-    GameTrigArr[25] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[25], EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(GameTrigArr[25], Condition(@KunaiOfBouldersCondition));
-    TriggerAddAction(GameTrigArr[25], @KunaiOfBouldersAction);
-    GameTrigArr[26] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[26], EVENT_PLAYER_UNIT_SPELL_EFFECT);
-    TriggerAddCondition(GameTrigArr[26], Condition(@AntiTeleportationStoneCondition));
-    TriggerAddAction(GameTrigArr[26], @AntiTeleportationStoneAction);
-    GameTrigArr[27] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[27], EVENT_PLAYER_UNIT_USE_ITEM);
-    TriggerAddCondition(GameTrigArr[27], Condition(@ScrollOfTeleportationCondition));
-    TriggerAddAction(GameTrigArr[27], @ScrollOfTeleportationAction);
-    GameTrigArr[28] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[28], EVENT_PLAYER_UNIT_DEATH);
-    TriggerAddAction(GameTrigArr[28], @ReviveSystemAction);
-    GameTrigArr[29] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[29], EVENT_PLAYER_UNIT_USE_ITEM);
-    TriggerAddCondition(GameTrigArr[29], Condition(@KawarimiUseCondition));
-    TriggerAddAction(GameTrigArr[29], @KawarimiUseAction);
-    GameTrigArr[30] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[30], EVENT_PLAYER_UNIT_DEATH);
-    TriggerAddCondition(GameTrigArr[30], Condition(@KawarimiBreakCondition));
-    TriggerAddAction(GameTrigArr[30], @KawarimiBreakAction);
-    GameTrigArr[31] = CreateTrigger();
-    TriggerRegisterAnyUnitEventRW(GameTrigArr[31], EVENT_PLAYER_UNIT_PICKUP_ITEM);
-    TriggerAddAction(GameTrigArr[31], @ItemCombinationAction);
-
-    trigger t = CreateTrigger( );
-    TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_DAMAGED );
-    TriggerAddAction( t, @OnPlayerUnitDamaged );
-}
-
-void GameSounds()
-{
-    GeneralSounds.resize( 4 );
-    GeneralSounds[0] = CreateSound("GeneralSounds\\BloodFlow.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    GeneralSounds[1] = CreateSound("GeneralSounds\\KickSound1.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    GeneralSounds[2] = CreateSound("GeneralSounds\\GlassShatterSound.mp3", false, false, false, 10, 10, "DefaultEAXON");
-    GeneralSounds[3] = CreateSound("GeneralSounds\\SlamSound.mp3", false, false, false, 10, 10, "DefaultEAXON");
-}
-
-void EnterRectEventsFunction()
-{
-    trigger t;
-    region reg;
-
-    worldBounds = GetWorldBounds();
-
-    t = CreateTrigger();
-    reg = CreateRegion( );
-    RegionAddRect(reg, worldBounds );
-    TriggerRegisterEnterRegion(t, reg, nil);
-    TriggerAddAction(t, @EnteringUnitCheckAction);
-
-    t = CreateTrigger();
-
-    reg = CreateRegion( );
-    RegionAddRect(reg, TeamStartRectArr[0]);
-    TriggerRegisterEnterRegion(t, reg, nil);
-
-    reg = CreateRegion( );
-    RegionAddRect(reg, TeamStartRectArr[1]);
-    TriggerRegisterEnterRegion(t, reg, nil);
-
-    TriggerAddAction(t, @CreepAndIllusionRemoverAction);
-
-    t = CreateTrigger();
-    reg = CreateRegion( );
-    RegionAddRect(reg, worldBounds );
-    TriggerRegisterEnterRegion(t, reg, nil);
-    TriggerAddCondition(t, Condition(@DummyUnitRemovalCondition));
-    TriggerAddAction(t, @DummyUnitRemovalAction);
-
-    t = CreateTrigger();
-    reg = CreateRegion( );
-    RegionAddRect(reg, CircleRectArr[0]);
-    TriggerRegisterEnterRegion(t, reg, nil);
-    TriggerAddCondition(t, Condition(@UnitCreationWithCircleCond));
-    TriggerAddAction(t, @UnitCreationOnTopLeftAction);
-
-    t = CreateTrigger();
-    reg = CreateRegion( );
-    RegionAddRect(reg, CircleRectArr[1]);
-    TriggerRegisterEnterRegion(t, reg, nil);
-    TriggerAddCondition(t, Condition(@UnitCreationWithCircleCond));
-    TriggerAddAction(t, @UnitCreationOnBottomLeftAction);
-
-    t = CreateTrigger();
-    reg = CreateRegion( );
-    RegionAddRect(reg, CircleRectArr[3]);
-    TriggerRegisterEnterRegion(t, reg, nil);
-    TriggerAddCondition(t, Condition(@UnitCreationWithCircleCond));
-    TriggerAddAction(t, @UnitCreationOnTopRightAction);
-
-    t = CreateTrigger();
-    reg = CreateRegion( );
-    RegionAddRect(reg, CircleRectArr[2]);
-    TriggerRegisterEnterRegion(t, reg, nil);
-    TriggerAddCondition(t, Condition(@UnitCreationWithCircleCond));
-    TriggerAddAction(t, @UnitCreationOnBottomRightAction);
-}
-
-void AllRegions()
-{
-    CircleRectArr[1] = Rect( - 2688, - 1920, - 2432, - 1600);
-    CircleRectArr[3] = Rect(2464, - 1920, 2720, - 1600);
-    CircleRectArr[0] = Rect( - 2688, 704, - 2432, 960);
-    CircleRectArr[2] = Rect(2464, 704, 2720, 960);
-    TeamStartRectArr[0] = Rect( - 5440, - 1440, - 3520, 480);
-    TeamStartRectArr[1] = Rect(3520, - 1440, 5440, 480);
-}
-
-void CreateAllUnits()
-{
-    int i = 1;
-    int NeutID = 1;
-    int NeutX = 0;
-    int NeutY = 0;
-    int ID = 1;
-    int LocX = - 5184;
-    int LocY = 0;
-    bool RevInt = false;
-    array<rect> LocRectArr( 6 );
-    array<int> NeutralIntArr( 6 );
-
-    LocRectArr[1] = CircleRectArr[0];
-    LocRectArr[2] = CircleRectArr[1];
-    LocRectArr[3] = Rect( - 672, - 1184, 672, 160);
-    LocRectArr[4] = CircleRectArr[3];
-    LocRectArr[5] = CircleRectArr[2];
-    NeutralIntArr[1] = 'mtk3' ;
-    NeutralIntArr[2] = 'mtk4' ;
-    NeutralIntArr[3] = 'mtk5' ;
-    NeutralIntArr[4] = 'mtk1' ;
-    NeutralIntArr[5] = 'mtk2' ;
-    while (true)
-    {
-        if (i > 10) break;
-        if (i == 6)
-        {
-            LocX = 5120;
-            LocY = 0;
-            ID = 1;
-        }
-        GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'wgt1' , LocX, LocY, 270);
-        WaygateSetDestination(GlobalUnit, GetRectCenterX(LocRectArr[ID]), GetRectCenterY(LocRectArr[ID]));
-        WaygateActivate(GlobalUnit, true);
-        LocY = LocY - 256;
-        ID = ID + 1;
-        if (i != 3 && i < 6)
-        {
-            CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), 'cofp' , GetRectCenterX(LocRectArr[i]), GetRectCenterY(LocRectArr[i]), 270);
-        }
-        if (i < 3)
-        {
-            NeutX = 4032;
-            NeutY = - 128;
-            NeutID = 1;
-            if (i == 2)
-            {
-                RevInt = true;
-            }
-            while (true)
-            {
-                if (NeutID > 5) break;
-                if (NeutID == 2)
-                {
-                    NeutX = NeutX + 100;
-                }
-                if (NeutID == 3)
-                {
-                    NeutX = 4032;
-                    NeutY = - 1088;
-                }
-                CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), NeutralIntArr[NeutID], SwapAmount(NeutX, RevInt), NeutY, 270);
-                NeutX = NeutX + 256;
-                NeutID = NeutID + 1;
-            }
-            GlobalUnit = CreateUnit(Player(12 - i), 'base' , SwapAmount(4350, RevInt), - 500, 270);
-            SetUnitVertexColor(GlobalUnit, 255, 255, 255, 75);
-        }
-        i = i + 1;
-    }
-    ID = GetRandomInt(1, 10);
-    if ((TeamPlayers[0] != 0 && TeamPlayers[1] != 0) && (TeamOneSelected[ID] == false && TeamTwoSelected[ID] == false))
-    {
-        HeroInit(ID);
-    }
-    MainBossUnit1 = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), HeroIDArray[ID], 0.f, - 3900.f, 90);
-    StartAI(MainBossUnit1);
-    SetHeroLevel(MainBossUnit1, 50, false);
-    SetHeroStr(MainBossUnit1, 5000, false);
-    SetHeroAgi(MainBossUnit1, 5000, false);
-    SetHeroInt(MainBossUnit1, 5000, false);
-    UnitAddAbility(MainBossUnit1, 'A017' );
-    UnitAddAbility(MainBossUnit1, 'A02F' );
-    UnitAddItemById(MainBossUnit1, 'I03S' );
-    UnitAddItemById(MainBossUnit1, 'I00S' );
-    UnitAddItemById(MainBossUnit1, 'I00U' );
-    UnitAddItemById(MainBossUnit1, 'I00H' );
-    UnitAddItemById(MainBossUnit1, 'I00T' );
-    UnitAddItemById(MainBossUnit1, 'I00R' );
-}
-
-void QuestCreationFunction()
-{
-    quest QuestCreation = CreateQuest();
-    QuestSetTitle(QuestCreation, "|cFFFFCC00Gameplay Information|r");
-    QuestSetDescription(QuestCreation, "|c0000ffffWhen you kill 8 bosses on the lanes you will get -T command|r.
-	|cFFFFCC00-T|r: |c0000ffffTeleports you to your|r |cFFFFCC00-save|r |c0000ffff(saved) location|r.
+	Choose desirable kills and mode|r" );
+	ModeSelectionTD = CreateTimerDialog( tmr );
+	TimerDialogSetTitle( ModeSelectionTD, "|c00ffff00Mode Selection" );
+	TimerDialogDisplay( ModeSelectionTD, true );
+	DialogSetMessage( ModeSelectionDialog, "Same u Mode" );
+	SameHeroModeButtonArray[10] = DialogAddButton( ModeSelectionDialog, "|c0000FF00Enable|r", 0 );
+	SameHeroModeButtonArray[11] = DialogAddButton( ModeSelectionDialog, "|c00ff0000Disable|r", 0 );
+	DialogShow( ModeSelectionDialog, true );
+	TimerStart( tmr, 5, false, @ModeSelectionFunction3 );
+}
+
+void RegisterPlayerLeaveAction( )
+{
+	player p = GetTriggerPlayer( );
+	int pid = GetPlayerId( p );
+	int teamId = GetPlayerTeam( p );
+	int count = TeamPlayers[teamId] - 1;
+	int gold = count > 0 ? ( GetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD ) / ( TeamPlayers[teamId] - 1 ) ) : 0;
+	int mbId = teamId == 0 ? pid + 1 : pid + 2;
+
+	multiboarditem mbItem = MultiboardGetItem( MainMultiboard, mbId, 0 );
+	MultiboardSetItemValue( mbItem, PlayerColorStringArray[pid] + "- Left -|r" );
+	MultiboardReleaseItem( mbItem );
+
+	TotalPlayers = TotalPlayers - 1;
+	TeamPlayers[teamId] = TeamPlayers[teamId] - 1;
+	DisplayTimedTextToPlayer( GetLocalPlayer( ), .0f, .0f, 5.f, PlayerColoredNameArray[pid] + "|r Has left the game!" );
+	RemoveUnit( MUnitArray[pid] );
+	RemovePlayer( p, PLAYER_GAME_RESULT_DEFEAT );
+
+	if ( gold > 0 )
+	{
+		for( int i = 0; i < PLAYER_NEUTRAL_AGGRESSIVE; i++ )
+		{
+			player p2 = Player( i ); if ( GetPlayerSlotState( p2 ) != PLAYER_SLOT_STATE_PLAYING || !IsPlayerAlly( p, p2 ) ) { continue; }
+			SetPlayerState( p2, PLAYER_STATE_RESOURCE_GOLD, GetPlayerState( p2, PLAYER_STATE_RESOURCE_GOLD ) + gold );
+		}
+		DisplayTextToPlayer( GetLocalPlayer( ), .0f, .0f, "Each player in Team " + I2S( teamId + 1 ) + " has received |cFFFFCC00" + I2S( gold ) + "|r gold from a leaver." );
+	}
+
+	if ( TeamPlayers[teamId] == 0 )
+	{
+		PrepareFinishGameAction( teamId == 0 ? 1 : 0 );
+	}
+}
+
+void DisableSharedUnitsAct( )
+{
+	for ( int i = 0; i < PLAYER_NEUTRAL_AGGRESSIVE; i++ )
+	{
+		for ( int j = 0; j < PLAYER_NEUTRAL_AGGRESSIVE; j++ )
+		{
+			player p1 = Player( i );
+			player p2 = Player( j );
+
+			if ( p1 == p2 ) { continue; }
+
+			SetPlayerAlliance( p1, p2, ALLIANCE_SHARED_CONTROL, false );
+		}
+	}
+}
+
+
+
+void CreepSpawn3Action( )
+{
+	if ( !B_IsCreepSpawn ) { return; }
+
+	player p = Player( PLAYER_NEUTRAL_AGGRESSIVE );
+
+	for ( int i = 0; i < 4; i++ )
+	{
+		if ( i < 2 )
+		{
+			CreateUnit( p, 'h003', -1888.f, -160.f, 270 );
+			CreateUnit( p, 'h004', -1888.f, -864.f, 270 );
+			CreateUnit( p, 'h007', -1184.f, -864.f, 270 );
+			CreateUnit( p, 'h015', 384.f, -896.f, 270 );
+			CreateUnit( p, 'h003', 1888.f, -160.f, 270 );
+			CreateUnit( p, 'h007', 1184.f, -864.f, 270 );
+			CreateUnit( p, 'h004', 1888.f, -896.f, 270 );
+		}
+		else if ( i < 3 )
+		{
+			CreateUnit( p, 'h009', -1888.f, -160.f, 270 );
+			CreateUnit( p, 'h016', -1888.f, -896.f, 270 );
+			CreateUnit( p, 'h001', -1184.f, -896.f, 270 );
+			CreateUnit( p, 'h016', -384.f, -160.f, 270 );
+			CreateUnit( p, 'h001', 384.f, -160.f, 270 );
+			CreateUnit( p, 'h009', -384.f, -896.f, 270 );
+			CreateUnit( p, 'h009', 1888.f, -160.f, 270 );
+			CreateUnit( p, 'h001', 1184.f, -896.f, 270 );
+			CreateUnit( p, 'h016', 1888.f, -896.f, 270 );
+		}
+
+		CreateUnit( p, 'h015', -1184.f, -160.f, 270 );
+		CreateUnit( p, 'h015', 1184.f, -160.f, 270 );
+	}
+}
+
+void CreepUpgrade2Action( )
+{
+	PauseTimer( CreepSpawnerTimer1 );
+	TimerStart( CreepSpawnerTimer1, 90.f, true, @CreepSpawn3Action );
+}
+
+void CreepSpawn2Action( )
+{
+	if ( !B_IsCreepSpawn ) { return; }
+
+	player p = Player( PLAYER_NEUTRAL_AGGRESSIVE );
+
+	for ( int i = 0; i < 6; i++ )
+	{
+		if ( i < 5 )
+		{
+			CreateUnit( p, 'h008', -1888.f, -160.f, 270 );
+			CreateUnit( p, 'h002', -1888.f, -896.f, 270 );
+			CreateUnit( p, 'h000', -1184.f, -896.f, 270 );
+			CreateUnit( p, 'h002', -384.f, -160.f, 270 );
+			CreateUnit( p, 'h000', 384.f, -160.f, 270 );
+			CreateUnit( p, 'h014', 384.f, -896.f, 270 );
+			CreateUnit( p, 'h008', -384.f, -896.f, 270 );
+			CreateUnit( p, 'h008', 1888.f, -160.f, 270 );
+			CreateUnit( p, 'h000', 1184.f, -896.f, 270 );
+			CreateUnit( p, 'h002', 1888.f, -896.f, 270 );
+		}
+		CreateUnit( p, 'h014', -1184.f, -160.f, 270 );
+		CreateUnit( p, 'h014', 1184.f, -160.f, 270 );
+	}
+}
+
+void CreepUpgrade1Action( )
+{
+	PauseTimer( CreepSpawnerTimer1 );
+	TimerStart( CreepUpgradeTimer1, 600.f, false, @CreepUpgrade2Action );
+	TimerStart( CreepSpawnerTimer1, 60.f, true, @CreepSpawn2Action );
+}
+
+void CreepSpawn1Action( )
+{
+	if ( !B_IsCreepSpawn ) { return; }
+
+	player p = Player( PLAYER_NEUTRAL_AGGRESSIVE );
+
+	for ( int i = 0; i < 4; i++ )
+	{
+		if ( i < 2 )
+		{
+			CreateUnit( p, 'h011', -1888.f, -896.f, 270 );
+			CreateUnit( p, 'h011', -384.f, -896.f, 270 );
+			CreateUnit( p, 'h011', 1888.f, -896.f, 270 );
+		}
+		CreateUnit( p, 'h010', 384.f, -896.f, 270 );
+		CreateUnit( p, 'h010', 1184.f, -896.f, 270 );
+		CreateUnit( p, 'h010', -1184.f, -896.f, 270 );
+		CreateUnit( p, 'h012', -1184.f, -160.f, 270 );
+		CreateUnit( p, 'h012', 1888.f, -160.f, 270 );
+		CreateUnit( p, 'h012', 384.f, -160.f, 270 );
+		CreateUnit( p, 'h013', -1888.f, -160.f, 270 );
+		CreateUnit( p, 'h013', -384.f, -160.f, 270 );
+		CreateUnit( p, 'h013', 1184.f, -160.f, 270 );
+	}
+}
+
+void UnitCreationAction( )
+{
+	TimerStart( CreepUpgradeTimer1, 300.f, false, @CreepUpgrade1Action );
+	TimerStart( CreepSpawnerTimer1, 30.f, true, @CreepSpawn1Action );
+}
+
+bool UnitCreationWithCircleCond( )
+{
+	return IsUnitType( GetEnteringUnit( ), UNIT_TYPE_HERO );
+}
+
+int SpawnNPCAtLimited( int uid, int toCreate, float minX, float maxX, float minY, float maxY, int lim )
+{
+	int count = 0;
+	player p = Player( PLAYER_NEUTRAL_AGGRESSIVE );
+
+	for ( int i = 0; i < MathIntegerClamp( toCreate, 0, lim - CountUnitInGroupOfPlayer( p, uid ) ); i++ )
+	{
+		CreateUnit( p, uid, GetRandomReal( minX, maxX ), GetRandomReal( minY, maxY ), GetRandomReal( 0.f, 360.f ) );
+		count++;
+	}
+
+	return count;
+}
+
+void PrintNPCSpawn( player p, int count = 0 )
+{
+	DisplayTextToPlayer( p, .0f, .0f, count > 0 ? "|c00CBFF75NPC Spawned" : "|c00ff0000Maximum amount of units was reached!" );
+}
+
+void OnAnyUnitEnterRegion( unit u, region reg, rect rec )
+{
+	player p = GetOwningPlayer( u );
+	float x = GetUnitX( u );
+	float y = GetUnitY( u );
+
+	if ( reg == LoadRegionHandle( DataHT, 'regs', 'BASE' ) )
+	{
+		if ( IsUnitIllusion( u ) || ( !IsUnitType( u, UNIT_TYPE_HERO ) && p == Player( PLAYER_NEUTRAL_AGGRESSIVE ) ) )
+		{
+			KillUnit( u );
+		}
+
+		return;
+	}
+
+	if ( rec == CircleRectArr[0] || rec == CircleRectArr[1] || rec == CircleRectArr[3] || rec == CircleRectArr[4] ) // spawner enter
+	{
+		if ( !IsUnitType( u, UNIT_TYPE_HERO ) ) { return; }
+
+		int npcCount = -1;
+
+		if ( rec == CircleRectArr[0] )
+		{
+			npcCount = SpawnNPCAtLimited( 'h022', 9, -5632.f, -3136.f, 1088.f, 3136.f, 160 );
+		}
+		else if ( rec == CircleRectArr[1] )
+		{
+			npcCount = SpawnNPCAtLimited( 'h018', 1, -5632.f, -3008.f, -4160.f, -2176.f, 30 ) + SpawnNPCAtLimited( 'h021', 1, -5632.f, -3008.f, -4160.f, -2176.f, 30 );
+		}
+		else if ( rec == CircleRectArr[3] )
+		{
+			npcCount = SpawnNPCAtLimited( 'h017', 9, 3072.f, 5632.f, -4160.f, -2208.f, 160 );
+		}
+		else if ( rec == CircleRectArr[4] )
+		{
+			npcCount = SpawnNPCAtLimited( 'h020', 1, 3200.f, 5664.f, 1120.f, 3168.f, 30 ) + SpawnNPCAtLimited( 'h023', 1, 3200.f, 5664.f, 1120.f, 3168.f, 30 );
+		}
+
+		if ( npcCount >= 0 )
+		{
+			PrintNPCSpawn( p, npcCount );
+		}
+
+		return;
+	}
+}
+
+void SaveUnitAxis( player p, bool checkEsc = false )
+{
+	int pid = GetPlayerId( p );
+	int hid = GetHandleId( p );
+
+	if ( !checkEsc || ESCLocationSaveBooleanArray[pid] )
+	{
+		DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c0000ffffCurrent location was saved!" );
+		SaveReal( DataHT, hid, '+tpX', GetUnitX( MUnitArray[pid] ) );
+		SaveReal( DataHT, hid, '+tpY', GetUnitY( MUnitArray[pid] ) );
+	}
+}
+
+void ESCToSaveAction( )
+{
+	SaveUnitAxis( GetTriggerPlayer( ), true );
+}
+
+void HealthDisplayReaderAction( )
+{
+	player p = GetTriggerPlayer( );
+	int pid = GetPlayerId( p );
+	unit u = GetTriggerUnit( );
+	int hpMax = R2I( GetUnitMaxLife( u ) );
+
+	if ( HealthDisplayBooleanArray[ pid ] && hpMax >= 10000 && GetOwningPlayer( u ) != Player( PLAYER_NEUTRAL_PASSIVE ) && GetUnitTypeId( u ) != 'n000' )
+	{
+		DisplayTextToPlayer( p, .0f, .0f, "|c0000ffff" + ( IsUnitType( u, UNIT_TYPE_HERO ) ? GetHeroProperName( u ) : GetUnitName( u ) ) + "|r has: |cFFFFCC00[" + I2S( hpMax ) + "]|r |c0000ffffHP|r" );
+	}
+}
+
+void HeroProcessAbilityDisplay( unit u, bool forceHide )
+{
+	int ulvl = GetUnitLevel( u );
+	int hid = GetHandleId( u );
+
+	string abils = GetUnitStringField( u, UNIT_SF_ABILITY_LIST );
+	array<string>@ abilList = abils.split( "," );
+
+	//print( "abils = " + abils + " " + "abilList.length( ) = " + I2S( abilList.length( ) ) + "\n" );
+
+	for ( uint i = 0; i < abilList.length( ); i++ )
+	{
+		int aid = String2Id( abilList[i] );
+
+		switch( aid )
+		{
+			case 'AInv': break;
+			default:
+			{
+				bool isShow = true;
+				//print( "aid: " + Id2String( aid ) + " -> reqLvL = " + I2S( GetAbilityBaseIntegerFieldById( aid, ABILITY_IF_REQUIRED_LEVEL ) ) + "\n" );
+
+				if ( forceHide )
+				{
+					if ( GetAbilityBaseIntegerFieldById( aid, ABILITY_IF_REQUIRED_LEVEL ) > 1 )
+					{
+						ShowUnitAbility( u, aid, false );
+					}
+				}
+				else
+				{
+					int reqLvL = GetAbilityBaseIntegerFieldById( aid, ABILITY_IF_REQUIRED_LEVEL ); if ( reqLvL == 0 ) { continue; }
+					ShowUnitAbility( u, aid, ulvl >= reqLvL );
+				}
+
+				break;
+			}
+		}
+	}
+}
+
+void HeroUnlockAbilities( unit u )
+{
+	HeroProcessAbilityDisplay( u, false );
+}
+
+void OnHeroLevel( )
+{
+	unit u = GetLevelingUnit( );
+	player p = GetOwningPlayer( u );
+	int ulvl = GetUnitLevel( u );
+	int uid = GetUnitTypeId( u );
+	int hid = GetHandleId( u );
+	int statCount = 0;
+
+	DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\LevelUp.mdl", u, "origin" ) );
+
+	HeroUnlockAbilities( u );
+
+	if ( GetPlayerController( p ) != MAP_CONTROL_COMPUTER )
+	{
+		if ( GetUnitLevel( u ) >= 50 )
+		{
+			SetHeroStr( u, GetHeroStr( u, false ) + 3, true );
+			SetHeroAgi( u, GetHeroAgi( u, false ) + 3, true );
+			SetHeroInt( u, GetHeroInt( u, false ) + 3, true );
+			SuspendHeroXP( u, true );
+		}
+	}
+	else
+	{
+		if ( GetAIDifficulty( p ) == AI_DIFFICULTY_NEWBIE )
+		{
+			statCount = 2;
+		}
+		else if ( GetAIDifficulty( p ) == AI_DIFFICULTY_NORMAL )
+		{
+			statCount = 3;
+		}
+		else if ( GetAIDifficulty( p ) == AI_DIFFICULTY_INSANE )
+		{
+			statCount = 5;
+		}
+
+		if ( ulvl >= 5 && ulvl < 10 )
+		{
+			statCount = statCount * 2;
+		}
+		else if ( ulvl >= 10 && ulvl < 15 )
+		{
+			statCount = statCount * 3;
+		}
+		else if ( ulvl >= 15 )
+		{
+			statCount = statCount * 5;
+		}
+
+		SetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD, GetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD ) + 50 * statCount );
+		SetHeroStr( u, GetHeroStr( u, false ) + statCount, true );
+		SetHeroAgi( u, GetHeroAgi( u, false ) + statCount, true );
+		SetHeroInt( u, GetHeroInt( u, false ) + statCount, true );
+	
+		switch( ulvl )
+		{
+			case 5: UnitAddItemById( u, 'I03U' ); break;
+			case 8: UnitAddItemById( u, 'I03X' ); break;
+			case 10: UnitAddItemById( u, 'I03Z' ); break;
+			case 13: UnitAddItemById( u, 'I00H' ); break;
+			case 15:
+			{
+				UnitAddItemById( u, LoadInteger( DataHT, GetUnitTypeId( u ), 'pitm' ) );
+
+				break;
+			}
+			case 20: UnitAddItemById( u, 'I03V' ); break;
+			case 21: UnitAddItemById( u, 'I03Z' ); break;
+			case 25: UnitAddItemById( u, 'I00X' ); break;
+			case 27: UnitAddItemById( u, 'I00T' ); break;
+		}
+	}
+}
+
+// MUI related functions
+int SpellTickEx( hashtable ht, int hid )
+{
+	int tick = LoadInteger( ht, hid, 'tick' ); if ( LoadBoolean( ht, hid, 'skip' ) ) { return tick; }
+	SaveInteger( ht, hid, 'tick', tick + 1 );
+	return tick;
+}
+
+int SpellTickEx( int hid )
+{
+	return SpellTickEx( GameHT, hid );
+}
+
+bool CounterEx( int hid, int id, int max )
+{
+	int count = LoadInteger( GameHT, hid, 'icnt' + id );
+
+	if ( !LoadBoolean( GameHT, hid, 'bcnt' + id ) )
+	{
+		SaveBoolean( GameHT, hid, 'bcnt' + id, true );
+		return true;
+	}
+
+	if ( count + 1 >= max )
+	{
+		SaveInteger( GameHT, hid, 'icnt' + id, 0 );
+		return true;
+	}
+	else
+	{
+		SaveInteger( GameHT, hid, 'icnt' + id, count + 1 );
+	}
+
+	return false;
+}
+
+void ReleaseTimer( timer tmr, bool extraClean = true )
+{
+	int hid = GetHandleId( tmr );
+	unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+	unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+
+	PauseTimer( tmr );
+
+	if ( extraClean )
+	{
+		if ( IsUnitPaused( source ) )
+		{
+			PauseUnit( source, false );
+			IssueImmediateOrder( source, "stop" );
+		}
+		SetUnitTimeScale( source, 1 );
+		ShowUnit( source, true );
+		SetUnitPathing( source, true );
+		KillUnit( LoadUnitHandle( GameHT, hid, 106 ) );
+		SetUnitInvulnerable( source, false );
+		RemoveLocation( LoadLocationHandle( GameHT, hid, 102 ) );
+		RemoveLocation( LoadLocationHandle( GameHT, hid, 103 ) );
+		RemoveLocation( LoadLocationHandle( GameHT, hid, 107 ) );
+		DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+		SetUnitVertexColor( source, 255, 255, 255, 255 );
+	}
+
+	FlushChildHashtable( GameHT, hid );
+	DestroyTimer( tmr );
+}
+
+void ClearAllData( int hid )
+{
+	ReleaseTimer( GetExpiredTimer( ), true );
+}
+
+bool StopSpell( int hid, int mod, bool onlyCheck = false )
+{
+	unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+	unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+	bool isClear = false;
+
+	if ( mod == 0 )
+	{
+		isClear = GetUnitCurrentLife( source ) <= .0f;
+	}
+	else
+	{
+		isClear = GetUnitCurrentLife( source ) <= .0f || GetUnitCurrentLife( target ) <= .0f;
+	}
+
+	if ( isClear && !onlyCheck )
+	{
+		ClearAllData( hid );
+	}
+
+	return isClear;
+}
+//
+
+// Nanaya Shiki Spells
+void NanayaShiki_D( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		PlayHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'D1', 90.f, .0f );
+		ReleaseTimer( tmr );
+	}
+}
+
+void NanayaShiki_Q( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'Q1' );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_StunUnit( source, .3f );
+		SetUnitAnimation( source, "spell slam one" );
+		PlayHeroSound( source, 'psnd' + 'Q1', 100.f, .0f );
+	}
+	else if ( ticks == 30 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+
+		SetUnitAnimation( source, "spell throw six" );
+
+		DisplaceWar3ImageLinear( source, angle, dist, .1f, .01f, false, true );
+
+		effect ef = CreateEffectEx( "Characters\\NanayaShiki\\NanayaShikiQEffect.mdl", MathPointProjectionX( x, angle, dist * .5f ), MathPointProjectionY( y, angle, dist * .5f ), .0f, angle, 3.f, 1.f );
+		SetEffectTimedLife( ef, 3.f );
+
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+		bool isEnhanced = GetUnitBuffLevel( source, 'B001' ) > 0;
+		if ( isEnhanced )
+		{
+			dmg *= 1.5f;
+		}
+
+		GroupEnumUnitsInLine( GroupEnum, x, y, angle, dist, 400.f );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				float u_x = GetUnitX( u );
+				float u_y = GetUnitY( u );
+
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", GetUnitX( u ), GetUnitY( u ) ) );
+				DisplaceWar3ImageLinear( u, MathAngleBetweenPoints( u_x, u_y, targX, targY ), 200.f, .5f, .01f, false, false );
+
+				ACF_DamageTarget( source, u, dmg );
+				if ( isEnhanced )
+				{
+					ACF_StunUnit( u, 1.f );
+				}
+			}
+		}
+
+		UnitRemoveAbility( source, 'B001' );
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void NanayaShiki_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'W1' );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float dmg = 5.f * GetHeroLevel( source ) + .033f * GetHeroInt( source, true );
+
+		PlayHeroSound( source, 'psnd' + 'W1', 100.f, .0f );
+		ACF_StunUnit( source, .3f );
+		SetUnitTimeScale( source, 2.f );
+		SetUnitAnimation( source, "spell two" );
+		SaveReal( GameHT, hid, '+dmg', GetUnitBuffLevel( source, 'B001' ) == 0 ? dmg : 1.5f * dmg );
+	}
+	else
+	{
+		int slashes = LoadInteger( GameHT, hid, 'slsh' );
+
+		if ( slashes < 30 )
+		{
+			if ( CounterEx( hid, 0, 2 ) )
+			{
+				player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+				unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+				float x = GetUnitX( source );
+				float y = GetUnitY( source );
+				float angle = GetUnitFacing( source );
+				float dmg = LoadReal( GameHT, hid, '+dmg' );
+				bool isEffect = CounterEx( hid, 1, 10 );
+
+				effect ef = CreateEffectEx( "Characters\\NanayaShiki\\WEffect.mdl", MathPointProjectionX( x, angle, 150.f ), MathPointProjectionY( y, angle, 150.f ), .0f, angle, 1.5f, 1.f );
+				SetSpecialEffectAnimation( ef, "stand" );
+				SetSpecialEffectColour( ef, 0xFFFF00FF );
+				SetEffectTimedLife( ef, 1.f );
+
+				GroupEnumUnitsInRange( GroupEnum, GetSpecialEffectX( ef ), GetSpecialEffectY( ef ), 350.f, nil );
+
+				for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+				{
+					if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+					{
+						if ( isEffect )
+						{
+							DestroyEffect( AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "chest" ) );
+							IssueImmediateOrder( u, "stop" );
+						}
+
+						if ( slashes == 29 )
+						{
+							DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\BloodEffect1.mdx", u, "chest" ) );
+						}
+
+						ACF_DamageTarget( source, u, dmg );
+					}
+				}
+
+				SaveInteger( GameHT, hid, 'slsh', slashes + 1 );
+			}
+		}
+		else
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+			UnitRemoveAbility( source, 'B001' );
+			SetUnitAnimation( source, "stand" );
+			ReleaseTimer( tmr );
+		}
+	}
+}
+
+void NanayaShiki_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		SaveBoolean( GameHT, hid, 'isex', GetUnitBuffLevel( source, 'B001' ) > 0 );
+		//ACF_DisableUnitTP( target, GetUnitAbilityLevel( source, 'B001' ) > 0 ? 1.5f : .5f );
+	}
+
+	if ( !LoadBoolean( GameHT, hid, 'isex' ) )
+	{
+		if ( StopSpell( hid, 1, true ) )
+		{
+			if ( StopSpell( hid, 0, true ) )
+			{
+				StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'R2' );
+			}
+			
+			ReleaseTimer( tmr );
+			return;
+		}
+
+		if ( ticks == 0 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float angle = GetUnitAngle( source, target );
+			float dist = GetUnitDistance( source, target ) + 200.f;
+
+			PlayHeroSound( source, 'psnd' + 'R2', 90.f, .0f );
+
+			ACF_StunUnit( source, .55f );
+			SetUnitAnimation( source, "spell slam one" );
+		}
+		else if ( ticks == 50 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float targX = GetUnitX( target );
+			float targY = GetUnitY( target );
+			float angle = GetUnitAngle( source, target );
+			float dmg = 1000.f + 100.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+			SetUnitXY( source, MathPointProjectionX( targX, angle, 100.f ), MathPointProjectionY( targY, angle, 100.f ) );
+			SetUnitAnimation( source, "spell throw six" );
+			ACF_DamageTarget( source, target, dmg );
+			ACF_StunUnit( target, 2.f );
+
+			effect ef;
+
+			ef = CreateEffectEx( "Characters\\NanayaShiki\\NanayaShikiQEffect.mdl", targX, targY, .0f, angle + 45.f, 2.f, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "Characters\\NanayaShiki\\NanayaShikiQEffect.mdl", targX, targY, .0f, angle - 45.f, 2.f, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\BloodEffect1.mdx", target, "origin" ) );
+			ReleaseTimer( tmr );
+		}
+	}
+	else
+	{
+		if ( ticks < 125 )
+		{
+			if ( StopSpell( hid, 1, true ) )
+			{
+				if ( StopSpell( hid, 0, true ) )
+				{
+					StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'R2' );
+				}
+				
+				ReleaseTimer( tmr );
+				return;
+			}
+		}
+
+		if ( ticks == 0 )
+		{
+			ACF_StunUnit( LoadUnitHandle( GameHT, hid, 'usrc' ), 1.5f );
+		}
+		else if ( ticks == 25 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float angle = GetUnitAngle( source, target );
+			float dist = GetUnitDistance( source, target ) - 150.f;
+
+			PlayHeroSound( source, 'psnd' + 'R2', 90.f, .0f );
+			SetUnitAnimation( source, "spell two alternate" );
+			DisplaceWar3ImageLinear( source, angle, dist, .25f, .01f, false, true );
+		}
+		else if ( ticks == 50 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float angle = GetUnitAngle( source, target );
+			float dmg = 1000.f + 100.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+			PlayHeroSound( source, 'gsnd' + 1, 60.f, .0f );
+			SetUnitAnimation( source, "spell slam one" );
+
+			ACF_DamageTarget( source, target, dmg );
+			SetUnitFlyHeightEx( target, 800.f, 4000.f );
+			DisplaceWar3ImageLinear( target, angle, 300.f, .4f, .01f, false, false, "" );
+		}
+		else if ( ticks == 75 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float angle = GetUnitAngle( source, target );
+			float dist = GetUnitDistance( source, target ) - 150.f;
+
+			PlayHeroSound( source, 'psnd' + 'E1', 100.f, .0f );
+			SetUnitFacing( source, angle );
+			SetUnitAnimation( source, "spell throw three" );
+			SetUnitFlyHeightEx( source, 600.f, 4000.f );
+			SetUnitXY( source, MathPointProjectionX( GetUnitX( source ), angle, dist ), MathPointProjectionY( GetUnitY( source ), angle, dist ) );
+		}
+		else if ( ticks == 125 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float angle = GetUnitAngle( source, target );
+			float dmg = 250.f + 25.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+			effect ef;
+
+			PlayHeroSound( source, 'psnd' + 'E2', 100.f, .0f );
+			ACF_DamageTarget( source, target, dmg );
+
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 800.f, angle, 1.5f, 3.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "GeneralEffects\\SlamEffect.mdl", x, y, 800.f, angle, 1.5f, 3.f );
+			SetEffectTimedLife( ef, 3.f );
+
+			SetUnitFlyHeightEx( target, 0.f, 2000.f );
+			SetUnitFlyHeightEx( source, 0.f, 99999.f );
+			DisplaceWar3ImageLinear( target, angle, 400.f, .4f, .01f, false, false, "" );
+		}
+		else if ( ticks == 150 )
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float targX = GetUnitX( target );
+			float targY = GetUnitY( target );
+
+			SetUnitAnimation( source, "spell throw two" );
+			UnitRemoveAbility( source, 'B001' );
+
+			effect ef = CreateEffectEx( "GeneralEffects\\FuzzyStomp.mdl", targX, targY, 0.f, GetRandomReal( 0.f, 360.f ), 3.f, 1.f );
+			SetEffectTimedLife( ef, 1.f );
+
+			for ( int i = 0; i < 5; i++ )
+			{
+				float move = 25.f + 25.f * i;
+
+				ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, 0.f, GetRandomReal( 0.f, 360.f ), 2.f, GetRandomReal( .5f, 2.f ) );
+				SetEffectTimedLife( ef, 4.f );
+			}
+
+			float dmg = 250.f + 25.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+
+			GroupEnumUnitsInRange( GroupEnum, targX, targY, 500.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+				{
+					ACF_DamageTarget( source, u, dmg );
+					ACF_StunUnit( u, 1.f );
+				}
+			}
+
+			ReleaseTimer( tmr );
+		}
+	}
+}
+
+void NanayaShiki_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( StopSpell( hid, 0, true ) || ticks == 305 )
+	{
+
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target ) - 200.f;
+
+		PlayHeroSound( source, 'psnd' + 'T1', 100.f, .0f );
+		SetAbilityRemainingCooldown( GetUnitAbility( source, 'A02P' ), .01f );
+		ACF_StunUnit( source, 3.f );
+		SetUnitTimeScale( source, 2.f );
+		SetUnitFacing( source, angle );
+		SetUnitAnimation( source, "spell channel one" );
+		DisplaceWar3ImageLinear( source, angle, dist, .25f, .01f, false, true );
+	}
+	else if ( ticks == 25 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = 600.f;
+
+		SetUnitAnimation( source, "spell throw four" );
+		EffectAPI::InverseDash( target );
+
+		DisplaceWar3ImageLinear( source, angle, -dist * .5f, 1.f, .01f, false, false );
+		DisplaceWar3ImageLinear( target, angle, dist, 1.f, .01f, false, false );
+	}
+	else if ( ticks == 125 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		effect ef;
+
+		PlayHeroSound( source, 'psnd' + 'T2', 100.f, .0f );
+		SetUnitAnimation( source, "spell throw five" );
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, GetRandomReal( .0f, 360.f ), 1.f + .25f * i, GetRandomReal( .5f, 2.f ) );
+			SetSpecialEffectAlpha( ef, GetRandomInt( 0x80, 0xC0 ) );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 50.f, angle, 1.5f, 2.f );
+		SetEffectTimedLife( ef, 4.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\SlamEffect.mdl", x, y, 50.f, angle, 1.f, 2.f );
+		SetEffectTimedLife( ef, 3.f );
+
+		SetUnitFacing( source, angle );
+		DisplaceUnitWithArgs( source, angle, dist, 1.f, .015f, 400.f );
+		string mdl = GetUnitModel( source );
+
+		for ( int i = 0; i < 15; i++ )
+		{
+			ef = CreateEffectEx( mdl, x, y, .0f, angle, 1.f, 1.f );
+			SetEffectTimedLife( ef, 1.f );
+			SetSpecialEffectAnimation( ef, "spell throw five" );
+			SetSpecialEffectAlpha( ef, 0xFF - 25 * i );
+			DisplaceWar3ImageWithArgs( ef, angle, dist, 1.f + .1f * i, .02f, 400.f );
+		}
+	}
+	else if ( ticks == 225 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = GetUnitFacing( source );
+		float dmg = 4000.f + 300.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+		effect ef;
+
+		PlayHeroSound( source, 'gsnd' + 2, 80.f, .0f );
+		PlayHeroSound( source, 'psnd' + 'D1', 100.f, .0f );
+
+		ACF_StunUnit( target, 1.f );
+		ACF_DamageTarget( source, target, dmg );
+
+		SetUnitFacing( source, angle );
+		SetUnitAnimation( source, "spell throw six" );
+		DisplaceWar3ImageLinear( source, angle, 250.f, .8f, .01f, false, false );
+		EffectAPI::Dash( source );
+
+		for ( int i = 0; i < 4; i++ )
+		{
+			ef = CreateEffectEx( "Characters\\NanayaShiki\\REffect2.mdl", targX, targY, .0f, 270.f, 4.f, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "Characters\\NanayaShiki\\NanayaShikiQEffect.mdl", targX, targY, .0f, ( angle + Pow( -1.f, i ) ) * 30.f, 3.f, .5f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, GetRandomReal( 0.f, 360.f ), 1.f + .25f * i, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, 0.f, GetRandomReal( 0.f, 360.f ), 1.f + .25f * i, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+	}
+}
+
+void NanayaShiki_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_StunUnit( source, 2.f );
+		SetUnitAnimation( source, "stand" );
+		SetAbilityRemainingCooldown( GetUnitAbility( source, 'A02P' ), .01f );
+	}
+	else if ( ticks == 50 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'T3', 100.f, .0f );
+		SetUnitTimeScale( source, .25f );
+		SetUnitAnimation( source, "spell one alternate" );
+	}
+	else if ( ticks == 90 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+
+		SetUnitTimeScale( source, 1.f );
+		SetUnitAnimation( source, "attack" );
+
+		effect ef = CreateEffectEx( "Characters\\NanayaShiki\\REffect.mdl", MathPointProjectionX( GetUnitX( source ), angle, 50.f ), MathPointProjectionY( GetUnitY( source ), angle, 50.f ), 100.f, angle, 1.f, 1.f );
+		SaveEffectHandle( GameHT, hid, '+eff', ef );
+
+		SaveBoolean( GameHT, hid, 'skip', true );
+		SaveInteger( GameHT, hid, 'tick', ticks + 5 );
+	}
+	else if ( ticks == 95 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+
+		if ( DisplaceWar3ImageToTarget( LoadEffectHandle( GameHT, hid, '+eff' ), target, 20.f, 75.f ) )
+		{
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+			float targX = GetUnitX( target );
+			float targY = GetUnitY( target );
+			float angle = MathAngleBetweenPoints( x, y, targX, targY );
+			float dist = MathDistanceBetweenPoints( x, y, targX, targY );
+			string mdl = GetUnitModel( source );
+
+			DestroyEffect( AddSpecialEffect( "GeneralSounds\\BlackBlink.mdx", x, y ) );
+			SetUnitTimeScale( source, 1.f );
+			SetUnitFlyHeightEx( source, 200.f, 99999.f );
+			SetUnitAnimation( source, "spell channel three" );
+			SetUnitXY( source, targX, targY );
+			DestroyEffect( AddSpecialEffect( "GeneralSounds\\BlackBlink.mdx", targX, targY ) );
+
+			effect ef = CreateEffectEx( mdl, MathPointProjectionX( targX, angle, 150.f ), MathPointProjectionY( targY, angle, 150.f ), .0f, -angle, 1.f, 1.f );
+			SetSpecialEffectAlpha( ef, 0xB0 );
+			SetEffectTimedLife( ef, .8f );
+			SetSpecialEffectAnimation( ef, "spell slam three" );
+			DestroyEffect( AddSpecialEffect( "GeneralSounds\\BlackBlink.mdx", GetSpecialEffectX( ef ), GetSpecialEffectY( ef ) ) );
+
+			DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+			SaveBoolean( GameHT, hid, 'skip', false );
+			SaveInteger( GameHT, hid, 'tick', ticks + 5 );
+			return;
+		}
+	}
+	else if ( ticks == 130 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = GetUnitAngle( source, target );
+		effect ef;
+
+		SetUnitAnimation( source, "spell throw six" );
+		SetUnitFlyHeightEx( source, 0, 99999.f );
+		DisplaceWar3ImageLinear( source, angle, -300.f, .4f, .01f, false, false );
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			ef = CreateEffectEx( "Characters\\NanayaShiki\\REffect2.mdl", targX, targY, 100.f, 270.f, 4.f, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "Characters\\NanayaShiki\\NanayaShikiQEffect.mdl", targX, targY, .0f, angle + 45.f - 45.f * i, 1.f, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+		DestroyEffect( AddSpecialEffect( "GeneralSounds\\26.mdx", targX, targY ) );
+	}
+	else if ( ticks == 170 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float dmg = 6000.f + 400.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		ACF_StunUnit( target, 2.f );
+		ACF_DamageTarget( source, target, dmg );
+		SetUnitTimeScale( source, 1.f );
+		ReleaseTimer( tmr );
+	}
+}
+//
+
+// Toono Shiki Spells
+void ToonoShiki_D( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		PlayHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'D1', 100.f, .0f );
+		ReleaseTimer( tmr );
+	}
+}
+
+void ToonoShiki_Q( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'Q1' );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_StunUnit( source, .3f );
+		SetUnitAnimation( source, "spell three" );
+		PlayHeroSound( source, 'psnd' + 'Q1', 100.f, .0f );
+	}
+	else if ( ticks == 30 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+
+		SetUnitAnimation( source, "spell four" );
+
+		DisplaceWar3ImageLinear( source, angle, dist, .1f, .01f, false, true );
+
+		effect ef = CreateEffectEx( "Characters\\ToonoShiki\\TohnoShikiQEffect.mdl", MathPointProjectionX( x, angle, dist * .5f ), MathPointProjectionY( y, angle, dist * .5f ), .0f, angle, 3.f, 1.f );
+		SetEffectTimedLife( ef, 3.f );
+
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+		GroupEnumUnitsInLine( GroupEnum, x, y, angle, dist, 400.f );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				float u_x = GetUnitX( u );
+				float u_y = GetUnitY( u );
+
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", GetUnitX( u ), GetUnitY( u ) ) );
+				DisplaceWar3ImageLinear( u, MathAngleBetweenPoints( u_x, u_y, targX, targY ), 200.f, .5f, .01f, false, false );
+
+				ACF_DamageTarget( source, u, dmg );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void ToonoShiki_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'W1' );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float dmg = 5.f * GetHeroLevel( source ) + .033f * GetHeroInt( source, true );
+
+		PlayHeroSound( source, 'psnd' + 'W1', 100.f, .0f );
+		ACF_StunUnit( source, .3f );
+		SetUnitTimeScale( source, 2.f );
+		SetUnitAnimation( source, "spell two" );
+	}
+	else
+	{
+		int slashes = LoadInteger( GameHT, hid, 'slsh' );
+
+		if ( slashes < 30 )
+		{
+			if ( CounterEx( hid, 0, 2 ) )
+			{
+				player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+				unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+				float x = GetUnitX( source );
+				float y = GetUnitY( source );
+				float angle = GetUnitFacing( source );
+				float dmg = LoadReal( GameHT, hid, '+dmg' );
+				bool isEffect = CounterEx( hid, 1, 10 );
+
+				effect ef = CreateEffectEx( "Characters\\NanayaShiki\\WEffect.mdl", MathPointProjectionX( x, angle, 150.f ), MathPointProjectionY( y, angle, 150.f ), .0f, angle, 1.5f, 1.f );
+				SetSpecialEffectAnimation( ef, "stand" );
+				SetSpecialEffectColour( ef, 0xFF4040FF ); // 0xFFC0C0FF
+				SetEffectTimedLife( ef, 1.f );
+
+				GroupEnumUnitsInRange( GroupEnum, GetSpecialEffectX( ef ), GetSpecialEffectY( ef ), 350.f, nil );
+
+				for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+				{
+					if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+					{
+						if ( isEffect )
+						{
+							DestroyEffect( AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "chest" ) );
+							IssueImmediateOrder( u, "stop" );
+						}
+
+						if ( slashes == 29 )
+						{
+							DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\BloodEffect1.mdx", u, "chest" ) );
+						}
+
+						ACF_DamageTarget( source, u, dmg );
+					}
+				}
+
+				SaveInteger( GameHT, hid, 'slsh', slashes + 1 );
+			}
+		}
+		else
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+			SetUnitAnimation( source, "stand" );
+			ReleaseTimer( tmr );
+		}
+	}
+}
+
+void ToonoShiki_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		StopHeroSound( source, 'psnd' + 'E2' );
+		StopHeroSound( source, 'psnd' + 'E3' );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+	
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		
+		PlayHeroSound( source, 'psnd' + 'E3', 100.f, .0f );
+		ACF_StunUnit( source, .9f );
+		SetUnitTimeScale( source, 2.5f );
+		SetUnitAnimation( source, "spell channel three" );
+		EffectAPI::Dash( source );
+		DisplaceWar3ImageLinear( source, angle, dist + 100.f, .2f, .01f, false, false );
+	}
+	else if ( ticks == 20 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'E2', 100.f, .0f );
+		SetUnitAnimation( source, "spell five" );
+	}
+	else if ( ticks == 70 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		float dmg = 500.f + 75.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		PlayHeroSound( source, 'gsnd' + 2, 60.f, .0f );
+		SetUnitTimeScale( source, 1 );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+		DisplaceWar3ImageLinear( source, angle, -300.f, .25f, .01f, false, false );
+		ACF_StunUnit( target, 1 );
+		ACF_DamageTarget( source, target, dmg );
+
+		effect ef;
+
+		ef = CreateEffectEx( "Characters\\ToonoShiki\\TohnoShikiQEffect.mdl", targX, targY, .0f, angle + 45.f, 2.f, 1.f );
+		SetEffectTimedLife( ef, 4.f );
+
+		ef = CreateEffectEx( "Characters\\ToonoShiki\\TohnoShikiQEffect.mdl", targX, targY, .0f, angle - 45.f, 2.f, 1.f );
+		SetEffectTimedLife( ef, 4.f );
+	}
+	else if ( ticks == 95 )
+	{
+		ReleaseTimer( tmr );
+	}
+}
+
+void ToonoShiki_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	int ticks = SpellTickEx( hid );
+
+	if ( StopSpell( hid, 1, true ) && ticks < 160 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		PlayHeroSound( source, 'psnd' + 'R1', 100.f, .0f );
+		ACF_StunUnit( source, 2.f );
+		SetUnitTimeScale( source, 2.f );
+		SetUnitAnimation( source, "spell channel five" );
+		EffectAPI::Dash( source );
+		DisplaceWar3ImageLinear( source, angle, dist - 150.f, .1f, .01f, false, false );
+	}
+	else if ( ticks == 20 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		float dmg = 325.f + 32.5f * GetHeroLevel( source ) + .2f * GetHeroInt( source, true );
+
+		PlayHeroSound( source, 'gsnd' + 1, 60.f, .0f );
+
+		EffectAPI::PushWind( source, target );
+		DisplaceWar3ImageLinear( target, angle, 150.f, .2f, .01f, false, false );
+		ACF_DamageTarget( source, target, dmg );
+		ACF_StunUnit( target, 1.f );
+	}
+	else if ( ticks == 40 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		SetUnitAnimation( source, "spell channel three" );
+		DisplaceWar3ImageLinear( source, angle, dist - 150.f, .1f, .01f, false, false );
+	}
+	else if ( ticks == 60 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'R2', 100.f, .0f );
+		SetUnitAnimation( source, "spell channel one" );
+	}
+	else if ( ticks == 110 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		float dmg = 750.f + 60.f * GetHeroLevel( source ) + .25f * GetHeroInt( source, true );
+
+		SetUnitTimeScale( source, 3 );
+		EffectAPI::PushWind( source, target, 50.f, -45.f );
+		ACF_DamageTarget( source, target, dmg );
+		SetUnitFlyHeightEx( source, 800.f, 2000.f );
+		SetUnitFlyHeightEx( target, 800.f, 2000.f );
+		DisplaceWar3ImageLinear( source, angle, 200.f, .4f, .01f, false, false );
+		DisplaceWar3ImageLinear( target, angle, 200.f, .4f, .01f, false, false );
+	}
+	else if ( ticks == 160 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		float dmg = 750.f + 60.f * GetHeroLevel( source ) + .25f * GetHeroInt( source, true );
+
+		PlayHeroSound( source, 'psnd' + 'R3', 100.f, .0f );
+		SetUnitAnimation( source, "spell channel four" );
+		EffectAPI::PushWind( source, target, 700.f, 45.f );
+
+		SetUnitFlyHeightEx( source, 0.f, 3000.f );
+		SetUnitFlyHeightEx( target, 0.f, 3000.f );
+		DisplaceWar3ImageLinear( source, angle, 200.f, .25f, .01f, false, false );
+		DisplaceWar3ImageLinear( target, angle, 200.f, .25f, .01f, false, false );
+		ACF_DamageTarget( source, target, dmg );
+	}
+	else if ( ticks == 200 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = MathAngleBetweenPoints( x, y, targX, targY );
+		effect ef;
+
+		for ( int i = 0; i < 4; i++ )
+		{
+			ef = CreateEffectEx( "Characters\\NanayaShiki\\REffect2.mdl", targX, targY, .0f, 270.f, 4.f, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "Characters\\NanayaShiki\\NanayaShikiQEffect.mdl", targX, targY, .0f, ( angle + Pow( -1.f, i ) ) * 30.f, 3.f, .5f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, GetRandomReal( 0.f, 360.f ), 1.f + .25f * i, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, 0.f, GetRandomReal( 0.f, 360.f ), 1.f + .25f * i, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		float dmg = 500.f + 40.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, targX, targY, 600.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void ToonoShiki_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		ACF_StunUnit( source, 1.3f );
+		SetUnitAnimation( source, "spell one" );
+		SetUnitFacing( source, angle );
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, GetRandomReal( 0.f, 360.f ), 1.f + .25f * i, 1.f );
+			SetSpecialEffectAlpha( ef, GetRandomInt( 0xA0, 0xC0 ) );
+			SetEffectTimedLife( ef, 4.f );
+		}
+	}
+	else if ( ticks == 90 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		float dmg = 3000.f + 300.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+		effect ef;
+
+		PlayHeroSound( source, 'gsnd' + 2, 80.f, .0f );
+		PlayHeroSound( source, 'psnd' + 'T1', 100.f, .0f );
+
+		DisplaceWar3ImageLinear( source, angle, dist + 250.f, .4f, .01f, false, false );
+		
+		for ( int i = 0; i < 17; i++ )
+		{
+			if ( i < 3 )
+			{
+				ef = CreateEffectEx( "Characters\\NanayaShiki\\REffect2.mdl", targX, targY, 100.f, 270.f, 4.f, 1.f );
+				SetEffectTimedLife( ef, 4.f );
+			}
+
+			if ( i < 8 )
+			{
+				ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, 0.f, GetRandomReal( 0.f, 360.f ), 1.f + .25f * i, 1.f );
+				SetSpecialEffectAlpha( ef, GetRandomInt( 0xA0, 0xC0 ) );
+				SetEffectTimedLife( ef, 4.f );
+			}
+
+			float face = GetRandomReal( 0.f, 360.f );
+
+			ef = CreateEffectEx( "Characters\\ToonoShiki\\TohnoShikiQEffect.mdl", targX, targY, .0f, face, 2.f, .5f );
+			DisplaceWar3ImageWithArgs( ef, face, GetRandomReal( 200.f, 800.f ), .1f, .01f, .0f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		ACF_StunUnit( target, 2.f );
+		ACF_DamageTarget( source, target, dmg );
+	}
+	else if ( ticks == 130 )
+	{
+		ReleaseTimer( tmr );
+	}
+}
+//
+
+// Ryougi Shiki Spells
+void RyougiShiki_D( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		PlayHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'D1', 100.f, .0f );
+		ReleaseTimer( tmr );
+	}
+}
+
+void RyougiShiki_Q( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'W1', 100.f, .0f );
+
+		ACF_StunUnit( source, .2f );
+		SetUnitTimeScale( source, 1.5f );
+		SetUnitAnimation( source, "spell channel four" );
+	}
+	else if ( ticks == 20 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = GetUnitFacing( source );
+		float targX = MathPointProjectionX( x, angle, 200.f );
+		float targY = MathPointProjectionY( y, angle, 200.f );
+
+		PlayHeroSound( source, 'gsnd' + 0, 50.f, .0f );
+		SetUnitTimeScale( source, 1.f );
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			effect ef = CreateEffectEx( "Characters\\RyougiShiki\\RyougiShikiWEffect.mdl", targX, targY, .0f, angle, 4.f, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		float dmg = 240.f + 80.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, targX, targY, 300.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+
+				DisplaceUnitWithArgs( u, angle, 300.f, .5f, .01f, 150.f );
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", GetUnitX( u ), GetUnitY( u ) ) );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void RyougiShiki_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+
+		PlayHeroSound( source, 'psnd' + 'Q1', 100.f, .0f );
+		ACF_StunUnit( source, .4f );
+		SetUnitAnimation( source, "Spell Channel Slam" );
+		SetUnitTimeScale( source, 2.f );
+		EffectAPI::Dash( source );
+
+		DisplaceWar3ImageLinear( source, GetUnitFacing( source ), dist, .4f, .01f, false, true );
+	}
+	else if ( ticks == 40 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = GetUnitFacing( source );
+		float targX = MathPointProjectionX( x, angle, 200.f );
+		float targY = MathPointProjectionY( y, angle, 200.f );
+
+		PlayHeroSound( source, 'gsnd' + 0, 50.f, .0f );
+		SetAbilityRemainingCooldown( GetUnitAbility( source, 'A033' ), .01f );
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			effect ef = CreateEffectEx( "Characters\\RyougiShiki\\RyougiShikiWEffect.mdl", targX, targY, .0f, angle, 4.f, 1.f );
+			//SetSpecialEffectColour( ef, 0xFFFF7000 );
+			SetEffectTimedLife( ef, 3.f );
+		}
+
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, targX, targY, 400.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", GetUnitX( u ), GetUnitY( u ) ) );
+				DisplaceWar3ImageLinear( u, angle, 150.f, .2f, .01f, false, false );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void RyougiShiki_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+
+		PlayHeroSound( source, 'psnd' + 'E1', 100.f, .0f );
+		ACF_StunUnit( source, .5f );
+		SetUnitTimeScale( source, 1.75f );
+		SetUnitAnimation( source, "spell channel two" );
+		DisplaceWar3ImageLinear( source, angle, dist, .4f, .01f, false, true );
+
+		SaveReal( GameHT, hid, 'srcX', x );
+		SaveReal( GameHT, hid, 'srcY', y );
+		SaveReal( GameHT, hid, 'trgX', MathPointProjectionX( x, angle, dist * .5f ) );
+		SaveReal( GameHT, hid, 'trgY', MathPointProjectionY( y, angle, dist * .5f ) );
+	}
+	else if ( ticks == 50 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float origX = LoadReal( GameHT, hid, 'srcX' );
+		float origY = LoadReal( GameHT, hid, 'srcX' );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+
+		PlayHeroSound( source, 'gsnd' + 0, 50.f, .0f );
+
+		effect ef = CreateEffectEx( "Characters\\ToonoShiki\\TohnoShikiQEffect.mdl", targX, targY, .0f, angle, 3.f, .5f );
+		SetEffectTimedLife( ef, 3.f );
+
+		float dmg = 75.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInLine( GroupEnum, origX, origY, angle, dist, 600.f );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", GetUnitX( u ), GetUnitY( u ) ) );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void RyougiShiki_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_StunUnit( source, 1.35f );
+		SetUnitAnimation( source, "spell one" );
+		PlayHeroSound( source, 'psnd' + 'T1', 80.f, .0f );
+	}
+	else if ( ticks == 25 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		float dmg = 1000.f + 100.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+
+		SetUnitAnimation( source, "spell channel five" );
+		ACF_DamageTarget( source, target, dmg );
+		SetUnitXY( source, MathPointProjectionX( targX, angle, 100.f ), MathPointProjectionY( targY, angle, 100.f ) );
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			effect ef = CreateEffectEx( "Characters\\RyougiShiki\\RyougiShikiQEffect.mdl", targX, targY, .0f, angle, 2.f, 1.f );
+			//SetSpecialEffectColour( ef, 0xFFFF7000 );
+			SetEffectTimedLife( ef, 3.f );
+		}
+	}
+	else if ( ticks == 75 )
+	{
+		SetUnitAnimation( LoadUnitHandle( GameHT, hid, 'usrc' ), "spell slam one" );
+	}
+	else if ( ticks == 135 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float dmg = 1000.f + 100.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+
+		PlayHeroSound( source, 'gsnd' + 0, 50.f, .0f );
+		ACF_DamageTarget( source, target, dmg );
+		ACF_StunUnit( target, 1.f );
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			effect ef = CreateEffectEx( "Characters\\NanayaShiki\\REffect2.mdl", targX, targY, 100.f, 270.f, 4.f, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\26.mdx", targX, targY ) );
+		ReleaseTimer( tmr );
+	}
+}
+
+void RyougiShiki_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_StunUnit( source, 1.25f );
+		SetUnitAnimation( source, "spell channel three" );
+		PlayHeroSound( source, 'psnd' + 'D1', 100.f, .0f );
+		SaveBoolean( GameHT, hid, 'skip', true );
+		SaveInteger( GameHT, hid, 'tick', ticks + 1 );
+	}
+	else if ( ticks == 1 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+
+		if ( DisplaceWar3ImageToTarget( source, target, 40.f, 600.f ) )
+		{
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+			float targX = GetUnitX( target );
+			float targY = GetUnitY( target );
+			float angle = MathAngleBetweenPoints( x, y, targX, targY );
+			float dist = MathDistanceBetweenPoints( x, y, targX, targY );
+			float dmg = 1500.f + 150.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+
+			PlayHeroSound( source, 'psnd' + 'R1', 100.f, .0f );
+			SetUnitAnimation( source, "spell channel four" );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+
+			for ( int i = 0; i < 3; i++ )
+			{
+				effect ef = CreateEffectEx( "Characters\\ToonoShiki\\TohnoShikiQEffect.mdl", targX, targY, .0f, angle, 1.f, 1.f );
+				SetEffectTimedLife( ef, 4.f );
+
+				ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, 0.f, GetRandomReal( 0.f, 360.f ), 1.f + .25f * i, 1.f );
+				SetSpecialEffectAlpha( ef, GetRandomInt( 0xA0, 0xC0 ) );
+				SetEffectTimedLife( ef, 4.f );
+			}
+
+			DisplaceWar3ImageLinear( source, angle, dist + 250.f, .2f, .01f, false, false );
+			
+			ACF_DamageTarget( source, target, dmg );
+			ACF_StunUnit( target, .5f );
+			SaveInteger( GameHT, hid, 'tick', 5 );
+			return;
+		}
+	}
+	else if ( ticks == 5 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		int slashes = LoadInteger( GameHT, hid, 'slsh' );
+
+		if ( slashes < 30 )
+		{
+			PlayHeroSound( source, 'psnd' + 'R2', 100.f, .0f );
+
+			for ( int i = 0; i < 3; i++ )
+			{
+				effect ef = CreateEffectEx( "Characters\\ToonoShiki\\TohnoShikiQEffect.mdl", targX, targY, .0f, slashes * 12.f, 1.f, 1.f );
+				SetEffectTimedLife( ef, 4.f );
+			}
+
+			SaveInteger( GameHT, hid, 'slsh', slashes + 1 );
+		}
+		else
+		{
+			float angle = GetUnitAngle( source, target );
+			float dist = GetUnitDistance( source, target );
+
+			SetUnitAnimation( source, "spell" );
+			DisplaceUnitWithArgs( source, angle, dist + 600.f, 1.1f, .01f, 250.f );
+			SaveInteger( GameHT, hid, 'tick', 10 );
+			SaveBoolean( GameHT, hid, 'skip', false );
+			return;
+		}
+	}
+	else if ( ticks == 70 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = GetUnitAngle( source, target );
+		effect ef;
+		float dmg = 1500.f + 150.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+
+		PlayHeroSound( source, 'gsnd' + 0, 70.f, .0f );
+
+		ACF_StunUnit( target, 1.f );
+		ACF_DamageTarget( source, target, dmg );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\26.mdx", targX, targY ) );
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			ef = CreateEffectEx( "Characters\\NanayaShiki\\REffect2.mdl", targX, targY, 0.f, angle, 4.f, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "Characters\\ToonoShiki\\TohnoShikiQEffect.mdl", targX, targY, .0f, angle, 4.f, 1.f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+	}
+	else if ( ticks == 120 )
+	{
+		ReleaseTimer( tmr );
+	}
+}
+//
+
+// Saber Alter Spells
+void SaberAlter_D( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		StopHeroSound( source, 'psnd' + 'D1' );
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'D1', 100.f, .0f );
+		ACF_StunUnit( source, .2f );
+		SetUnitAnimation( source, "Morph" );
+	}
+	else if ( ticks == 20 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			effect ef = CreateEffectEx( "Characters\\SaberAlter\\DarkLightningNova.mdl", x, y, 50.f, .0f, .2f * i, .6f + .1f * i );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+		
+		GroupEnumUnitsInRange( GroupEnum, x, y, 300.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				float dist = GetUnitDistance( source, u );
+
+				ACF_DamageTarget( source, u, dmg );
+				DisplaceUnitWithArgs( u, GetUnitAngle( source, u ), 200.f, .5f, .01f, 200.f );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void SaberAlter_Q( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'Q1', 100.f, .0f );
+		ACF_StunUnit( source, .3f );
+		SetUnitTimeScale( source, 1.5f );
+		SetUnitAnimation( source, "spell Slam" );
+	}
+	else if ( ticks == 10 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+		float targX = MathPointProjectionX( x, angle, dist * .5f );
+		float targY = MathPointProjectionY( y, angle, dist * .5f );
+	
+		DisplaceWar3ImageLinear( source, angle, dist, .1f, .01f, false, true );
+
+		PlayHeroSound( source, 'psnd' + 'Q2', 100.f, .0f );
+
+		effect ef = CreateEffectEx( "Characters\\SaberAlter\\SaberAlterClaw.mdl", targX, targY, .0f, angle, 3.f, .5f );
+		SetSpecialEffectColour( ef, 0xFF800080 );
+		SetEffectTimedLife( ef, 3.f );
+
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInLine( GroupEnum, x, y, angle, dist, 400.f );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", GetUnitX( u ), GetUnitY( u ) ) );
+				DisplaceWar3ImageLinear( u, angle, 200.f, .5f, .01f, false, false );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void SaberAlter_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+
+		SetUnitAnimation( source, "spell Two" );
+		EffectAPI::Jump( source );
+
+		DisplaceUnitWithArgs( source, LoadReal( GameHT, hid, 'angl' ), dist, .4f, .01f, 200.f + dist / 5.f );
+	}
+	else if ( ticks == 40 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		effect ef;
+
+		PlayHeroSound( source, 'psnd' + 'W2', 100.f, .0f );
+		PlayHeroSound( source, 'psnd' + 'W3', 100.f, .0f );
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\LightningStrike1.mdx", x, y ) );
+
+		ef = CreateEffectEx( "Characters\\SaberAlter\\DarkExplosion.mdl", x, y, .0f, 270.f, .5f, 1.f );
+
+		for ( int i = 0; i < 4; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, GetRandomReal( 0.f, 360.f ), 1.f + .25f * i, 1.f );
+			SetSpecialEffectAlpha( ef, GetRandomInt( 0xA0, 0xC0 ) );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		float dmg = 150.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, 300.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void SaberAlter_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		DestroyGroup( LoadGroupHandle( GameHT, hid, '+grp' ) );
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'E1', 100.f, .0f );
+		ACF_StunUnit( source, .6f );
+		SaveGroupHandle( GameHT, hid, '+grp', CreateGroup( ) );
+		SetUnitAnimation( source, "spell Five" );
+	}
+	else if ( ticks == 60 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'E2', 100.f, .5f );
+		SaveReal( GameHT, hid, 'srcX', GetUnitX( source ) );
+		SaveReal( GameHT, hid, 'srcY', GetUnitY( source ) );
+	}
+	else if ( ticks > 60 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float move = LoadReal( GameHT, hid, 'move' ) + 150.f;
+		int id = R2I( move / 150.f );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float x = MathPointProjectionX( LoadReal( GameHT, hid, 'srcX' ), angle, move );
+		float y = MathPointProjectionY( LoadReal( GameHT, hid, 'srcY' ), angle, move );
+		group g = LoadGroupHandle( GameHT, hid, '+grp' );
+
+		effect ef = CreateEffectEx( "Characters\\SaberAlter\\ShadowBurstBigger.mdx", x, y, .0f, .0f, .2f + .05f * id, 1.f );
+		SetEffectTimedLife( ef, 1.f + .025f * id );
+
+		float dmg = 75.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, 300.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) && !IsUnitInGroup( u, g ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+				DisplaceUnitWithArgs( u, .0f, .0f, .5f, .01f, 400.f );
+
+				GroupAddUnit( g, u );
+			}
+		}
+
+		if ( move >= 1500.f )
+		{
+			DestroyGroup( g );
+			ReleaseTimer( tmr );
+			return;
+		}
+
+		SaveReal( GameHT, hid, 'move', move );
+	}
+}
+
+void SaberAlter_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_StunUnit( source, 1.5f );
+		PlayHeroSound( source, 'psnd' + 'R1', 100.f, .0f );
+		PlayHeroSound( source, 'psnd' + 'R2', 100.f, .5f );
+	}
+	else if ( ticks >= 10 )
+	{
+		int slashes = LoadInteger( GameHT, hid, 'slsh' );
+
+		if ( CounterEx( hid, 0, 40 ) )
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+			float angle = GetUnitFacing( source );
+			float efX = MathPointProjectionX( x, angle, 50.f );
+			float efY = MathPointProjectionY( y, angle, 50.f );
+
+			PlayHeroSound( source, 'psnd' + 'R2', 100.f, .5f );
+			SetUnitAnimation( source, slashes == 0 || slashes == 2 ? "spell Three" : "spell Six" );
+
+			for ( int i = 0; i < 5; i++ )
+			{
+				effect ef = CreateEffectEx( "Characters\\SaberAlter\\SaberAlterSlash.mdl", efX, efY, .0f, angle, 1.f, 1.f );
+				SetEffectTimedLife( ef, 3.f );
+			}
+
+			DisplaceWar3ImageLinear( source, angle, 100.f, .4f, .01f, false, false );
+
+			float dmg = 30.f * GetHeroLevel( source ) + .25f * GetHeroInt( source, true );
+
+			GroupEnumUnitsInRange( GroupEnum, efX, efY, 300.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+				{
+					ACF_DamageTarget( source, u, dmg );
+					DisplaceUnitWithArgs( u, angle, slashes < 3 ? 100.f : 300.f, .35f, .01f, 300.f );
+					DestroyEffect( AddSpecialEffectTarget( slashes < 3 ? "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl" : "GeneralEffects\\BloodEffect1.mdx", u, "chest" ) );
+				}
+			}
+
+			slashes++;
+  
+			if ( slashes > 3 )
+			{
+				ReleaseTimer( tmr );
+				return;
+			}
+			else
+			{
+				SaveInteger( GameHT, hid, 'slsh', slashes );
+			}
+		}
+	}
+}
+
+void SaberAlter_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		DestroyGroup( LoadGroupHandle( GameHT, hid, '+grp' ) );
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+
+		PlayHeroSound( source, 'psnd' + 'T1', 100.f, .0f );
+		ACF_StunUnit( source, 1.f );
+		SetUnitAnimation( source, "spell Channel One" );
+		DestroyEffect( AddSpecialEffectTarget( "Characters\\SaberAlter\\ShadowBurst.mdx", source, "weapon" ) );
+
+		EffectAPI::Jump( source );
+
+		for ( int i = 0; i < 2; i++ )
+		{
+			effect ef = CreateEffectEx( "Characters\\SaberAlter\\DarkExplosion.mdl", x, y, .0f, .0f, GetRandomReal( .95f, 1.25f ), GetRandomReal( .45f, .7f ) );
+			SetEffectTimedLife( ef, 2.f );
+		}
+
+		SaveGroupHandle( GameHT, hid, '+grp', CreateGroup( ) );
+	}
+	else if ( ticks == 100 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+
+		SetUnitAnimation( source, "spell Channel Two" );
+		PlayHeroSound( source, 'psnd' + 'T2', 100.f, .0f );
+
+		effect ef = CreateEffectEx( "Characters\\SaberAlter\\DarkWave.mdl", x, y, 50.f, angle, 1.f, 1.f );
+		SetSpecialEffectColour( ef, 0xFFA0FF70 );
+		SetEffectTimedLife( ef, 3.f );
+
+		SaveReal( GameHT, hid, 'srcX', x );
+		SaveReal( GameHT, hid, 'srcY', y );
+	}
+	else if ( ticks >= 100 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		group g = LoadGroupHandle( GameHT, hid, '+grp' );
+		float x = LoadReal( GameHT, hid, 'srcX' );
+		float y = LoadReal( GameHT, hid, 'srcY' );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float moved = LoadReal( GameHT, hid, 'move' );
+		bool isEff = ( moved % 400.f ) == 0.f; moved += 100.f;
+
+		float efX = MathPointProjectionX( x, angle, moved );
+		float efY = MathPointProjectionY( y, angle, moved );
+
+		if ( isEff )
+		{
+			effect ef = CreateEffectEx( "GeneralEffects\\FuzzyStomp.mdl", efX, efY, 0.f, GetRandomReal( 0.f, 360.f ), 3.f, 1.f );
+			SetEffectTimedLife( ef, 1.f );
+		}
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", efX, efY ) );
+
+		float dmg = 300.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, efX, efY, 500.f, nil );
+	
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) && !IsUnitInGroup( u, g ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+
+				GroupAddUnit( g, u );
+			}
+		}
+
+		if ( moved >= 3000 )
+		{
+			DestroyGroup( g );
+			ReleaseTimer( tmr );
+			return;
+		}
+
+		SaveReal( GameHT, hid, 'move', moved );
+	}
+}
+//
+
+// Saber Nero Spells
+void SaberNero_Q( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+
+		PlayHeroSound( source, 'psnd' + 'Q1', 100.f, .0f );
+		EffectAPI::Dash( source );
+		ACF_StunUnit( source, .5f );
+		SetUnitTimeScale( source, 1.5f );
+		SetUnitAnimation( source, "spell two" );
+		DisplaceWar3ImageLinear( source, angle, dist, .5f, .01f, false, true );
+	}
+	else if ( ticks == 50 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float angle = GetUnitFacing( source );
+		float x = MathPointProjectionX( GetUnitX( source ), angle, 200.f );
+		float y = MathPointProjectionY( GetUnitY( source ), angle, 200.f );
+
+		for ( int i = 0; i < 2; i++ )
+		{
+			effect ef = CreateEffectEx( "Characters\\SaberNero\\SaberNeroFireCutEffect.mdl", x, y, .0f, angle, 2.5f, 1.f );
+			SetEffectTimedLife( ef, 1.f );
+		}
+
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, 400.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", GetUnitX( u ), GetUnitY( u ) ) );
+				DisplaceWar3ImageLinear( u, GetUnitAngle( source, u ), 200.f, .3f, .01f, false, false );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void SaberNero_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		PlayHeroSound( source, 'psnd' + 'W1', 100.f, .0f );
+		ACF_StunUnit( source, .4f );
+		SetUnitAnimation( source, "attack slam" );
+	}
+	else if ( ticks == 40 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		effect ef;
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\LightningStrike1.mdx", x, y ) );
+
+		ef = CreateEffectEx( "GeneralEffects\\FuzzyStomp.mdl", x, y, .0f, 270.f, 4.f, 1.f );
+
+		for ( int i = 0; i < 8; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, GetRandomReal( 0.f, 360.f ), 1.5f + .25f * i, GetRandomReal( .5f, 2.f ) );
+			SetSpecialEffectAlpha( ef, GetRandomInt( 0xA0, 0xC0 ) );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		float dmg = 250 + GetHeroLevel( LoadUnitHandle( GameHT, hid, 'usrc' ) ) * 50 + GetHeroInt( LoadUnitHandle( GameHT, hid, 'usrc' ), true );
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, 450.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+				DisplaceWar3ImageLinear( u, GetUnitAngle( source, u ), 200.f, .25f, .01f, false, false );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void SaberNero_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		PlayHeroSound( source, 'psnd' + 'E1', 100.f, .0f );
+		
+		ACF_StunUnit( source, 1.7f );
+		SetUnitTimeScale( source, 1.5f );
+		SetUnitAnimation( source, "Spell Three" );
+		DisplaceWar3ImageLinear( source, angle, dist - 150.f, .1f, .015f, false, true );
+	}
+	else if ( ticks == 10 )
+	{
+		ACF_StunUnit( LoadUnitHandle( GameHT, hid, 'utrg' ), .35f );
+	}
+	else if ( ticks >= 35 && ticks <= 140 )
+	{
+		if ( CounterEx( hid, 0, 35 ) )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float targX = GetUnitX( target );
+			float targY = GetUnitY( target );
+			float dmg = 10.f * GetHeroLevel( source );
+
+			SetUnitFacing( source, GetUnitAngle( source, target ) );
+			ACF_DamageTarget( source, target, dmg );
+			ACF_StunUnit( target, .35f );
+
+			effect ef = CreateEffectEx( "GeneralEffects\\qqqqq.mdl", targX, targY, 100.f, GetRandomReal( 0.f, 360.f ), 1.2f, 1.f );
+			SetEffectTimedLife( ef, 1.f );
+
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\RedAftershock.mdx", targX, targY ) );
+			DestroyEffect( AddSpecialEffectTarget( "Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl", target, "chest" ) );
+		}
+	}
+	else if ( ticks == 170 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		effect ef;
+
+		ef = CreateEffectEx( "GeneralEffects\\lssdqiu.mdl", targX, targY, .0f, 270.f, 4.f, 1.f );
+		SetEffectTimedLife( ef, 1.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\moonwrath.mdl", targX, targY, .0f, .0f, 4.f, 1.f );
+		SetEffectTimedLife( ef, 4.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\apocalypsecowstomp.mdl", targX, targY, .0f, .0f, 1.5f, 1.f );
+		SetSpecialEffectColour( ef, 0xFFFF00FF );
+
+		for ( int i = 0; i < 8; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, 0.f, GetRandomReal( 0.f, 360.f ), 1.5f + .25f * i, GetRandomReal( .5f, 2.f ) );
+			SetSpecialEffectAlpha( ef, GetRandomInt( 0xA0, 0xC0 ) );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		float dmg = 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, targX, targY, 400.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void SaberNero_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'R1', 100.f, .0f );
+		ACF_StunUnit( source, 1.85f );
+		SetUnitFacing( source, LoadReal( GameHT, hid, 'angl' ) );
+		SetUnitAnimation( source, "spell One" );
+		SaveReal( GameHT, hid, 'circ', 800 );
+	}
+
+	if ( ticks < 80 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		float circle = LoadReal( GameHT, hid, 'circ' );
+
+		DisplaceCircular( p, LoadReal( GameHT, hid, 'trgX' ), LoadReal( GameHT, hid, 'trgY' ), 300.f, circle, 1.f, "Abilities\\Spells\\Other\\Doom\\DoomDeath.mdl" );
+
+		SaveReal( GameHT, hid, 'circ', circle - 10.f );
+	}
+	else if ( ticks == 80 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float angle = GetUnitFacing( source );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+
+		SetUnitAnimation( source, "spell channel one" );
+		DisplaceWar3ImageLinear( source, angle, dist * .4f, .5f, .01f, false, false );
+	}
+	else if ( ticks == 130 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = GetUnitFacing( source );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+		effect ef;
+
+		SetUnitAnimation( source, "attack slam" );
+
+		DisplaceUnitWithArgs( source, angle, ( dist * .6f ), .6f, .01f, 600.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\wave.mdl", x, y, 200.f, angle, 2.f, 1.f );
+		SetEffectTimedLife( ef, 3.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\SlamEffect.mdl", x, y, 50.f, angle, 1.f, 2.f );
+		SetEffectTimedLife( ef, 3.f );
+
+		for ( int i = 0; i < 4; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, GetRandomReal( 0.f, 360.f ), 1.5f + .25f * i, GetRandomReal( .5f, 2.f ) );
+			SetSpecialEffectAlpha( ef, GetRandomInt( 0xA0, 0xC0 ) );
+			SetEffectTimedLife( ef, 4.f );
+		}
+	}
+	else if ( ticks == 185 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+		effect ef = CreateEffectEx( "GeneralEffects\\FuzzyStomp.mdl", targX, targY, .0f, 270.f, 6.f, 1.f );
+
+		for ( int i = 0; i < 12; i++ )
+		{
+			if ( i < 8 )
+			{
+				ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, 0.f, GetRandomReal( 0.f, 360.f ), 4.5f + .25f * i, GetRandomReal( .5f, 2.f ) );
+				SetSpecialEffectAlpha( ef, GetRandomInt( 0xA0, 0xC0 ) );
+				SetEffectTimedLife( ef, 4.f );
+			}
+
+			for ( int j = 0; j < 3; j++ )
+			{
+				float efX = MathPointProjectionX( targX, 30.f * i, 200.f + 200.f * j );
+				float efY = MathPointProjectionY( targY, 30.f * i, 200.f + 200.f * j );
+
+				ef = CreateEffectEx( "GeneralEffects\\ioncannonbeam.mdl", efX, efY, 50.f, .0f, 10.f, 1.f );
+				SetSpecialEffectColour( ef, 0xFFFF6400 );
+				SetSpecialEffectAnimation( ef, "birth" );
+				SetEffectTimedLife( ef, 1.5f );
+			}
+		}
+
+		float dmg = 2000.f + 125.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, targX, targY, 800.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 2.f );
+				DisplaceUnitWithArgs( u, GetUnitAngle( source, u ), 1000.f, 1, .01f, 600.f );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void SaberNero_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_StunUnit( source, 4.1f );
+		SetUnitTimeScale( source, 1.5f );
+		SetUnitAnimation( source, "Spell Fly Slam" );
+
+		SaveBoolean( GameHT, hid, 'skip', true );
+		SaveInteger( GameHT, hid, 'tick', 5 );
+	}
+	else if ( ticks == 5 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+
+		if ( DisplaceWar3ImageToTarget( source, target, 50.f, 150.f ) )
+		{
+			PlayHeroSound( source, 'psnd' + 'T1', 100.f, .0f );
+			SetUnitAnimation( source, "Spell Three" );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\RedAftershock.mdx", GetUnitX( source ), GetUnitY( source ) ) );
+
+			SaveBoolean( GameHT, hid, 'skip', false );
+			SaveInteger( GameHT, hid, 'tick', 30 );
+
+			return;
+		}
+	}
+	else if ( ticks >= 30 && ticks <= 120 )
+	{
+		if ( CounterEx( hid, 0, 30 ) )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float targX = GetUnitX( target );
+			float targY = GetUnitY( target );
+			float angle = GetUnitAngle( source, target );
+			float dmg = 20.f * GetHeroLevel( source );
+
+			ACF_DamageTarget( source, target, dmg );
+			SetUnitFacing( source, angle );
+
+			effect ef = CreateEffectEx( "GeneralEffects\\qqqqq.mdl", targX, targY, 100.f, GetRandomReal( 0.f, 360.f ), 1.2f, 1.f );
+			SetEffectTimedLife( ef, 1.f );
+
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\RedAftershock.mdx", targX, targY ) );
+			DestroyEffect( AddSpecialEffectTarget( "Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl", target, "chest" ) );
+		}
+	}
+	else if ( ticks == 170 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float dmg = 20.f * GetHeroLevel( source );
+		effect ef;
+
+		SetUnitTimeScale( source, 1.f );
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\LightningStrike1.mdx", targX, targY ) );
+		for ( int i = 0; i < 8; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, 0.f, GetRandomReal( 0.f, 360.f ), 4.5f + .25f * i, GetRandomReal( .5f, 2.f ) );
+			SetSpecialEffectAlpha( ef, GetRandomInt( 0xA0, 0xC0 ) );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		ACF_DamageTarget( source, target, dmg );
+		DisplaceUnitWithArgs( target, 0, 0, .9f, .01f, 600.f );
+		SetUnitAnimation( source, "Spell Five" );
+	}
+	else if ( ticks == 250 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		float dmg = 20.f * GetHeroLevel( source );
+		effect ef;
+
+		PlayHeroSound( source, 'gsnd' + 1, 60.f, .0f );
+
+		SetUnitAnimation( source, "Spell One" );
+
+		ef = CreateEffectEx( "GeneralEffects\\wave.mdl", targX, targY, 200.f, angle, 2.f, 1.f );
+		SetSpecialEffectPitch( ef, -90.f );
+		SetEffectTimedLife( ef, 3.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\SlamEffect.mdl", targX, targY, 50.f, angle, 1.f, 2.f );
+		SetSpecialEffectPitch( ef, -90.f );
+		SetEffectTimedLife( ef, 3.f );
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			ef = CreateEffectEx( "Characters\\SaberNero\\SaberNeroFireCutEffect.mdl", x, y, .0f, angle, 2.5f, 1.f );
+			SetEffectTimedLife( ef, 1.f );
+		}
+
+		ACF_DamageTarget( source, target, dmg );
+
+		EffectAPI::PushWind( source, target );
+
+		DisplaceWar3ImageLinear( target, angle, 500.f, 1, .01f, false, false );
+	}
+	else if ( ticks == 330 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		SetUnitAnimation( source, "Attack Slam" );
+		EffectAPI::Dash( source );
+		
+		DisplaceUnitWithArgs( source, angle, 950.f, .8f, .01f, 600.f );
+	}
+	else if ( ticks == 410 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float dmg = 180.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+		effect ef = CreateEffectEx( "GeneralEffects\\FuzzyStomp.mdl", targX, targY, .0f, 270.f, 4.f, 1.f );
+
+		PlayHeroSound( source, 'gsnd' + 2, 80.f, .0f );
+
+		for ( int i = 0; i < 10; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\BlinkNew.mdl", targX, targY, 200.f, 36.f * i, .5f * i, 1.5f - .1f * i );
+			SetSpecialEffectColour( ef, 0xFF6000FF );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, 0.f, GetRandomReal( 0.f, 360.f ), 4.5f + .25f * i, GetRandomReal( .5f, 2.f ) );
+			SetSpecialEffectAlpha( ef, GetRandomInt( 0xA0, 0xC0 ) );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\26.mdx", targX, targY ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+		ACF_DamageTarget( source, target, dmg );
+		ACF_StunUnit( target, 1.f );
+		ReleaseTimer( tmr );
+	}
+}
+//
+
+// Kuchiki Byakuya Spells
+void KuchikiByakuya_Q( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+		DestroyGroup( LoadGroupHandle( GameHT, hid, '+grp' ) );
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'Q2', 90.f, .0f );
+
+		ACF_StunUnit( source, .25f );
+		SetUnitAnimation( source, "spell" );
+	}
+	else if ( ticks == 25 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = GetUnitFacing( source );
+		effect ef = CreateEffectEx( "Characters\\KuchikiByakuya\\KuchikiByakuyaSpellQEffect.mdl", MathPointProjectionX( x, angle, 150.f ), MathPointProjectionY( y, angle, 150.f ), .0f, angle, 1.5f, 1.f );
+
+		PlayHeroSound( source, 'psnd' + 'Q1', 90.f, .0f );
+
+		SaveEffectHandle( GameHT, hid, '+eff', ef );
+		SaveGroupHandle( GameHT, hid, '+grp', CreateGroup( ) );
+
+		DisplaceWar3ImageLinear( ef, angle, 1250.f, .5f, .01f, false, false, "" );
+	}
+
+	if ( ticks >= 25 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		effect ef = LoadEffectHandle( GameHT, hid, '+eff' );
+		group g = LoadGroupHandle( GameHT, hid, '+grp' );
+		float x = GetSpecialEffectX( ef );
+		float y = GetSpecialEffectY( ef );
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, 250.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) && !IsUnitInGroup( u, g ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				GroupAddUnit( g, u );
+			}
+		}
+
+		if ( ticks == 60 )
+		{
+			DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+			DestroyGroup( LoadGroupHandle( GameHT, hid, '+grp' ) );
+			ReleaseTimer( tmr );
+		}
+	}
+}
+
+void KuchikiByakuya_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		HandleListCleanEffects( LoadHandleList( GameHT, hid, 'elst' ), true, true );
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'W1', 100.f, .0f );
+		ACF_StunUnit( source, .25f );
+		SetUnitAnimation( source, "spell channel one" );
+
+		SaveHandleList( GameHT, hid, 'elst', HandleListCreate( ) );
+	}
+	else if ( ticks >= 10 && ticks <= 20 )
+	{
+		if ( CounterEx( hid, 0, 2 ) )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float targX = GetUnitX( target );
+			float targY = GetUnitY( target );
+			float angle = GetUnitAngle( source, target );
+			handlelist hl = LoadHandleList( GameHT, hid, 'elst' );
+			int count = HandleListGetEffectCount( hl );
+			float efAngle = 60.f * count;
+			float efX = MathPointProjectionX( targX, efAngle, 100.f );
+			float efY = MathPointProjectionY( targX, efAngle, 100.f );
+			effect ef = CreateEffectEx( "Characters\\KuchikiByakuya\\KuchikiByakuyaSenkeiSword.mdl", efX, efY, 350.f, .0f, 3.f, 1.f );
+			SetSpecialEffectAnimation( ef, "stand" );
+			SetSpecialEffectPitch( ef, -85.f );
+			SetEffectTimedLife( ef, .25f - count * .01f );
+
+			HandleListAddHandle( hl, ef );
+		}
+	}
+	else if ( ticks == 50 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		handlelist hl = LoadHandleList( GameHT, hid, 'elst' );
+		float angleStep = 360.f / HandleListGetEffectCount( hl );
+
+		for ( int i = 0; i < HandleListGetEffectCount( hl ); i++ )
+		{
+			effect ef = HandleListGetEffectByIndex( hl, i );
+
+			SetSpecialEffectPosition( ef, MathPointProjectionX( targX, i * angleStep, 100.f ), MathPointProjectionY( targY, i * angleStep, 100.f ) );
+			SetSpecialEffectHeight( ef, 100.f );
+		}
+
+		float dmg = 245.f + 65.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		ACF_DamageTarget( source, target, dmg );
+		ACF_StunUnit( source, 1.f );
+
+		effect ef = CreateEffectEx( "Characters\\KuchikiByakuya\\KuchikiByakuyaSpellQEffect.mdl", targX, targY, .0f, .0f, 1.5f, 1.f );
+		SetEffectTimedLife( ef, .5f );
+
+		DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\BloodEffect1.mdx", target, "origin" ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\Spark_Pink.mdx", targX, targY ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\Deadspirit Asuna.mdx", targX, targY ) );
+
+		HandleListDestroy( hl );
+		ReleaseTimer( tmr );
+	}
+}
+
+void KuchikiByakuya_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'E1', 90.f, .0f );
+
+		ACF_StunUnit( source, 2.f );
+		SetUnitAnimation( source, "spell Slam" );
+	}
+	else if ( ticks == 10 )
+	{
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			effect ef = CreateEffectEx( "GeneralEffects\\plasma.mdl", targX, targY, .0f, .0f, 1.3f + i * .1f, 1.f );
+			SetSpecialEffectAnimation( ef, "stand" );
+			SetSpecialEffectColour( ef, 0xFFFF3060 );
+			SetEffectTimedLife( ef, 2.f );
+		}
+	}
+	else if ( ticks >= 20 && ticks <= 200 )
+	{
+		if ( CounterEx( hid, 0, 20 ) )
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float targX = LoadReal( GameHT, hid, 'trgX' );
+			float targY = LoadReal( GameHT, hid, 'trgY' );
+
+			float dmg = 3.f * GetHeroLevel( source ) + .05f * GetHeroInt( source, true );
+			float dmgFin = 40.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+
+			GroupEnumUnitsInRange( GroupEnum, targX, targY, 450.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+				{
+					if ( ticks != 200 )
+					{
+						ACF_DamageTarget( source, u, dmg );
+						ACF_AddBuffTimed( u, 'Bslo', 1.f, false );
+					}
+					else
+					{
+						ACF_DamageTarget( source, u, dmgFin );
+						ACF_StunUnit( u, 1.f );
+
+						DisplaceWar3ImageLinear( u, MathAngleBetweenPoints( targX, targY, GetUnitX( u ), GetUnitY( u ) ), 300.f, .5f, .01f, false, false );
+					}
+
+					DestroyEffect( AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "chest" ) );
+				}
+			}
+
+			if ( ticks == 200 )
+			{
+				effect ef = CreateEffectEx( "Characters\\KuchikiByakuya\\KuchikiByakuyaSakuraExplosionEffect.mdl", targX, targY, 50.f, .0f, 1.f, .3f );
+				SetEffectTimedLife( ef, 5.f );
+
+				ReleaseTimer( tmr );
+			}
+		}
+	}
+}
+
+void KuchikiByakuya_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( StopSpell( hid, 0, true ) || ticks > 1000 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		HandleListCleanEffects( LoadHandleList( GameHT, hid, 'elst' ), true, true );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	if ( ticks == 0 )
+	{
+		SetUnitAnimation( LoadUnitHandle( GameHT, hid, 'usrc' ), "morph" );
+		SaveHandleList( GameHT, hid, 'elst', HandleListCreate( ) );
+	}
+	else if ( ticks == 25 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		handlelist hl = LoadHandleList( GameHT, hid, 'elst' );
+		effect ef;
+		
+		for ( int i = 0; i < 3; i++ )
+		{
+			ef = CreateEffectEx( "Characters\\KuchikiByakuya\\KuchikiByakuyaBankaiEffect.mdl", x, y, 200.f * i, .0f, 1.f, 3.f );
+			SetSpecialEffectTimeScale( ef, 3.f );
+			HandleListAddHandle( hl, ef );
+		}
+	}
+	else if ( ticks >= 100 )
+	{
+		float x = .0f;
+		float y = .0f;
+		handlelist hl = LoadHandleList( GameHT, hid, 'elst' );
+
+		for ( int i = 0; i < HandleListGetEffectCount( hl ); i++ )
+		{
+			effect ef = HandleListGetEffectByIndex( hl, i );
+			float newFacing = 0;
+
+			if ( i == 0 )
+			{
+				newFacing = 5.f;
+				x = GetSpecialEffectX( ef );
+				y = GetSpecialEffectY( ef );
+			}
+			else if ( i == 1 )
+			{
+				newFacing = -5.f;
+			}
+			else if ( i == 2 )
+			{
+				newFacing = 7.5f;
+			}
+
+			SetSpecialEffectFacing( ef, GetSpecialEffectFacing( ef ) + newFacing );
+		}
+
+		if ( CounterEx( hid, 0, 25 ) )
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float dmg = 5.f * GetHeroLevel( source ) + .05f * GetHeroInt( source, true );
+			bool isEffect = CounterEx( hid, 1, 5 );
+			GroupEnumUnitsInRange( GroupEnum, x, y, 800.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+				{
+					ACF_DamageTarget( source, u, dmg );
+
+					if ( isEffect )
+					{
+						DestroyEffect( AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "chest" ) );
+						DestroyEffect( AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "head" ) );
+					}
+				}
+			}
+		}
+	}
+}
+
+void KuchikiByakuya_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+	
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'T3', 100.f, .0f );
+		ACF_StunUnit( source, 2.5f );
+		SetUnitTimeScale( source, 2.f );
+		SetUnitAnimation( source, "Attack Alternate One" );
+	}
+	else if ( ticks == 40 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+
+		PlayHeroSound( source, 'gsnd' + 1, 60.f, .0f );
+
+		EffectAPI::PushWind( source, target );
+
+		DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\QQQQQ.mdx", target, "chest" ) );
+		ACF_StunUnit( target, 2.f );
+
+		DisplaceWar3ImageLinear( target, angle, 400.f, .4f, .01f, false, false );
+	}
+	else if ( ticks == 80 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'T2', 100.f, .0f );
+		SetUnitTimeScale( source, 1.f );
+		SetUnitAnimation( source, "spell three" );
+	}
+	else if ( ticks == 120 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		SetUnitAnimation( source, "spell four" );
+		EffectAPI::Dash( source );
+
+		DisplaceWar3ImageLinear( source, angle, dist - 250.f, .5f, .01f, false, false );
+	}
+	else if ( ticks == 170 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'T1', 100.f, .0f );
+
+		SetUnitAnimation( source, "spell one" );
+		EffectAPI::Dash( source );
+	}
+	else if ( ticks == 180 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		effect ef;
+
+		for ( int i = 0; i < 2; i++ )
+		{
+			ef = CreateEffectEx( "Characters\\RyougiShiki\\RyougiShikiQEffect.mdl", targX, targY, .0f, angle, 4.f, 1.f );
+			//SetSpecialEffectColour( ef, 0xFFFF7000 );
+			SetEffectTimedLife( ef, 3.f );
+		}
+
+		DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\QQQQQ.mdx", target, "chest" ) );
+
+		ef = CreateEffectEx( "GeneralEffects\\qianbenying8.mdl", targX, targY, .0f, .0f, 1.f, 1.f );
+		SetEffectTimedLife( ef, .5f );
+
+		DisplaceWar3ImageLinear( source, angle, dist + 400.f, .6f, .01f, false, false );
+	}
+	else if ( ticks == 250 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		effect ef;
+		float dmg = 3000.f + 300.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		PlayHeroSound( source, 'gsnd' + 0, 60.f, .0f );
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			ef = CreateEffectEx( "Characters\\KuchikiByakuya\\KuchikiByakuyaSakuraExplosionEffect.mdl", targX, targY, 50.f, .0f, .5f * i, .3f + i );
+			SetEffectTimedLife( ef, 5.f );
+		}
+
+		ef = CreateEffectEx( "GeneralEffects\\qianbenying8.mdl", targX, targY, .0f, .0f, 1.f, 1.f );
+		SetEffectTimedLife( ef, .5f );
+
+		DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\BloodEffect1.mdx", target, "chest" ) );
+		DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\BloodEffect1.mdx", target, "origin" ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\Spark_Pink.mdx", targX, targY ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\Deadspirit Asuna.mdx", targX, targY ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\26.mdx", targX, targY ) );
+
+		ACF_StunUnit( target, 1.f );
+		ACF_DamageTarget( source, target, dmg );
+		ReleaseTimer( tmr );
+	}
+}
+//
+
+// Akame Spells
+void Akame_D( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'D1' );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float dist = -400.f;
+
+		if ( LoadInteger( GameHT, hid, 'atid' ) == 'A052' )
+		{
+			dist = -350.f;
+			ShowUnitAbility( source, 'A03L', true );
+			ShowUnitAbility( source, 'A052', false );
+		}
+		PlayHeroSound( source, 'psnd' + 'D1', 80.f, .0f );
+		ACF_StunUnit( source, .3f );
+		SetUnitTimeScale( source, 2.f );
+		SetUnitAnimation( source, "spell two" );
+		SetUnitInvulnerable( source, true );
+		SaveReal( GameHT, hid, 'dist', dist );
+	}
+	else if ( ticks == 20 )
+	{
+		DisplaceUnitWithArgs( LoadUnitHandle( GameHT, hid, 'usrc' ), LoadReal( GameHT, hid, 'angl' ), LoadReal( GameHT, hid, 'dist' ), .2f, .01f, 0 );
+	}
+	else if ( ticks == 30 )
+	{
+		ReleaseTimer( tmr );
+	}
+}
+
+void Akame_Q( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( StopSpell( hid, 0, true ) || ticks == 200 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		if ( ticks != 200 )
+		{
+			StopHeroSound( source, 'psnd' + 'Q1' );
+		}
+
+		ShowUnitAbility( source, 'A03L', true );
+		ShowUnitAbility( source, 'A052', false );
+		ReleaseTimer( tmr );
+		return;
+	}
+	else if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_StunUnit( source, .2f );
+		SetUnitAnimation( source, "Spell Four" );
+	}
+	else if ( ticks == 20 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float angle = GetUnitFacing( source );
+		float dist = 200.f;
+		float x = MathPointProjectionX( GetUnitX( source ), angle, dist );
+		float y = MathPointProjectionY( GetUnitY( source ), angle, dist );
+
+		PlayHeroSound( source, 'psnd' + 'Q1', 60.f, .0f );
+
+		ShowUnitAbility( source, 'A03L', false );
+		ShowUnitAbility( source, 'A052', true );
+
+		for ( int i = 0; i < 5; i++ )
+		{
+			effect ef = CreateEffectEx( "GeneralEffects\\AkihaClaw.mdl", x, y, .0f, angle + 30.f, 1.5f, .8f );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, 400.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", GetUnitX( u ), GetUnitY( u ) ) );
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+			}
+		}
+	}
+}
+
+void Akame_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		if ( StopSpell( hid, 0, true ) )
+		{
+			StopHeroSound( source, 'psnd' + 'W1' );
+		}
+
+		SetUnitVertexColor( source, 0xFF, 0xFF, 0xFF, 0xFF );
+		DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+		ReleaseTimer( tmr );
+
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_StunUnit( source, .2f );
+		SetUnitPathing( source, false );
+		SetUnitAnimation( source, "Spell Channel" );
+		SaveInteger( GameHT, hid, 'acol', 0xFF );
+		SaveEffectHandle( GameHT, hid, '+eff', AddSpecialEffectTarget( "Abilities\\Weapons\\PhoenixMissile\\Phoenix_Missile.mdl", source, "weapon" ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", GetUnitX( source ), GetUnitY( source ) ) );
+	}
+	else
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = MathAngleBetweenPoints( x, y, targX, targY );
+		int alpha = MathIntegerClamp( LoadInteger( GameHT, hid, 'acol' ) - 5, 0, 0xFF );
+
+		SetUnitVertexColor( source, 0xFF, 0xFF, 0xFF, alpha );
+		SaveInteger( GameHT, hid, 'acol', alpha );
+
+		if ( DisplaceWar3ImageToTarget( source, target, 20.f, 100.f ) )
+		{
+			float dmg = 200.f + 100.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+			PlayHeroSound( source, 'psnd' + 'W1', 100.f, .0f );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+
+			for ( int i = 0; i < 5; i++ )
+			{
+				effect ef = CreateEffectEx( "Characters\\RyougiShiki\\RyougiShikiWEffect.mdl", x, y, .0f, angle, 4.f, 1.f );
+				//SetSpecialEffectColour( ef, 0xFFFF7000 );
+				SetEffectTimedLife( ef, 3.f );
+			}
+
+			ACF_StunUnit( target, 1.f );
+			ACF_DamageTarget( source, target, dmg );
+			SetUnitAnimation( source, "attack" );
+
+			SetUnitVertexColor( source, 0xFF, 0xFF, 0xFF, 0xFF );
+			DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+			ReleaseTimer( tmr );
+			return;
+		}
+	}
+}
+
+void Akame_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'E1' );
+		ReleaseTimer( tmr );
+
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_StunUnit( source, .3f );
+		SetUnitAnimation( source, "Spell Four" );
+		PlayHeroSound( source, 'psnd' + 'E1', 100.f, .0f );
+	}
+	else if ( ticks == 30 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+
+		effect ef = CreateEffectEx( "GeneralEffects\\AkihaClaw.mdl", MathPointProjectionX( x, angle, dist * .5f ), MathPointProjectionY( y, angle, dist * .5f ), .0f, angle, 3.f, 1.f );
+		SetEffectTimedLife( ef, 3.f );
+
+		DisplaceWar3ImageLinear( source, angle, dist, .1f, .01f, false, true );
+
+		float dmg = 300.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInLine( GroupEnum, x, y, angle, dist, 450.f );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				DisplaceWar3ImageLinear( u, angle, 200.f, .5f, .01f, false, false );
+				DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", GetUnitX( u ), GetUnitY( u ) ) );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void Akame_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		if ( StopSpell( hid, 0, true ) )
+		{
+			StopHeroSound( source, 'gsnd' + 0 );
+			StopHeroSound( source, 'gsnd' + 1 );
+			StopHeroSound( source, 'psnd' + 'D1' );
+			StopHeroSound( source, 'psnd' + 'W1' );
+			StopHeroSound( source, 'psnd' + 'R1' );
+			StopHeroSound( source, 'psnd' + 'R2' );
+		}
+
+		DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		DisplaceWar3ImageLinear( source, angle, dist - 150.f, .6f, .01f, false, false );
+		SetUnitTimeScale( source, 2.f );
+		ACF_StunUnit( source, 2.8f );
+		SetUnitAnimation( source, "spell three" );
+	}
+	else if ( ticks == 40 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		float dmg = 250.f + 30.f * GetHeroLevel( source );
+
+		PlayHeroSound( source, 'gsnd' + 1, 60.f, .0f );
+		PlayHeroSound( source, 'psnd' + 'D1', 80.f, .0f );
+
+		EffectAPI::PushWind( source, target );
+
+		DisplaceWar3ImageLinear( target, angle, 400.f, .5f, .01f, false, false );
+		ACF_DamageTarget( source, target, dmg );
+		SetUnitAnimation( source, "spell two" );
+		DisplaceUnitWithArgs( source, angle, -400.f, 1, .01f, 0 );
+	}
+	else if ( ticks == 140 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'R2', 80.f, .0f );
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", GetUnitX( source ), GetUnitY( source ) ) );
+		ShowUnit( source, false );
+		SaveBoolean( GameHT, hid, 'skip', true );
+		SaveInteger( GameHT, hid, 'tick', ticks + 5 );
+	}
+	else if ( ticks == 145 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float dmg = 25.f + GetHeroLevel( source );
+		int slashCount = LoadInteger( GameHT, hid, 'slct' );
+
+		if ( slashCount < 20 )
+		{
+			float angle = slashCount * 18.f;
+			float efX = MathPointProjectionX( GetUnitX( target ), angle, 150.f );
+			float efY = MathPointProjectionY( GetUnitY( target ), angle, 150.f );
+			effect ef;
+
+			ACF_DamageTarget( source, target, dmg );
+
+			if ( CounterEx( hid, 0, 4 ) )
+			{
+				ef = AddSpecialEffectTarget( "GeneralEffects\\BloodEffect1.mdx", target, "chest" );
+				SetSpecialEffectScale( ef, .5f );
+				DestroyEffect( ef );
+			}
+			
+			ef = CreateEffectEx( "GeneralEffects\\BlackBlink.mdx", efX, efY, .0f, .0f, .75f, 1.f );
+			DestroyEffect( ef );
+
+			SaveInteger( GameHT, hid, 'slct', slashCount + 1 );
+		}
+		else
+		{
+			SaveBoolean( GameHT, hid, 'skip', false );
+			SaveInteger( GameHT, hid, 'tick', ticks + 1 );
+			ShowUnit( source, true );
+			ACF_SelectUnit( source, LoadPlayerHandle( GameHT, hid, '+ply' ) );
+			SetUnitFacing( source, GetUnitAngle( source, target ) );
+			SetUnitTimeScale( source, .1f );
+			SetUnitAnimation( source, "attack" );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", GetUnitX( source ), GetUnitY( source ) ) );
+			SaveEffectHandle( GameHT, hid, '+eff', AddSpecialEffectTarget( "Abilities\\Weapons\\PhoenixMissile\\Phoenix_Missile.mdl", source, "weapon" ) );
+			return;
+		}
+	}
+	else if ( ticks == 190 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		ACF_SelectUnit( source, LoadPlayerHandle( GameHT, hid, '+ply' ) );
+		PlayHeroSound( source, 'psnd' + 'W1', 90.f, .0f );
+		SetUnitTimeScale( source, 2.f );
+	}
+	else if ( ticks == 210 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = MathAngleBetweenPoints( x, y, targX, targY );
+		float dist = MathDistanceBetweenPoints( x, y, targX, targY );
+
+		PlayHeroSound( source, 'psnd' + 'R1', 90.f, .0f );
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			effect ef = CreateEffectEx( "GeneralEffects\\AkihaClaw.mdl", targX, targY, .0f, angle, 4.f, 1.f ); // perhaps better to change logic of the effect...?
+			SetEffectTimedLife( ef, 1.f );
+		}
+
+		DisplaceWar3ImageLinear( source, angle, dist + 400.f, .2f, .01f, false, false );
+
+		DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\BloodEffect1.mdx", target, "origin" ) );
+	}
+	else if ( ticks == 250 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float dmg = 500.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		ACF_StunUnit( target, 1 );
+		PlayHeroSound( source, 'gsnd' + 0, 60.f, .0f );
+		ACF_DamageTarget( source, target, dmg );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\26.mdx", targX, targY ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+		DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+		ReleaseTimer( tmr );
+	}
+}
+
+void Akame_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		StopHeroSound( source, 'gsnd' + 1 );
+		StopHeroSound( source, 'psnd' + 'Q1' );
+		StopHeroSound( source, 'psnd' + 'T1' );
+
+		DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		DisplaceWar3ImageLinear( source, angle, dist - 150.f, .5f, .01f, false, false );
+		ACF_StunUnit( source, 2.f );
+		SetUnitAnimation( source, "spell three" );
+		ACF_StunUnit( target, 2.f );
+		SaveEffectHandle( GameHT, hid, '+eff', AddSpecialEffectTarget( "Abilities\\Weapons\\PhoenixMissile\\Phoenix_Missile.mdl", source, "weapon" ) );
+	}
+	else if ( ticks == 50 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+		float dmg = 500.f + 50.f * GetHeroLevel( source );
+
+		PlayHeroSound( source, 'gsnd' + 1, 60.f, .0f );
+
+		EffectAPI::PushWind( source, target );
+
+		effect ef;
+
+		ef = CreateEffectEx( "GeneralEffects\\wave.mdl", targX, targY, 200.f, angle, 1.f, 1.f );
+		SetSpecialEffectPitch( ef, -90.f );
+
+		DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\BloodEffect1.mdx", target, "chest" ) );
+		DestroyEffect( AddSpecialEffectTarget( "GeneralEffects\\QQQQQ.mdx", target, "chest" ) );
+		DisplaceWar3ImageLinear( target, angle, 600.f, 1.f, .01f, false, false );
+		ACF_DamageTarget( source, target, dmg );
+	}
+	else if ( ticks == 75 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float dist = GetUnitDistance( source, target ) + 600.f;
+		float height = dist / 2.f;
+
+		DisplaceUnitWithArgs( source, GetUnitAngle( source, target ), dist, .8f, .01f, MathRealClamp( height, 100.f, 250.f ) );
+	}
+	else if ( ticks == 155 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+
+		SetUnitTimeScale( source, 1.75f );
+		PlayHeroSound( source, 'psnd' + 'Q1', 80.f, .0f );
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", GetUnitX( target ), GetUnitY( target ) ) );
+	}
+	else if ( ticks == 205 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float dmg = 1000.f + 100.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		PlayHeroSound( source, 'gsnd' + 0, 60.f, .0f );
+		DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\26.mdx", GetUnitX( target ), GetUnitY( target ) ) );
+
+		ACF_StunUnit( target, 1.f );
+		ACF_DamageTarget( source, target, dmg );
+
+		ReleaseTimer( tmr );
+	}
+}
+//
+
+// Scathach Spells
+void SetScathachQState( unit u, int state = 0 )
+{
+	ShowUnitAbility( u, 'A040', state == 0 );
+	ShowUnitAbility( u, 'A03Y', state == 1 );
+	ShowUnitAbility( u, 'A03Z', state == 2 );
+}
+
+void ResetScathachQ( unit u )
+{
+	SetScathachQState( u, 0 );
+}
+
+void Scathach_Q1( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( StopSpell( hid, 1, true ) || ticks == 300 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		if ( ticks != 300 )
+		{
+			StopHeroSound( source, 'psnd' + 'Q3' );
+		}
+
+		ResetScathachQ( source );
+		ReleaseTimer( tmr );
+		return;
+	}
+	else if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+
+		PlayHeroSound( source, 'psnd' + 'Q3', 100.f, .0f );
+		ACF_StunUnit( source, .55f );
+		SetUnitFacing( source, GetUnitAngle( source, target ) );
+		SetUnitAnimation( source, "Attack" );
+		
+	}
+	else if ( ticks == 20 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		SetScathachQState( source, GetUnitLevel( source ) >= 5 ? 1 : 0 );
+		SetUnitFacing( source, angle );
+		EffectAPI::Dash( source );
+		DisplaceWar3ImageLinear( source, angle, dist - 50.f, .35f, .02f, false, true );
+	}
+	else if ( ticks == 55 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float dmg = 100.f + 50.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+
+		ACF_StunUnit( target, 1.f );
+		ACF_DamageTarget( source, target, dmg );
+	}
+}
+
+void Scathach_Q2( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( StopSpell( hid, 1, true ) || ticks == 300 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		StopHeroSound( source, 'psnd' + 'Q1' );
+		ResetScathachQ( source );
+		ReleaseTimer( tmr );
+		return;
+	}
+	else if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		PlayHeroSound( source, 'psnd' + 'Q2', 100.f, .0f );
+		ACF_StunUnit( source, .15f );
+		SetUnitAnimation( source, "spell Three" ); 
+		DisplaceWar3ImageLinear( source, angle, dist - 150.f, .1f, .02f, false, true );
+	}
+	else if ( ticks == 10 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dmg = 50.f + 25.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+
+		SetScathachQState( source, GetUnitLevel( source ) >= 8 ? 2 : 0 );
+		EffectAPI::PushWind( source, target );
+		DisplaceWar3ImageLinear( target, angle, 200.f, .25f, .01f, false, false );
+		ACF_DamageTarget( source, target, dmg );
+		ReleaseTimer( tmr );
+	}
+}
+
+void Scathach_Q3( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		StopHeroSound( source, 'psnd' + 'Q1' );
+		ResetScathachQ( source );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = GetUnitAngle( source, target );
+		float dist = GetUnitDistance( source, target );
+
+		PlayHeroSound( source, 'psnd' + 'Q1', 100.f, .0f );
+		ACF_StunUnit( source, .45f );
+
+		SetUnitFacing( source, angle );
+		SetUnitAnimation( source, "Spell Three" );
+
+		effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, .0f, 2.f, 1.f );
+		SetEffectTimedLife( ef, 4.f );
+
+		DisplaceWar3ImageLinear( source, angle, dist - 150.f, .2f, .02f, false, true );
+	}
+	else if ( ticks == 20 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+
+		ResetScathachQ( source );
+		SetUnitFacing( source, GetUnitAngle( source, target ) );
+		SetUnitAnimation( source, "Spell Three" );
+	}
+	else if ( ticks == 45 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = GetUnitAngle( source, target );
+		float dmg = 100.f + 25.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+		effect ef;
+
+		SetUnitFacing( source, angle );
+
+		EffectAPI::PushWind( source, target );
+		DisplaceWar3ImageLinear( target, angle, 200.f, .5f, .01f, false, false );
+		ACF_DamageTarget( source, target, dmg );
+
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void Scathach_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		StopHeroSound( source, 'psnd' + 'W1' );
+		StopHeroSound( source, 'psnd' + 'Q3' );
+		DestroyEffect( LoadEffectHandle( GameHT, hid, 'eff' ) );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+
+		PlayHeroSound( source, 'psnd' + 'W1', 100.f, .0f );
+		ACF_StunUnit( source, .5f );
+		SetUnitAnimation( source, "spell Throw" );
+
+		effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, .0f, 2.f, 1.f );
+		SetEffectTimedLife( ef, 4.f );
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", x, y ) );
+		SaveEffectHandle( GameHT, hid, '+eff', AddSpecialEffectTarget( "Abilities\\Weapons\\PhoenixMissile\\Phoenix_Missile.mdl", source, "weapon" ) );
+
+		DisplaceUnitWithArgs( source, angle, LoadReal( GameHT, hid, 'dist' ), .5f, .01f, 600.f );
+	}
+	else if ( ticks == 50 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+
+		PlayHeroSound( source, 'psnd' + 'Q3', 100.f, .0f );
+		
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\LightningStrike1.mdx", x, y ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\SlamEffect.mdx", x, y ) );
+		DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, GetRandomReal( 0.f, 360.f ), 1.5f + .25f * i, GetRandomReal( .5f, 2.f ) );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, 400.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 2.f );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void Scathach_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		HandleListCleanEffects( LoadHandleList( GameHT, hid, 'elst' ), true, true );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = MathAngleBetweenPoints( x, y, targX, targY );
+		handlelist hl = HandleListCreate( );
+
+		ACF_DisableUnitTP( target, 1.f );
+		ACF_StunUnit( source, 1.f );
+		SetUnitPathing( source, false );
+		SetUnitAnimation( source, "Spell Three" ); // was channel
+
+		for ( int i = 0; i < 8; i++ )
+		{
+			float dist = 80.f * i;
+			effect ef;
+
+			ef = CreateEffectEx( "GeneralEffects\\OrbOfFire.mdl", MathPointProjectionX( x, angle - 160.f, dist ), MathPointProjectionY( y, angle - 160.f, dist ), 150.f, angle, 1.5f, 1.f );
+
+			HandleListAddHandle( hl, ef );
+
+			ef = CreateEffectEx( "GeneralEffects\\OrbOfFire.mdl", MathPointProjectionX( x, angle + 160.f, dist ), MathPointProjectionY( y, angle + 160.f, dist ), 150.f, angle, 1.5f, 1.f );
+
+			HandleListAddHandle( hl, ef );
+		}
+
+		SaveHandleList( GameHT, hid, 'elst', hl );
+	}
+	else if ( ticks == 50 )
+	{
+		SaveInteger( GameHT, hid, 'tick', ticks + 5 );
+		SaveBoolean( GameHT, hid, 'skip', true );
+	}
+	else if ( ticks == 55 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = MathAngleBetweenPoints( x, y, targX, targY );
+		float dist = MathDistanceBetweenPoints( x, y, targX, targY );
+		handlelist hl = LoadHandleList( GameHT, hid, 'elst' );
+
+		if ( CounterEx( hid, 0, 10 ) )
+		{
+			ACF_StunUnit( source, .1f );
+		}
+
+		if ( dist >= 150.f )
+		{
+			SetUnitFacing( source, angle );
+			SetUnitXY( source, MathPointProjectionX( x, angle, 50.f ), MathPointProjectionY( y, angle, 50.f ) );
+		}
+		else
+		{
+			SetUnitAnimation( source, "spell Seven" );
+			PlayHeroSound( source, 'psnd' + 'R1', 100.f, .0f );
+			SaveBoolean( GameHT, hid, 'skip', false );
+			//HandleListCleanEffects( LoadHandleList( GameHT, hid, 'elst' ), true, true );
+		}
+
+		for ( int i = 0; i < HandleListGetEffectCount( hl ); i++ )
+		{
+			effect ef = HandleListGetEffectByIndex( hl, i );
+			angle = GetSpecialEffectFacing( ef );
+
+			SetSpecialEffectPosition( ef, MathPointProjectionX( GetSpecialEffectX( ef ), angle, 50.f ), MathPointProjectionY( GetSpecialEffectY( ef ), angle, 50.f ) );
+		}
+	}
+	else if ( ticks == 60 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = MathAngleBetweenPoints( x, y, targX, targY );
+		effect ef;
+
+		PlayHeroSound( source, 'psnd' + 'R2', 100.f, .0f );
+		SetUnitFacing( source, angle );
+		SetUnitAnimation( source, "spell four" );
+
+		EffectAPI::PushWind( source, target );
+
+		ef = CreateEffectEx( "GeneralEffects\\t_huobao.mdl", targX, targY, 100.f, angle, .5f, 1.f );
+		SetSpecialEffectPitch( ef, -90.f );
+		SetEffectTimedLife( ef, 2.f );
+
+		SaveInteger( GameHT, hid, 'tick', ticks + 5 );
+		SaveBoolean( GameHT, hid, 'skip', true );
+
+		float dist = 500.f;
+		SaveReal( GameHT, hid, 'angl', GetUnitAngle( source, target ) );
+		SaveReal( GameHT, hid, 'dist', dist );
+		SaveReal( GameHT, hid, '+spd', dist * .01f / .4f ); // dist * tickRate / time
+	}
+	else if ( ticks == 65 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+		float speed = LoadReal( GameHT, hid, '+spd' );
+		handlelist hl = LoadHandleList( GameHT, hid, 'elst' );
+
+		if ( CounterEx( hid, 0, 10 ) )
+		{
+			ACF_StunUnit( source, .1f );
+		}
+
+		if ( dist >= 0.f )
+		{
+			SetUnitXY( target, MathPointProjectionX( targX, angle, speed ), MathPointProjectionY( targY, angle, speed ) );
+
+			if ( CounterEx( hid, 1, 5 ) )
+			{
+				DestroyEffect( AddSpecialEffect( "Abilities\\Weapons\\AncientProtectorMissile\\AncientProtectorMissile.mdl", targX, targY ) );
+			}
+
+			for ( int i = 0; i < HandleListGetEffectCount( hl ); i++ )
+			{
+				effect ef = HandleListGetEffectByIndex( hl, i );
+				angle = GetSpecialEffectFacing( ef );
+
+				SetSpecialEffectPosition( ef, MathPointProjectionX( GetSpecialEffectX( ef ), angle, speed ), MathPointProjectionY( GetSpecialEffectY( ef ), angle, speed ) );
+			}
+		}
+		else
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", targX, targY ) );
+
+			for ( int i = 0; i < 10; i++ )
+			{
+				effect ef = CreateEffectEx( "GeneralEffects\\t_huobao.mdl", targX, targY, 100.f, 36.f * i, 2.f, 1.f );
+				SetSpecialEffectPitch( ef, -90.f );
+				SetEffectTimedLife( ef, 2.f ); 
+			}
+
+			float dmg = 75.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+			GroupEnumUnitsInRange( GroupEnum, targX, targY, 600.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+				{
+					ACF_DamageTarget( source, u, dmg );
+				}
+			}
+
+			HandleListCleanEffects( hl, true, true );
+			//SaveBoolean( GameHT, hid, 'skip', false );
+			ReleaseTimer( tmr );
+		}
+
+		SaveReal( GameHT, hid, 'dist', dist - speed );
+	}
+}
+
+void Scathach_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'E1' );
+
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+
+		PlayHeroSound( source, 'psnd' + 'E1', 80.f, .0f );
+		ACF_StunUnit( source, 1.25f );
+		SetUnitTimeScale( source, 2.f );
+		SetUnitAnimation( source, "spell Three" ); // attack?
+		ACF_DisableUnitTP( target, 1.25f );
+		DisplaceWar3ImageLinear( source, angle, GetUnitDistance( source, target ) - 100.f, .2f, .01f, false, false );
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, GetRandomReal( 0.f, 360.f ), .5f * ( i + 1 ), 2.f + .25 * i );
+			SetEffectTimedLife( ef, 4.f );
+		}
+	}
+	else if ( ticks >= 20 && ticks <= 120 )
+	{
+		if ( CounterEx( hid, 0, 20 ) )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float targX = GetUnitX( target );
+			float targY = GetUnitY( target );
+			float angle = GetUnitAngle( source, target );
+			float dist = GetUnitDistance( source, target );
+			float dmg = 25.f * GetHeroLevel( source ) + .2f * GetHeroInt( source, true );
+			effect ef;
+
+			SetUnitAnimationWithRarity( source, "attack", RARITY_RARE );
+			SetUnitFacing( source, angle );
+
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, 50.f, angle, 1.5f, 2.f );
+			SetSpecialEffectPitch( ef, -90.f );
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "GeneralEffects\\SlamEffect.mdl", targX, targY, 50.f, angle, 1.f, 2.f );
+			SetSpecialEffectPitch( ef, -90.f );
+			SetEffectTimedLife( ef, 3.f );
+
+			DisplaceWar3ImageLinear( target, angle, 50.f, .2f, .01f, false, false );
+			if ( ACF_DamageTarget( source, target, dmg ) )
+			{
+				if ( ticks <= 100 )
+				{
+					DisplaceWar3ImageLinear( source, angle, dist - 50.f, .2f, .01f, false, false );
+				}
+				else
+				{
+					ef = CreateEffectEx( "GeneralEffects\\t_huobao.mdl", targX, targY, 100.f, angle, .5f, 1.f );
+					SetSpecialEffectPitch( ef, -90.f );
+					SetEffectTimedLife( ef, 2.f );
+					ACF_StunUnit( target, 2.f );
+					ReleaseTimer( tmr );
+				}
+			}
+		}
+	}
+}
+
+void Scathach_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+	
+		StopHeroSound( source, 'psnd' + 'Q1' );
+		StopHeroSound( source, 'psnd' + 'T1' );
+		DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = MathAngleBetweenPoints( x, y, LoadReal( GameHT, hid, 'trgX' ), LoadReal( GameHT, hid, 'trgY' ) );
+
+		PlayHeroSound( source, 'psnd' + 'Q1', 100.f, .0f );
+		ACF_StunUnit( source, 1.f );
+		SetUnitAnimation( source, "spell Three" );
+
+		effect ef = CreateEffectEx( "GeneralEffects\\laxus_lightning_spear.mdl", x, y, 50.f, angle, 2.f, 1.f );
+		SetSpecialEffectColour( ef, 0x64840000 );
+
+		SaveEffectHandle( GameHT, hid, '+eff', ef );
+	}
+	else if ( ticks < 100 )
+	{
+		if ( CounterEx( hid, 0, 5 ) )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+			float angle = MathAngleBetweenPoints( x, y, LoadReal( GameHT, hid, 'trgX' ), LoadReal( GameHT, hid, 'trgY' ) );
+			effect ef = LoadEffectHandle( GameHT, hid, '+eff' );
+
+			SetUnitFacing( source, angle );
+			SetSpecialEffectFacing( ef, angle );
+			SetSpecialEffectScale( ef, 2.f + ticks / 50.f );
+		}
+	}
+	else if ( ticks == 100 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float dist = MathDistanceBetweenPoints( x, y, LoadReal( GameHT, hid, 'trgX' ), LoadReal( GameHT, hid, 'trgY' ) );
+
+		PlayHeroSound( source, 'psnd' + 'T1', 100.f, .0f );
+
+		for ( int i = 0; i < 8; i++ )
+		{
+			effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, GetRandomReal( 0.f, 360.f ), 1.f + i / 5.f, 1.25f );
+			SetSpecialEffectAlpha( ef, 0x50 );
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		SetUnitAnimation( source, "spell Four" );
+		SaveReal( GameHT, hid, 'dist', dist );
+	}
+	else if ( ticks > 100 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		effect ef = LoadEffectHandle( GameHT, hid, '+eff' );
+		float efX = GetSpecialEffectX( ef );
+		float efY = GetSpecialEffectY( ef );
+		float angle = GetSpecialEffectFacing( ef );
+		float moveX = MathPointProjectionX( efX, angle, 50.f );
+		float moveY = MathPointProjectionY( efY, angle, 50.f );
+		float dist = LoadReal( GameHT, hid, 'dist' );
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+
+		if ( dist >= 100.f )
+		{
+			SetSpecialEffectPosition( ef, moveX, moveY );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", efX, efY ) );
+			GroupEnumUnitsInRange( GroupEnum, moveX, moveY, 450.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+				{
+					float x = GetUnitX( u );
+					float y = GetUnitY( u );
+					float toAngle = MathAngleBetweenPoints( x, y, moveX, moveY );
+
+					SetUnitXY( u, MathPointProjectionX( x, toAngle, 50.f ), MathPointProjectionY( y, toAngle, 50.f ) );
+				}
+			}
+
+			SaveReal( GameHT, hid, 'dist', dist - 50.f );
+		}
+		else
+		{
+			PlayHeroSound( source, 'gsnd' + 2, 80.f, .0f );
+
+			DestroyEffect( ef );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\26.mdx", efX, efY ) );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", efX, efY ) );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", efX, efY ) );
+
+			for ( int i = 0; i < 8; i++ )
+			{
+				ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", efX, efY, .0f, GetRandomReal( 0.f, 360.f ), 1.f + i / 5.f, 1.25f );
+				SetSpecialEffectAlpha( ef, 0x50 );
+				SetEffectTimedLife( ef, 4.f );
+			}
+
+			GroupEnumUnitsInRange( GroupEnum, efX, efY, 450.f, nil );
+
+			float dmg = 300.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+				{
+					ACF_DamageTarget( source, u, dmg );
+					ACF_StunUnit( u, 1.f );
+				}
+			}
+
+			ReleaseTimer( tmr );
+		}
+	}
+}
+//
+
+// Akainu Spells
+
+void Akainu_D( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		PlayHeroSound( source, 'psnd' + 'D1', 100.f, .0f );
+		SaveEffectHandle( GameHT, hid, '+eff', AddSpecialEffectTarget( "GeneralEffects\\lavaspray.mdx", source, "head" ) );
+	}
+
+	if ( CounterEx( hid, 0, 50 ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		if ( GetUnitAbilityLevel( source, 'B04H' ) <= 0 )
+		{
+			DestroyEffect( LoadEffectHandle( GameHT, hid, '+eff' ) );
+			ReleaseTimer( tmr );
+		}
+
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float dmg = 12.5f * GetHeroLevel( source ) + .1f * GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, 300.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				if ( ACF_DamageTarget( source, u, dmg ) )
+				{
+					DestroyEffect( AddSpecialEffectTarget( "Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl", u, "chest" ) );
+				}
+			}
+		}
+	}
+}
+
+void Akainu_Q( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		StopHeroSound( source, 'psnd' + 'R1' );
+		StopHeroSound( source, 'psnd' + 'R2' );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+	unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+
+	if ( ticks == 0 )
+	{
+		PlayHeroSound( source, 'psnd' + 'R2', 90.f, .0f );
+		ACF_StunUnit( source, .25f );
+		SetUnitPathing( source, false );
+		SetUnitAnimation( source, "spell three" );
+	}
+
+	if ( CounterEx( hid, 0, 10 ) )
+	{
+		ACF_StunUnit( source, .10f );
+		//ACF_DisableUnitTP( target, .10f ); // this adds up
+	}
+
+	float x = GetUnitX( source );
+	float y = GetUnitY( source );
+	float targX = GetUnitX( target );
+	float targY = GetUnitY( target );
+	float dist = MathDistanceBetweenPoints( x, y, targX, targY );
+	float angle = MathAngleBetweenPoints( x, y, targX, targY );
+	float moveX = MathPointProjectionX( x, angle, 20.f );
+	float moveY = MathPointProjectionY( y, angle, 20.f );
+
+	if ( dist > 150.f )
+	{
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", x, y ) );
+		SetUnitXY( source, moveX, moveY );
+		SetUnitFacingInstant( source, angle );
+	}
+	else
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+
+		PlayHeroSound( source, 'psnd' + 'R1', 90.f, .0f );
+		SetUnitAnimation( source, "spell two" );
+
+		effect ef;
+		// "Units\\Creeps\\LavaSpawn\\LavaSpawn.mdl"
+
+		ef = CreateEffectEx( "Abilities\\Weapons\\DemolisherFireMissile\\DemolisherFireMissile.mdl", moveX, moveY, 50.f, angle, 1.f, 1.f );
+		SetSpecialEffectPitch( ef, -90.f );
+		DestroyEffect( ef );
+
+		ef = CreateEffectEx( "GeneralEffects\\t_huobao.mdl", moveX, moveY, 100.f, angle, 1.f, 1.f );
+		SetSpecialEffectPitch( ef, -90.f );
+		SetEffectTimedLife( ef, 2.f );
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			float face = 120.f * i;
+			moveX = MathPointProjectionX( targX, face, 150.f );
+			moveY = MathPointProjectionY( targY, face, 150.f );
+
+			DestroyEffect( CreateEffectEx( "Units\\Creeps\\LavaSpawn\\LavaSpawn.mdl", moveX, moveY, .0f, .0f, 1.5f, 1.f ) );
+			DestroyEffect( CreateEffectEx( "Characters\\Akainu\\magmablast2.mdl", moveX, moveY, 120.f, face, .5f, 1.5f ) );
+		}
+
+		GroupEnumUnitsInRange( GroupEnum, GetUnitX( target ), GetUnitY( target ), 300.f, nil );
+		float dmg = 200 + 25.f * GetHeroLevel( source ) + .5f * GetHeroInt( source, true );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				if ( u == target )
+				{
+					ACF_StunUnit( u, 2.f );
+					DisplaceWar3ImageLinear( target, angle, -300.f, .4f, .01f, false, false );
+				}
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void Akainu_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'E1' );
+		ReleaseTimer( tmr );
+	}
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+
+		PlayHeroSound( source, 'psnd' + 'E1', 90.f, .0f );
+		ACF_StunUnit( source, .5f );
+		SetUnitAnimation( source, "spell one" );
+
+		effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, .0f, 1.5f, 1.f );
+		SetEffectTimedLife( ef, 4.f );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", x, y ) );
+		DisplaceUnitWithArgs( source, angle, LoadReal( GameHT, hid, 'dist' ), .5f, .01f, 600.f );
+	}
+	else if ( ticks == 50 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		effect ef;
+
+		ef = CreateEffectEx( "GeneralEffects\\FuzzyStomp.mdl", x, y, .0f, .0f, 1.5f, 1.f );
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\LightningStrike1.mdx", x, y ) );
+
+		for ( int i = 0; i < 4; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, GetRandomReal( 0.f, 360.f ), 1.5f, 1.25f ); 
+			SetEffectTimedLife( ef, 4.f );
+
+			ef = CreateEffectEx( "Characters\\Akainu\\magmablast2.mdl", x, y, .0f, 90.f * i, .5f, 1.5f );
+			SetEffectTimedLife( ef, 2.f );
+		}
+
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, 350.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void Akainu_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'R1' );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		ACF_StunUnit( source, .25f );
+		SetUnitTimeScale( source, 2.f );
+		SetUnitAnimation( source, "attack" );
+	}
+	else if ( ticks == 20 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+
+		SetUnitTimeScale( source, 1 );
+
+		projectile proj = CreateProjectileEx( source, 'B-Mi', 0 );
+		SetProjectileModel( proj, "Characters\\Akainu\\magmablast2.mdl" ); // Characters\\Akainu\\moon_shin_mg1.mdl
+		SetProjectileScale( proj, 1.5f );
+		SetProjectilePositionWithZ( proj, MathPointProjectionX( x, angle, 40.f ), MathPointProjectionY( y, angle, 40.f ), GetUnitZ( source ) + 100.f );
+		SetProjectileDamage( proj, 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true ) );
+		SetProjectileAttackType( proj, ATTACK_TYPE_NORMAL );
+		SetProjectileDamageType( proj, DAMAGE_TYPE_MAGIC );
+		SetProjectileWeaponType( proj, WEAPON_TYPE_WHOKNOWS );
+		SetProjectileArc( proj, .0f );
+		SetProjectileSpeed( proj, 1500.f );
+		SaveInteger( GameHT, GetHandleId( proj ), 'atid', LoadInteger( GameHT, hid, 'atid' ) );
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void Akainu_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		StopHeroSound( source, 'psnd' + 'Q1' );
+		StopHeroSound( source, 'psnd' + 'R2' );
+
+		DestroyGroup( LoadGroupHandle( GameHT, hid, '+grp' ) );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		PlayHeroSound( source, 'psnd' + 'Q1', 90.f, .0f );
+		SetUnitTimeScale( source, 2 );
+		ACF_StunUnit( source, .2f );
+		SetUnitAnimation( source, "attack" );
+
+		SaveGroupHandle( GameHT, hid, '+grp', CreateGroup( ) );
+	}
+	else if ( ticks == 20 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+
+		effect ef = CreateEffectEx( "Characters\\Akainu\\moon_shin_dph23.mdl", MathPointProjectionX( x, angle, 300.f ), MathPointProjectionY( y, angle, 300.f ), 100.f, angle, 2.f, 1.f );
+		SetEffectTimedLife( ef, 1.f );
+
+		SetUnitTimeScale( source, 1.f );
+		PlayHeroSound( source, 'psnd' + 'R2', 60.f, .0f );
+	}
+	else if ( ticks > 20 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		group g = LoadGroupHandle( GameHT, hid, '+grp' );
+		float angle = LoadReal( GameHT, hid, 'angl' );
+		float dist = LoadReal( GameHT, hid, 'edst' ) + 100.f;
+		float x = MathPointProjectionX( LoadReal( GameHT, hid, 'srcX' ), angle, dist );
+		float y = MathPointProjectionY( LoadReal( GameHT, hid, 'srcY' ), angle, dist );
+
+		SaveReal( GameHT, hid, 'edst', dist );
+
+		for ( int i = 0; i < 2; i++ )
+		{
+			float efAngle = GetRandomReal( 0.f, 360.f );
+			float efDist = GetRandomReal( 0.f, 500.f );
+			float efX = MathPointProjectionX( x, efAngle, efDist );
+			float efY = MathPointProjectionY( y, efAngle, efDist );
+
+			DestroyEffect( CreateEffectEx( "Characters\\Akainu\\magmablast2.mdl", efX, efY, 120.f, GetRandomReal( 0.f, 360.f ), .5f, 1.f ) );
+			DestroyEffect( AddSpecialEffect( "abilities\\weapons\\catapult\\catapultmissile.mdl", efX, efY ) );
+		}
+
+		float dmg = 100.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		GroupEnumUnitsInRange( GroupEnum, x, y, 500.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) && !IsUnitInGroup( u, g ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+				GroupAddUnit( g, u );
+			}
+		}
+
+		if ( dist >= 1500.f )
+		{
+			DestroyGroup( g );
+			ReleaseTimer( tmr );
+		}
+	}
+}
+
+void Akainu_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'T1' );
+		HandleListCleanEffects( LoadHandleList( GameHT, hid, 'elst' ), true, true );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		ACF_StunUnit( source, 50 * .025f );
+		PlayHeroSound( source, 'psnd' + 'T1', 100.f, .0f );
+		SetUnitAnimation( source, "Spell" );
+		SaveHandleList( GameHT, hid, 'elst', HandleListCreate( ) );
+		// "Characters\\Akainu\\moon_shin_dph12.mdl"
+	}
+	else if ( ticks >= 10 )
+	{
+		handlelist eflist = LoadHandleList( GameHT, hid, 'elst' );
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+
+		if ( CounterEx( hid, 0, 5 ) )
+		{
+			int count = LoadInteger( GameHT, hid, 'cout' );
+
+			if ( count < 50 )
+			{
+				float dist = GetRandomReal( 0.f, 550.f );
+				float face = GetRandomReal( 0.f, 360.f );
+
+				effect ef = CreateEffectEx( "Characters\\Akainu\\moon_shin_dph12.mdl", MathPointProjectionX( targX, face, dist ), MathPointProjectionY( targY, face, dist ), 1000.f, GetRandomReal( 0.f, 360.f ), .4f, .0f );
+				SetSpecialEffectAnimationOffsetPercent( ef, .75f );
+				//SetSpecialEffectPitch( ef, GetRandomReal( -10.f, -45.f ) );
+				HandleListAddHandle( eflist, ef );
+
+				SaveInteger( GameHT, hid, 'cout', count + 1 );
+			}
+		}
+
+		int maxCount = HandleListGetEffectCount( eflist );
+
+		for ( int i = 0; i < maxCount; i++ )
+		{
+			effect ef = HandleListGetEffectByIndex( eflist, i );
+			float x = GetSpecialEffectX( ef );
+			float y = GetSpecialEffectY( ef );
+			float angle = MathAngleBetweenPoints( x, y, targX, targY );
+			float dist = MathDistanceBetweenPoints( x, y, targX, targY );
+			float newHeight = GetSpecialEffectHeight( ef ) - GetRandomReal( 15.f, 25.f );
+
+			if ( dist >= 20.f )
+			{
+				SetSpecialEffectX( ef, MathPointProjectionX( x, angle, 20.f ) );
+				SetSpecialEffectY( ef, MathPointProjectionY( y, angle, 20.f ) );
+			}
+			SetSpecialEffectHeight( ef, newHeight );
+
+			if ( newHeight <= .0f )
+			{
+				player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+				unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+				float dmg = 25.f * GetHeroLevel( source ) + GetHeroInt( source, true ) * .05f;
+				GroupEnumUnitsInRange( GroupEnum, GetSpecialEffectX( ef ), GetSpecialEffectY( ef ), 500.f, nil );
+
+				for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+				{
+					if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+					{
+						ACF_DamageTarget( source, u, dmg );
+					}
+				}
+
+				HandleListRemoveHandle( eflist, ef );
+				SetSpecialEffectTimeScale( ef, 1.f );
+				DestroyEffect( ef );
+				maxCount--;
+				i--;
+			}
+		}
+
+		if ( maxCount == 0 )
+		{
+			HandleListCleanEffects( LoadHandleList( GameHT, hid, 'elst' ), true, true );
+			ReleaseTimer( tmr );
+		}
+	}
+}
+//
+
+// Reinforce Spells
+void Reinforce_Q( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( StopSpell( hid, 0, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'Q1' );
+
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+		effect ef;
+
+		PlayHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'Q1', 60.f, .0f );
+
+		ef = CreateEffectEx( "Characters\\Reinforce\\BlackHole.mdl", targX, targY, .0f, 270.f, 1.2f, 1.f );
+		SetEffectTimedLife( ef, 1.f );
+
+		ef = CreateEffectEx( "Characters\\SaberAlter\\DarkExplosion.mdl", targX, targY, .0f, 270.f, 1.2f, 1.f );
+		SetEffectTimedLife( ef, 3.f );
+	}
+	else
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+
+		GroupEnumUnitsInRange( GroupEnum, targX, targY, 400.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				float x = GetUnitX( u );
+				float y = GetUnitY( u );
+				float angle = MathAngleBetweenPoints( x, y, targX, targY ) + 60.f;
+
+				SetUnitXY( u, MathPointProjectionX( x, angle, 10.f ), MathPointProjectionY( y, angle, 10.f ) );
+			}
+		}
+
+		if ( ticks >= 100 )
+		{
+			effect ef;
+
+			ef = CreateEffectEx( "GeneralEffects\\SlamEffect.mdl", targX, targY, 50.f, 270.f, 5.f, 2.f );
+			SetEffectTimedLife( ef, 3.f );
+
+			ef = CreateEffectEx( "Characters\\Reinforce\\firaga6.mdl", targX, targY, 75.f, 270.f, 4.f, .8f );
+			SetEffectTimedLife( ef, 3.f );
+
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+			GroupEnumUnitsInRange( GroupEnum, targX, targY, 400.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+				{
+					float x = GetUnitX( u );
+					float y = GetUnitY( u );
+					float angle = MathAngleBetweenPoints( x, y, targX, targY );
+
+					if ( ACF_DamageTarget( source, u, dmg ) )
+					{
+						DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", x, y ) );
+						ACF_StunUnit( u, 2.f );
+					}
+					
+					DisplaceUnitWithArgs( u, angle, -200.f, 1, .01f, 0 );
+				}
+			}
+
+			ReleaseTimer( tmr );
+		}
+	}
+}
+
+void Reinforce_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	
+	if ( StopSpell( hid, 1, true ) )
+	{
+		StopHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'W1' );
+		HandleListCleanEffects( LoadHandleList( GameHT, hid, 'elst' ), true, true );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		handlelist hl = HandleListCreate( );
+
+		PlayHeroSound( source, 'psnd' + 'W1', 60.f, .0f );
+		SaveHandleList( GameHT, hid, 'elst', hl );
+
+		for ( int i = 0; i < 20; i++ )
+		{
+			float face = 36.f * i;
+			float dist = GetRandomReal( 100.f, 1000.f );
+			float x = MathPointProjectionX( targX, face, dist );
+			float y = MathPointProjectionY( targY, face, dist );
+			float angle = MathAngleBetweenPoints( x, y, targX, targY );
+			float height = GetRandomReal( 500.f, 1000.f );
+
+			effect ef;
+
+			ef = CreateEffectEx( "Characters\\NanayaShiki\\REffect.mdl", x, y, height, angle, 1.5f, 1.f );
+			SetSpecialEffectColour( ef, 0xFFFF0000 );
+			SetSpecialEffectPitch( ef, -45.f );
+
+			HandleListAddHandle( hl, ef );
+
+			ef = CreateEffectEx( "Abilities\\Spells\\Orc\\FeralSpirit\\feralspirittarget.mdl", x, y, height, angle, 1.f, 1.f );
+			SetSpecialEffectColour( ef, 0xFFFF0000 );
+			DestroyEffect( ef );
+		}
+	}
+	else if ( ticks >= 100 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		handlelist eflist = LoadHandleList( GameHT, hid, 'elst' );
+
+		for ( int i = 0; i < HandleListGetEffectCount( eflist ); i++ )
+		{
+			effect ef = HandleListGetEffectByIndex( eflist, i );
+			SetSpecialEffectFacing( ef, MathAngleBetweenPoints( GetSpecialEffectX( ef ), GetSpecialEffectY( ef ), targX, targY ) );
+			SetSpecialEffectX( ef, targX );
+			SetSpecialEffectY( ef, targY );
+			SetSpecialEffectHeight( ef, .0f );
+		}
+
+		float dmg = 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\26.mdx", targX, targY ) );
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", targX, targY ) );
+		ACF_StunUnit( target, 1 );
+		ACF_DamageTarget( source, target, dmg );
+		HandleListCleanEffects( LoadHandleList( GameHT, hid, 'elst' ), true, true );
+		ReleaseTimer( tmr );
+	}
+}
+
+void Reinforce_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( StopSpell( hid, 0 ) ) { return; }
+
+	if ( ticks == 0 )
+	{
+		PlayHeroSound( LoadUnitHandle( GameHT, hid, 'usrc' ), 'psnd' + 'E1', 60.f, .0f );
+	}
+	else if ( ticks == 100 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+		effect ef;
+
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", targX, targY ) );
+		DestroyEffect( AddSpecialEffect( "Characters\\Reinforce\\ApocalypseStomp.mdx", targX, targY ) );
+
+		ef = CreateEffectEx( "GeneralEffects\\moonwrath.mdl", targX, targY, 0.f, .0f, 4.f, 1.f );
+		SetSpecialEffectColour( ef, 0xFFFF00FF ); // green = 0
+		SetEffectTimedLife( ef, 4.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, .0f, .0f, 2.5f, .75f );
+		SetEffectTimedLife( ef, 4.f );
+
+		float dmg = 60.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+		GroupEnumUnitsInRange( GroupEnum, targX, targY, 450.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				if ( ACF_DamageTarget( LoadUnitHandle( GameHT, hid, 'usrc' ), u, dmg ) )
+				{
+					ACF_AddBuffTimed( u, 'Bslo', 1.f );
+				}
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void Reinforce_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+	if ( StopSpell( hid, 1, true ) )
+	{
+		StopHeroSound( source, 'psnd' + 'R1' );
+		ReleaseTimer( tmr );
+		return;
+	}
+
+	int ticks = SpellTickEx( hid );
+	unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+
+	if ( ticks == 0 )
+	{
+		PlayHeroSound( source, 'psnd' + 'R1', 60.f, .0f );
+		ACF_StunUnit( source, .25f );
+		SetUnitPathing( source, false );
+		SetUnitAnimation( source, "walk" );
+	}
+
+	if ( CounterEx( hid, 0, 10 ) )
+	{
+		ACF_StunUnit( source, .10f );
+		//ACF_DisableUnitTP( target, .10f ); // this adds up
+	}
+
+	float x = GetUnitX( source );
+	float y = GetUnitY( source );
+	float targX = GetUnitX( target );
+	float targY = GetUnitY( target );
+	float dist = MathDistanceBetweenPoints( x, y, targX, targY );
+	float angle = MathAngleBetweenPoints( x, y, targX, targY );
+	float moveX = MathPointProjectionX( x, angle, 20.f );
+	float moveY = MathPointProjectionY( y, angle, 20.f );
+
+	if ( dist > 150.f )
+	{
+		DestroyEffect( AddSpecialEffect( "GeneralEffects\\NewDirtEx.mdx", x, y ) );
+		SetUnitXY( source, moveX, moveY );
+		SetUnitFacingInstant( source, angle );
+	}
+	else
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		effect ef;
+
+		ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 50.f, angle, 1.5f, 2.f );
+		SetSpecialEffectPitch( ef, -90.f );
+		SetEffectTimedLife( ef, 4.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\SlamEffect.mdl", x, y, 50.f, angle, 1.5f, 2.f );
+		SetSpecialEffectPitch( ef, -90.f );
+		SetEffectTimedLife( ef, 3.f );
+
+		GroupEnumUnitsInRange( GroupEnum, GetUnitX( target ), GetUnitY( target ), 400.f, nil );
+		float dmg = 150.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+			}
+		}
+
+		StopHeroSound( source, 'psnd' + 'R1' );
+		ReleaseTimer( tmr );
+	}
+}
+
+void Reinforce_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( ticks == 0 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		PlayHeroSound( source, 'psnd' + 'T1', 100.f, .0f );
+		SaveReal( GameHT, hid, 'disp', 800 );
+		ACF_DisableUnitTP( source, 3.f );
+		ACF_StunUnit( source, 3.f );
+		SetUnitAnimation( source, "spell channel" );
+	}
+
+	if ( ticks < 70 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+		if ( IsUnitDead( source ) )
+		{
+			StopSound( LoadSoundHandle( SoundHT, GetHandleId( source ), 'psnd' + 'T1' ), false, false );
+			SetAbilityRemainingCooldown( GetUnitAbility( source, 'A04K' ), .01f );
+			RemoveEffect( LoadEffectHandle( GameHT, hid, '+eff' + 0 ) );
+
+			ReleaseTimer( tmr );
+			return;
+		}
+
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+		float mangl = LoadReal( GameHT, hid, 'disp' );
+
+		DisplaceCircular( p, targX, targY, 450.f, mangl, 2.5f, "Abilities\\Spells\\Undead\\DeathandDecay\\DeathandDecayTarget.mdl" );
+
+		SaveReal( GameHT, hid, 'disp', mangl - 16.f );
+	}
+	else if ( ticks == 70 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		effect ef = CreateEffectEx( "Characters\\Reinforce\\CosmicField.mdl", LoadReal( GameHT, hid, 'trgX' ), LoadReal( GameHT, hid, 'trgY' ), .0f, .0f, 5.f, 1.f );
+		//SetSpecialEffectAnimation( ef, "birth" );
+		SaveEffectHandle( GameHT, hid, '+eff' + 0, ef );
+
+		SetUnitAnimation( source, "attack slam" );
+	}
+	else if ( ticks == 120 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float facing = GetUnitFacing( source );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		effect ef;
+
+		SetUnitAnimation( source, "spell channel" );
+
+		for ( int i = 1; i < 6; i++ )
+		{
+			ef = CreateEffectEx( "Characters\\Reinforce\\mfqwd.mdl", x, y, .0f, .0f, 1.f * i, .05f * i );
+			SetSpecialEffectColour( ef, 0xFFFF32FF ); // green = 50
+			SetEffectTimedLife( ef, 1.8f );
+		}
+
+		float targX = MathPointProjectionX( x, GetUnitFacing( source ), 130.f );
+		float targY = MathPointProjectionY( y, GetUnitFacing( source ), 130.f );
+
+		ef = CreateEffectEx( "Characters\\Reinforce\\t_xuliyy.mdl", targX, targY, 30.f, .0f, 1.f, 1.f );
+		SetSpecialEffectColour( ef, 0xFFFF00FF ); // green = 0
+		SetEffectTimedLife( ef, 2.f ); // 3.6f
+	}
+	else if ( ticks == 280 )
+	{
+		SetUnitAnimation( LoadUnitHandle( GameHT, hid, 'usrc' ), "spell slam" );
+	}
+	else if ( ticks == 300 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		float targX = LoadReal( GameHT, hid, 'trgX' );
+		float targY = LoadReal( GameHT, hid, 'trgY' );
+		float dmg = 400.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+		effect ef;
+
+		ef = CreateEffectEx( "Characters\\Reinforce\\ShadowExplosion.mdl", targX, targY, 50.f, .0f, 10.f, 1.f );
+		SetEffectTimedLife( ef, 4.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\moonwrath.mdl", targX, targY, 0.f, .0f, 10.f, 1.f );
+		SetSpecialEffectColour( ef, 0xFFFF00FF ); // green = 0
+		SetEffectTimedLife( ef, 4.f );
+
+		ef = CreateEffectEx( "GeneralEffects\\apocalypsecowstomp.mdl", targX, targY, 0.f, .0f, 3.5f, 1.f );
+		SetSpecialEffectColour( ef, 0xFFFF00FF ); // green = 0
+		SetEffectTimedLife( ef, 3.f );
+
+		GroupEnumUnitsInRange( GroupEnum, targX, targY, 900.f, nil );
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+				DisplaceWar3ImageLinear( u, MathAngleBetweenPoints( targX, targY, GetUnitX( u ), GetUnitY( u ) ), 300.f, 1.f, .01f, false, false );
+			}
+		}
+
+		RemoveEffect( LoadEffectHandle( GameHT, hid, '+eff' + 0 ) );
+		ReleaseTimer( tmr );
+	}
+}
+//
+
+// Arcueid Spells
+void Arcueid_Q( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( !StopSpell( hid, 0 ) )
+	{
+		int ticks = SpellTickEx( hid );
+
+		if ( ticks == 0 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+			PlayHeroSound( source, 'psnd' + 'Q1', 100.f, .0f );
+			ACF_StunUnit( source, .25f );
+			SetUnitTimeScale( source, 2 );
+			SetUnitAnimation( source, "Spell One" );
+		}
+		else if ( ticks == 20 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float dmg = 250.f + GetHeroLevel( source ) * 70.f + GetHeroInt( source, true );
+			float x = LoadReal( GameHT, hid, 'srcX' );
+			float y = LoadReal( GameHT, hid, 'srcY' );
+
+			PlayHeroSound( source, 'gsnd' + 0, 100.f, .0f );
+			GroupEnumUnitsInRange( GroupEnum, LoadReal( GameHT, hid, 'trgX' ), LoadReal( GameHT, hid, 'trgY' ), 300.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitEnemy( u, GetOwningPlayer( source ) ) )
+				{
+					float u_x = GetUnitX( u );
+					float u_y = GetUnitY( u );
+					float angle = MathAngleBetweenPoints( x, y, u_x, u_y );
+
+					DisplaceUnitWithArgs( u, angle, -300.f, .5f, .01f, 250.f );
+					ACF_DamageTarget( source, u, dmg );
+					DestroyEffect( AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", u_x, u_y ) );
+				}
+			}
+
+			SetUnitTimeScale( source, 1.f );
+			ReleaseTimer( tmr );
+		}
+	}
+}
+
+void Arcueid_W( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( !StopSpell( hid, 0 ) )
+	{
+		if ( ticks == 0 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+			PlayHeroSound( source, 'psnd' + 'W1', 100.f, .0f );
+
+			ACF_StunUnit( source, .4f );
+			SetUnitTimeScale( source, 1.75f );
+			SetUnitAnimation( source, "Spell Five" );
+		}
+		if ( ticks == 10 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+
+			for ( int i = 0; i < 5; i++ )
+			{
+				effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, .0f, GetRandomReal( 1.5f, 2.f ), 1.5f );
+				SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
+				SetEffectTimedLife( ef, 4.f );
+			}
+		}
+		else if ( ticks == 25 )
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+			float dmg = 350.f + 60.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+			GroupEnumUnitsInRange( GroupEnum, x, y, 450.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+				{
+					float targX = GetUnitX( u );
+					float targY = GetUnitY( u );
+					float angle = MathAngleBetweenPoints( x, y, targX, targY );
+
+					DisplaceWar3ImageLinear( u, angle, 200.f, .15f, .01f, false, false );
+					ACF_DamageTarget( source, u, dmg );
+				}
+			}
+		}
+		else if ( ticks == 40 )
+		{
+			ReleaseTimer( tmr );
+		}
+	}
+}
+
+void Arcueid_E( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( !StopSpell( hid, 0 ) )
+	{
+		if ( ticks == 0 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+			effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, .0f, 1.5f, 1.5f );
+			
+			SetEffectTimedLife( ef, 4.f );
+			ACF_StunUnit( source, .25f );
+			SetUnitAnimation( source, "Attack Two" );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", x, y ) );
+		}
+		else if ( ticks == 15 )
+		{
+			ShowUnit( LoadUnitHandle( GameHT, hid, 'usrc' ), false );
+		}
+		else if ( ticks >= 25 )
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float targX = LoadReal( GameHT, hid, 'trgX' );
+			float targY = LoadReal( GameHT, hid, 'trgY' );
+			float dmg = 100.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+
+			PlayHeroSound( source, 'gsnd' + 3, 60.f, .0f );
+			SetUnitXY( source, targX, targY );
+			ShowUnit( source, true );
+			ACF_SelectUnit( source, p );
+			GroupEnumUnitsInRange( GroupEnum, targX, targY, 400.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+				{
+					ACF_DamageTarget( source, u, dmg );
+					ACF_StunUnit( u, 1.f );
+				}
+			}
+
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\SlamEffect.mdx", targX, targY ) );
+
+			for ( int i = 0; i < 3; i++ )
+			{
+				effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", targX, targY, .0f, .0f, GetRandomReal( 1.5f, 2.f ), 1.5f );
+				SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
+				SetEffectTimedLife( ef, 4.f );
+			}
+
+			ReleaseTimer( tmr );
+		}
+	}
+}
+
+void Arcueid_R( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+	int ticks = SpellTickEx( hid );
+
+	if ( !StopSpell( hid, 0 ) )
+	{
+		if ( ticks == 0 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			
+			ACF_StunUnit( source, .8f );
+			SetUnitTimeScale( source, 1.75f );
+			SetUnitAnimation( source, "Attack Slam" );
+
+			ACF_DisableUnitTP( target, .8f );
+		}
+		else if ( ticks == 15 )
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+			float x = GetUnitX( source );
+			float y = GetUnitY( source );
+			float targX = GetUnitX( target );
+			float targY = GetUnitY( target );
+			float angle = MathAngleBetweenPoints( x, y, targX, targY );
+			float dmg = GetHeroLevel( source ) * 150 + GetHeroInt( source, true ) * .5f;
+
+			effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, angle, 1.5f, 1.5f );
+			SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
+			SetEffectTimedLife( ef, 4.f );
+
+			PlayHeroSound( source, 'gsnd' + 1, 60.f, .0f );
+			ACF_DamageTarget( source, target, dmg );
+			SetUnitFlyHeightEx( target, 600.f, 4000.f );
+		}
+		else if ( ticks == 25 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", GetUnitX( source ), GetUnitY( source ) ) );
+		}
+		else if ( ticks == 30 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+			SetUnitFlyHeightEx( source, 700.f, 4000.f );
+			SetUnitAnimation( source, "Attack Two" );
+		}
+	}
+
+	if ( ticks == 60 )
+	{
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float targX = GetUnitX( target );
+		float targY = GetUnitY( target );
+		float angle = MathAngleBetweenPoints( x, y, targX, targY );
+		float dmg = GetHeroLevel( source ) * 50 + GetHeroInt( source, true ) * .5f;
+
+		effect ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 800.f, angle, 1.5f, 1.5f );
+		SetSpecialEffectPitch( ef, -90.f );
+		SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
+		SetEffectTimedLife( ef, 4.f );
+
+		ACF_DamageTarget( source, target, dmg );
+		SetUnitFlyHeightEx( target, 0, 2000.f );
+		SetUnitFlyHeightEx( source, 0, 99999.f );
+		DisplaceWar3ImageLinear( target, angle, 250.f, .2f, .01f, false, false );
+	}
+	else if ( ticks >= 80 )
+	{
+		player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+		unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+		unit target = LoadUnitHandle( GameHT, hid, 'utrg' );
+		float x = GetUnitX( source );
+		float y = GetUnitY( source );
+		float dmg = 50.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+		effect ef;
+		
+		ef = CreateEffectEx( "GeneralEffects\\FuzzyStomp.mdl", x, y, 0.f, GetRandomReal( 0.f, 360.f ), 1.5f, 1.f );
+		SetEffectTimedLife( ef, 1.f );
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			ef = CreateEffectEx( "GeneralEffects\\ValkDust.mdl", x, y, 0.f, .0f, GetRandomReal( 1.5f, 2.f ), 1.5f );
+			SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
+			SetEffectTimedLife( ef, 4.f );
+		}
+
+		for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+		{
+			if ( IsUnitAlive( u ) && IsUnitEnemy( u, p ) )
+			{
+				ACF_DamageTarget( source, u, dmg );
+				ACF_StunUnit( u, 1.f );
+			}
+		}
+
+		ReleaseTimer( tmr );
+	}
+}
+
+void Arcueid_T( )
+{
+	timer tmr = GetExpiredTimer( );
+	int hid = GetHandleId( tmr );
+
+	if ( !StopSpell( hid, 0 ) )
+	{
+		int ticks = SpellTickEx( hid );
+
+		if ( ticks == 0 )
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float x = LoadReal( GameHT, hid, 'srcX' );
+			float y = LoadReal( GameHT, hid, 'srcY' );
+
+			PlayHeroSound( source, 'psnd' + 'T1', 100.f, .0f );
+			ACF_StunUnit( source, .5f );
+			SetEffectTimedLife( AddSpecialEffect( "GeneralEffects\\ValkDust.mdl", GetUnitX( source ), GetUnitY( source ) ), 4.f );
+			SetUnitAnimation( source, "Spell Six" );
+
+			DestroyEffect( AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", x, y ) );
+		}
+		else if ( ticks == 25 )
+		{
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+			ShowUnit( source, false );
+			SetUnitXY( source, LoadReal( GameHT, hid, 'trgX' ), LoadReal( GameHT, hid, 'trgY' ) );
+		}
+		else if ( ticks == 45 )
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float targX = LoadReal( GameHT, hid, 'trgX' );
+			float targY = LoadReal( GameHT, hid, 'trgY' );
+			float dmg = 200.f * GetHeroLevel( source ) + GetHeroInt( source, true );
+ 
+			GroupEnumUnitsInRange( GroupEnum, targX, targY, 600.f, nil );
+
+			for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+			{
+				if ( IsUnitEnemy( u, p ) )
+				{
+					for ( int i = 0; i < 3; i++ )
+					{
+						effect ef = CreateEffectEx( "GeneralEffects\\ShortSlash\\ShortSlash.mdl", GetUnitX( u ), GetUnitY( u ), GetUnitFlyHeight( u ) + 50.f, i * GetRandomInt( 60, 90 ), GetRandomReal( .75f, 1.f ), GetRandomReal( .75f, 1.f ) );
+						DestroyEffect( ef );
+					}
+
+					ACF_DamageTarget( source, u, dmg );
+					DestroyEffect( AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "chest" ) );
+					DestroyEffect( AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "head" ) );
+				}
+			}
+		}
+		else if ( ticks == 50 )
+		{
+			player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+			unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+			float targX = LoadReal( GameHT, hid, 'trgX' );
+			float targY = LoadReal( GameHT, hid, 'trgY' );
+
+			ShowUnit( source, true );
+			SetUnitAnimation( source, "Stand" );
+			ACF_SelectUnit( source, p );
+
+			for ( int i = 0; i < 3; i++ )
+			{
+				effect ef = AddSpecialEffect( "GeneralEffects\\ValkDust.mdl", targX, targY );
+				SetSpecialEffectScale( ef, 2.f );
+				SetSpecialEffectTimeScale( ef, GetRandomReal( .5f, 2.f ) );
+				SetEffectTimedLife( ef, 4.f );
+			}
+
+			ReleaseTimer( tmr );
+		}
+	}
+}
+//
+
+void TeleportToSavedLocation( player p )
+{
+	int pid = GetPlayerId( p );
+	int p_hid = GetHandleId( p );
+	float targX = LoadReal( DataHT, p_hid, '+tpX' );
+	float targY = LoadReal( DataHT, p_hid, '+tpY' );
+	unit u = MUnitArray[pid];
+
+	DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c0000ffffYou have been teleported to saved position" );
+	DestroyEffect( AddSpecialEffect( "Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX( u ), GetUnitY( u ) ) );
+	SetUnitXY( u, targX, targY );
+	DestroyEffect( AddSpecialEffect( "Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", targX, targY ) );
+	ACF_PanCameraToTimed( p, targX, targY, .0f );
+}
+
+timer Spells_Handler( ability abil, unit source, unit target, float targX, float targY, CallbackFunc@ act )
+{
+	timer tmr = CreateTimer( );
+	int hid = GetHandleId( tmr );
+	int aid = GetAbilityTypeId( abil );
+	int alvl = GetAbilityLevel( abil );
+	int lvl = GetHeroLevel( source );
+	int uid = GetUnitTypeId( source );
+	player p = GetOwningPlayer( source );
+	float x = GetUnitX( source );
+	float y = GetUnitY( source );
+	float facing = GetUnitFacing( source );
+	float angle = facing;
+
+	SaveInteger( GameHT, hid, 'utid', uid );
+	SaveInteger( GameHT, hid, 'ulvl', lvl );
+	SaveInteger( GameHT, hid, 'atid', aid );
+	SaveInteger( GameHT, hid, 'alvl', alvl );
+
+	SaveReal( GameHT, hid, 'srcX', GetUnitX( source ) );
+	SaveReal( GameHT, hid, 'srcY', GetUnitY( source ) );
+	SaveReal( GameHT, hid, 'face', facing );
+
+	SavePlayerHandle( GameHT, hid, '+ply', p );
+	SaveAbilityHandle( GameHT, hid, 'abil', abil );
+	SaveUnitHandle( GameHT, hid, 'usrc', source );
+
+	if ( target != nil )
+	{
+		SaveUnitHandle( GameHT, hid, 'utrg', target );
+		targX = GetUnitX( target );
+		targY = GetUnitY( target );
+	}
+
+	SaveReal( GameHT, hid, 'angl', x == targX && y == targY ? facing : MathAngleBetweenPoints( x, y, targX, targY ) );
+	SaveReal( GameHT, hid, 'dist', MathDistanceBetweenPoints( x, y, targX, targY ) );
+	SaveReal( GameHT, hid, 'trgX', targX );
+	SaveReal( GameHT, hid, 'trgY', targY );
+
+	if ( !( act is null ) )
+	{
+		TimerStart( tmr, .01f, true, act );
+	}
+	
+	return tmr;
+}
+
+timer Spells_Handler( CallbackFunc@ act )
+{
+	return Spells_Handler( nil, nil, nil, .0f, .0f, act );
+}
+
+bool IsStopCast( unit target, float targX, float targY )
+{
+	return target == nil && IsTerrainPathable( targX, targY, PATHING_TYPE_WALKABILITY );
+}
+
+void OnAnyItemPick( )
+{
+	int charges = 0;
+	int max = 2;
+	unit u = GetTriggerUnit( );
+	player p = GetOwningPlayer( u );
+	item itm = GetManipulatedItem( );
+	int iid = GetItemTypeId( itm );
+
+	if ( GetItemPlayer( itm ) == Player( PLAYER_NEUTRAL_PASSIVE ) )
+	{
+		SetItemPlayer( itm, p, false );
+	}
+
+	if ( GetItemPlayer( itm ) != p )
+	{
+		UnitRemoveItem( u, itm );
+		DisplayTextToPlayer( p, .0f, .0f, "|c00ffff00That is not your Item!|r" );
+		return;
+	}
+
+	if ( GetItemCharges( itm ) > 0 ) // if stacked item
+	{
+		for ( int i = 0; i < 6; i++ )
+		{
+			item itm_tmp = UnitItemInSlot( u, i ); if ( itm_tmp == itm || GetItemTypeId( itm ) != GetItemTypeId( itm_tmp ) ) { continue; }
+
+			if ( GetItemCharges( itm_tmp ) + GetItemCharges( itm ) <= max )
+			{
+				charges = GetItemCharges( itm_tmp ) + GetItemCharges( itm );
+				SetItemCharges( itm_tmp, charges );
+				RemoveItem( itm );
+				break;
+			}
+		}
+	}
+
+	switch( iid )
+	{
+		case 'I00P': // Cloak of Flames
+		{
+			if ( ACF_CountItems( u, iid ) == 1 )
+			{
+				timer tmr = CreateTimer( );
+				int hid = GetHandleId( tmr );
+
+				SavePlayerHandle( GameHT, hid, '+ply', p );
+				SaveUnitHandle( GameHT, hid, 'usrc', u );
+			
+				TimerStart( tmr, 1.f, true,
+					function( )
+					{
+						timer tmr = GetExpiredTimer( );
+						int hid = GetHandleId( GetExpiredTimer( ) );
+						unit source = LoadUnitHandle( GameHT, hid, 'usrc' );
+
+						if ( IsUnitAlive( source ) && ACF_UnitHasItemById( source, 'I00P' ) )
+						{
+							player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+							float x = GetUnitX( source );
+							float y = GetUnitY( source );
+							float aoe = 300.f;
+							float dmg = 30.f + 10.f * GetHeroLevel( source );
+							
+							GroupEnumUnitsInRange( GroupEnum, x, y, aoe, nil );
+
+							for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+							{
+								if ( IsUnitEnemy( u, p ) && !IsUnitInvisible( u, p ) )
+								{
+									ACF_DamageTarget( source, u, dmg );
+									DestroyEffect( AddSpecialEffectTarget( "Abilities\\Spells\\Other\\ImmolationRed\\ImmolationRedDamage.mdl", u, "chest" ) );
+								}
+							}
+						}
+						else
+						{
+							PauseTimer( tmr );
+							FlushChildHashtable( GameHT, hid );
+							DestroyTimer( tmr );
+						}
+					}
+				 );
+			}
+
+			break;
+		}
+		case 'I02R': // Item Certificate
+		{
+			int piid = LoadInteger( DataHT, GetUnitTypeId( u ), 'pitm' );
+			RemoveItem( itm );
+
+			if ( GetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD ) >= 10000 )
+			{
+				if ( ACF_CountItems( u, piid ) == 0 )
+				{
+					UnitAddItemById( u, piid );
+					SetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD, GetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD ) - 10000 );
+				}
+			}
+
+			break;
+		}
+		case 'I04E': // str tome
+		case 'I04D': // agi tome
+		case 'I00C': // int tome
+		{
+			int goldCost = 0;
+			int statBonus = 0;
+			int statType = 0;
+
+			switch( iid )
+			{
+				case 'I04E': // str tome
+				{
+					goldCost = 1000;
+					statBonus = 10;
+					statType = '+str';
+
+					break;
+				}
+				case 'I04D': // str tome
+				{
+					goldCost = 1000;
+					statBonus = 10;
+					statType = '+agi';
+
+					break;
+				}
+				case 'I00C': // str tome
+				{
+					goldCost = 1000;
+					statBonus = 10;
+					statType = '+int';
+
+					break;
+				}
+			}
+
+			if ( statType == 0 ) { break; }
+
+			timer tmr = CreateTimer( );
+			int hid = GetHandleId( tmr );
+
+			SavePlayerHandle( GameHT, hid, '+ply', p );
+			SaveUnitHandle( GameHT, hid, 'usrc', u );
+			SaveInteger( GameHT, hid, 'cost', goldCost );
+			SaveInteger( GameHT, hid, '+sts', statBonus );
+			SaveInteger( GameHT, hid, 'styp', statType );
+
+			TimerStart( tmr, .01f, true, 
+				function( )
+				{
+					timer tmr = GetExpiredTimer( );
+					int hid = GetHandleId( tmr );
+					player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+					unit u = LoadUnitHandle( GameHT, hid, 'usrc' );
+					int gold = GetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD );
+					int cost = LoadInteger( GameHT, hid, 'cost' );
+
+					if ( cost <= gold )
+					{
+						SetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD, gold - cost );
+
+						int statBonus = LoadInteger( GameHT, hid, '+sts' );
+
+						switch( LoadInteger( GameHT, hid, 'styp' ) )
+						{
+							case '+str': SetHeroStr( u, GetHeroStr( u, false ) + statBonus, true ); break;
+							case '+agi': SetHeroAgi( u, GetHeroAgi( u, false ) + statBonus, true ); break;
+							case '+int': SetHeroInt( u, GetHeroInt( u, false ) + statBonus, true ); break;
+						}
+					}
+					else
+					{
+						PauseTimer( tmr );
+						FlushChildHashtable( GameHT, hid );
+						DestroyTimer( tmr );
+					}
+				}
+			 );
+
+			return;
+		}
+	}
+
+	// Item Combinations
+
+	if ( iid == 'I03U' )
+	{
+		if ( ACF_CountItems( u, 'I03U' ) > 1 )
+		{
+			RemoveItem( ACF_GetItemById( u, 'I03U' ) );
+			RemoveItem( ACF_GetItemById( u, 'I03U' ) );
+			UnitAddItemById( u, 'I00Y' );
+		}
+	}
+	else if ( ACF_CountItems( u, 'I03X' ) > 0 && ACF_CountItems( u, 'I03Z' ) > 0 && ACF_CountItems( u, 'I03U' ) > 0 )
+	{
+		RemoveItem( ACF_GetItemById( u, 'I03U' ) );
+		RemoveItem( ACF_GetItemById( u, 'I03Z' ) );
+		RemoveItem( ACF_GetItemById( u, 'I03X' ) );
+		UnitAddItemById( u, 'I00X' );
+	}
+	else if ( ACF_CountItems( u, 'I03V' ) > 0 && ACF_CountItems( u, 'I03Z' ) > 0 )
+	{
+		RemoveItem( ACF_GetItemById( u, 'I03V' ) );
+		RemoveItem( ACF_GetItemById( u, 'I03Z' ) );
+		UnitAddItemById( u, 'I00R' );
+	}
+	else if ( ACF_CountItems( u, 'I03X' ) > 0 && ACF_CountItems( u, 'I03Y' ) > 0 )
+	{
+		RemoveItem( ACF_GetItemById( u, 'I03Y' ) );
+		RemoveItem( ACF_GetItemById( u, 'I03X' ) );
+		UnitAddItemById( u, 'I00S' );
+	}
+	else if ( ACF_CountItems( u, 'I03Y' ) > 0 && ACF_CountItems( u, 'I03V' ) > 0 )
+	{
+		RemoveItem( ACF_GetItemById( u, 'I03Y' ) );
+		RemoveItem( ACF_GetItemById( u, 'I03V' ) );
+		UnitAddItemById( u, 'I00Z' );
+	}
+	else if ( ACF_CountItems( u, 'I03X' ) > 0 && ACF_CountItems( u, 'I03W' ) > 0 )
+	{
+		RemoveItem( ACF_GetItemById( u, 'I03X' ) );
+		RemoveItem( ACF_GetItemById( u, 'I03W' ) );
+		UnitAddItemById( u, 'I00U' );
+	}
+	else if ( ACF_CountItems( u, 'I00Q' ) > 0 && ACF_CountItems( u, 'I00K' ) > 0 )
+	{
+		RemoveItem( ACF_GetItemById( u, 'I00Q' ) );
+		RemoveItem( ACF_GetItemById( u, 'I00K' ) );
+		UnitAddItemById( u, 'I00R' );
+	}
+	else if ( ACF_CountItems( u, 'I00Q' ) > 0 && ACF_CountItems( u, 'I00N' ) > 0 )
+	{
+		RemoveItem( ACF_GetItemById( u, 'I00Q' ) );
+		RemoveItem( ACF_GetItemById( u, 'I00N' ) );
+		UnitAddItemById( u, 'I00S' );
+	}
+	else if ( ACF_CountItems( u, 'I00O' ) > 0 && ACF_CountItems( u, 'I00I' ) > 0 )
+	{
+		RemoveItem( ACF_GetItemById( u, 'I00O' ) );
+		RemoveItem( ACF_GetItemById( u, 'I00I' ) );
+		UnitAddItemById( u, 'I00U' );
+	}
+	else if ( ACF_CountItems( u, 'I00N' ) > 0 && ACF_CountItems( u, 'I00K' ) > 0 )
+	{
+		RemoveItem( ACF_GetItemById( u, 'I00N' ) );
+		RemoveItem( ACF_GetItemById( u, 'I00K' ) );
+		UnitAddItemById( u, 'I00Z' );
+	}
+	else if ( ACF_CountItems( u, 'I02Q' ) > 0 && ACF_CountItems( u, 'I00J' ) > 0 && GetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD ) >= 3800 )
+	{
+		SetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD, GetPlayerState( p, PLAYER_STATE_RESOURCE_GOLD ) - 3800 );
+		RemoveItem( ACF_GetItemById( u, 'I02Q' ) );
+		RemoveItem( ACF_GetItemById( u, 'I00J' ) );
+		UnitAddItemById( u, 'I00T' );
+	}
+	else if ( ACF_CountItems( u, 'I01K' ) > 0 && ACF_CountItems( u, 'I01S' ) > 0 )
+	{
+		if ( GetItemCharges( ACF_GetItemById( u, 'I01S' ) ) == 1 && GetItemCharges( ACF_GetItemById( u, 'I01K' ) ) == 1 )
+		{
+			RemoveItem( ACF_GetItemById( u, 'I01S' ) );
+			RemoveItem( ACF_GetItemById( u, 'I01K' ) );
+			UnitAddItemById( u, 'I01T' );
+		}
+		else if ( GetItemCharges( ACF_GetItemById( u, 'I01S' ) ) == 2 && GetItemCharges( ACF_GetItemById( u, 'I01K' ) ) == 1 )
+		{
+			RemoveItem( ACF_GetItemById( u, 'I01S' ) );
+			RemoveItem( ACF_GetItemById( u, 'I01K' ) );
+			UnitAddItemById( u, 'I01T' );
+			UnitAddItemById( u, 'I01S' );
+		}
+		else if ( GetItemCharges( ACF_GetItemById( u, 'I01S' ) ) == 1 && GetItemCharges( ACF_GetItemById( u, 'I01K' ) ) == 2 )
+		{
+			RemoveItem( ACF_GetItemById( u, 'I01S' ) );
+			RemoveItem( ACF_GetItemById( u, 'I01K' ) );
+			UnitAddItemById( u, 'I01T' );
+			UnitAddItemById( u, 'I01K' );
+		}
+		else if ( GetItemCharges( ACF_GetItemById( u, 'I01S' ) ) == 2 && GetItemCharges( ACF_GetItemById( u, 'I01K' ) ) == 2 )
+		{
+			RemoveItem( ACF_GetItemById( u, 'I01S' ) );
+			RemoveItem( ACF_GetItemById( u, 'I01K' ) );
+			UnitAddItemById( u, 'I01T' );
+			UnitAddItemById( u, 'I01T' );
+		}
+	}
+}
+
+bool OnProcessItemState( item itm )
+{
+	if ( GetItemLife( itm ) <= .0f )
+	{
+		RemoveItem( itm );
+		return true;
+	}
+
+	return false;
+}
+
+void OnAnyItemDrop( )
+{
+	item itm = GetManipulatedItem( );
+
+	if ( OnProcessItemState( itm ) ) { return; }
+
+
+}
+
+void OnAnyItemUsed( )
+{
+	unit source = GetTriggerUnit( );
+	player p = GetOwningPlayer( source );
+	int pid = GetPlayerId( p );
+	float x = GetUnitX( source );
+	float y = GetUnitY( source );
+	item itm = GetManipulatedItem( );
+	int iid = GetItemTypeId( itm );
+
+	switch( iid )
+	{
+		case 'I01T': // Shadow Scroll
+		{
+			unit clone = CreateIllusionFromUnitEx( source, true ); // 'I01U'
+			SetIllusionDamageDealt( clone, .0f );
+			SetIllusionDamageReceived( clone, 1.f );
+			UnitApplyTimedLife( clone, 'BTLF', 25.f );
+
+			break;
+		}
+		case 'I01S': // Red Tablet
+		{
+			unit clone = CreateIllusionFromUnitEx( source, true ); // 'I00M'
+			SetIllusionDamageDealt( clone, .0f );
+			SetIllusionDamageReceived( clone, 1.f );
+			UnitApplyTimedLife( clone, 'BTLF', 20.f );
+
+			break;
+		}
+		case 'I003': // Scroll of Teleportation
+		{
+			if ( IsUnitCCed( source ) || IsUnitPaused( source ) )
+			{
+				DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c0000ffffUnable to teleport!" );
+			}
+			else
+			{
+				TeleportToSavedLocation( p );
+			}
+
+			break;
+		}
+		case 'I00V': // Kawarimi
+		{
+			KawarimiTriggerUnitArray[pid] = source;
+			DestroyEffect( AddSpecialEffect( "Abilities\\Spells\\Human\\Polymorph\\PolyMorphTarget.mdl", x, y ) );
+
+			unit dummy = CreateUnit( p, 'n000', x, y, 270.f );
+			SetUnitInvulnerable( source, true );
+			PauseUnit( source, true );
+			ShowUnit( source, false );
+			UnitApplyTimedLife( dummy, 'BOmi', 3.f );
+
+			break;
+		}
+	}
+}
+
+void OnAnySpellAction( )
+{
+	ability abil = GetSpellAbility( );
+	unit source = GetTriggerUnit( );
+	player p = GetOwningPlayer( source );
+	unit target = GetSpellTargetUnit( );
+	float targX = GetSpellTargetX( );
+	float targY = GetSpellTargetY( );
+	float delay = .0f;
+	int aid = GetAbilityTypeId( abil );
+	int hid = 0;
+	eventid evId = GetTriggerEventId( );
+	timer tmr;
+
+	if ( evId == EVENT_PLAYER_UNIT_SPELL_CAST )
+	{
+		if ( aid == 'A01W' ) // Anti-TP stone
+		{
+			if ( GetUnitTypeId( target ) == 'H02M' )
+			{
+				DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c0000ffffInvalid target!" );
+				return;
+			}
+		}
+
+		if ( aid == 'A021' || aid == 'A00X' )
+		{
+
+		}
+		else
+		{
+			UnitRemoveAbility( source, 'B018' );
+			UnitRemoveAbility( source, 'Binv' );
+		}
+
+		if ( IsUnitType( source, UNIT_TYPE_HERO ) && aid != 'A055' && aid != 'A01S' )
+		{
+			texttag txtTag = CreateTextTag( );
+			float speed = 100.f;
+			float angle = 90.f;
+			float size = 13.f;
+			float vel = speed * 0.071f / 128.f;
+			float xvel = vel * Cos( Deg2Rad( angle ) );
+			float yvel = vel * Sin( Deg2Rad( angle ) );
+			float textHeight = size * 0.023f / 10.f;
+
+			SetTextTagText( txtTag, GetObjectName( aid ), textHeight );
+			SetTextTagColor( txtTag, 255, 0, 0, 100 );
+			SetTextTagPosUnit( txtTag, source, 50 );
+			SetTextTagVelocity( txtTag, xvel, yvel );
+			SetTextTagPermanent( txtTag, false );
+			SetTextTagLifespan( txtTag, 2.f );
+			SetTextTagFadepoint( txtTag, .25f );
+		}
+
+		if ( LoadBoolean( GameHT, aid, 'PATH' ) && IsTerrainPathable( targX, targY, PATHING_TYPE_WALKABILITY ) ) // flag is inversed in the engine...
+		{
+			IssueImmediateOrder( source, "stop" );
+			return;
+		}
+	}
+	else
+	{
+		switch( aid )
+		{
+			case 'A00V': // Kunai of Boulders
+			{
+				for ( int i = 0; i < 10; i++ )
+				{
+					PauseUnit( CreateUnit( p, 'n002', targX + GetRandomReal( -125.f, 125.f ), targY + GetRandomReal( -125.f, 125.f ), GetRandomReal( 0.f, 360.f ) ), true );
+				}
+
+				break;
+			}
+			// Nanaya Shiki Spells
+			case 'A02P': tmr = Spells_Handler( abil, source, nil, targX, targY, @NanayaShiki_D ); break;
+			case 'A02M': tmr = Spells_Handler( abil, source, nil, targX, targY, @NanayaShiki_Q ); break;
+			case 'A02N': tmr = Spells_Handler( abil, source, nil, targX, targY, @NanayaShiki_W ); break;
+			case 'A02O': tmr = Spells_Handler( abil, source, target, targX, targY, @NanayaShiki_E ); break;
+			case 'A02Q': tmr = Spells_Handler( abil, source, target, targX, targY, @NanayaShiki_R ); break;
+			case 'A02R': tmr = Spells_Handler( abil, source, target, targX, targY, @NanayaShiki_T ); break;
+			// Toono Shiki Spells
+			case 'A02X': tmr = Spells_Handler( abil, source, nil, targX, targY, @ToonoShiki_D ); break;
+			case 'A02U': tmr = Spells_Handler( abil, source, nil, targX, targY, @ToonoShiki_Q ); break;
+			case 'A02V': tmr = Spells_Handler( abil, source, nil, targX, targY, @ToonoShiki_W ); break;
+			case 'A02W': tmr = Spells_Handler( abil, source, target, targX, targY, @ToonoShiki_E ); break;
+			case 'A02Y': tmr = Spells_Handler( abil, source, target, targX, targY, @ToonoShiki_R ); break;
+			case 'A02Z': tmr = Spells_Handler( abil, source, target, targX, targY, @ToonoShiki_T ); break;
+			// Ryougi Shiki Spells
+			case 'A035': tmr = Spells_Handler( abil, source, nil, targX, targY, @RyougiShiki_D ); break;
+			case 'A033': tmr = Spells_Handler( abil, source, nil, targX, targY, @RyougiShiki_Q ); break;
+			case 'A032': tmr = Spells_Handler( abil, source, nil, targX, targY, @RyougiShiki_W ); break;
+			case 'A034': tmr = Spells_Handler( abil, source, nil, targX, targY, @RyougiShiki_E ); break;
+			case 'A036': tmr = Spells_Handler( abil, source, target, targX, targY, @RyougiShiki_R ); break;
+			case 'A037': tmr = Spells_Handler( abil, source, target, targX, targY, @RyougiShiki_T ); break;
+			// Saber Alter Spells
+			case 'A03S': tmr = Spells_Handler( abil, source, nil, targX, targY, @SaberAlter_D ); break;
+			case 'A03T': tmr = Spells_Handler( abil, source, nil, targX, targY, @SaberAlter_Q ); break;
+			case 'A03U': tmr = Spells_Handler( abil, source, nil, targX, targY, @SaberAlter_W ); break;
+			case 'A03V': tmr = Spells_Handler( abil, source, nil, targX, targY, @SaberAlter_E ); break;
+			case 'A03W': tmr = Spells_Handler( abil, source, nil, targX, targY, @SaberAlter_R ); break;
+			case 'A03X': tmr = Spells_Handler( abil, source, nil, targX, targY, @SaberAlter_T ); break;
+			// Saber Nero Spells
+			case 'A038': tmr = Spells_Handler( abil, source, nil, targX, targY, @SaberNero_Q ); break;
+			case 'A039': tmr = Spells_Handler( abil, source, nil, targX, targY, @SaberNero_W ); break;
+			case 'A03A': tmr = Spells_Handler( abil, source, target, targX, targY, @SaberNero_E ); break;
+			case 'A03B': tmr = Spells_Handler( abil, source, nil, targX, targY, @SaberNero_R ); break;
+			case 'A03C': tmr = Spells_Handler( abil, source, target, targX, targY, @SaberNero_T ); break;
+			// Kuchiki Byakuya Spells
+			case 'A03E': tmr = Spells_Handler( abil, source, nil, targX, targY, @KuchikiByakuya_Q ); break;
+			case 'A03D': tmr = Spells_Handler( abil, source, target, targX, targY, @KuchikiByakuya_W ); break;
+			case 'A03G': tmr = Spells_Handler( abil, source, nil, targX, targY, @KuchikiByakuya_E ); break;
+			case 'A03H': tmr = Spells_Handler( abil, source, target, targX, targY, @KuchikiByakuya_R ); break;
+			case 'A03I': tmr = Spells_Handler( abil, source, target, targX, targY, @KuchikiByakuya_T ); break;
+			// Akame Spells
+			case 'A052': tmr = Spells_Handler( abil, source, nil, targX, targY, @Akame_D ); break;
+			case 'A03K': tmr = Spells_Handler( abil, source, nil, targX, targY, @Akame_D ); break;
+			case 'A03L': tmr = Spells_Handler( abil, source, nil, targX, targY, @Akame_Q ); break;
+			case 'A03M': tmr = Spells_Handler( abil, source, target, targX, targY, @Akame_W ); break;
+			case 'A03N': tmr = Spells_Handler( abil, source, nil, targX, targY, @Akame_E ); break;
+			case 'A03O': tmr = Spells_Handler( abil, source, target, targX, targY, @Akame_R ); break;
+			case 'A03P': tmr = Spells_Handler( abil, source, target, targX, targY, @Akame_T ); break;
+			// Scathach Spells
+			case 'A040': tmr = Spells_Handler( abil, source, target, targX, targY, @Scathach_Q1 ); break;
+			case 'A03Y': tmr = Spells_Handler( abil, source, target, targX, targY, @Scathach_Q2 ); break;
+			case 'A03Z': tmr = Spells_Handler( abil, source, target, targX, targY, @Scathach_Q3 ); break;
+			case 'A041': tmr = Spells_Handler( abil, source, nil, targX, targY, @Scathach_W ); break;
+			case 'A042': tmr = Spells_Handler( abil, source, target, targX, targY, @Scathach_E ); break;
+			case 'A043': tmr = Spells_Handler( abil, source, target, targX, targY, @Scathach_R ); break;
+			case 'A044': tmr = Spells_Handler( abil, source, nil, targX, targY, @Scathach_T ); break;
+			// Akainu Spells
+			case 'A049': tmr = Spells_Handler( abil, source, target, targX, targY, @Akainu_D ); break;
+			case 'A04A': tmr = Spells_Handler( abil, source, target, targX, targY, @Akainu_Q ); break;
+			case 'A04C': tmr = Spells_Handler( abil, source, target, targX, targY, @Akainu_W ); break;
+			case 'A04B': tmr = Spells_Handler( abil, source, target, targX, targY, @Akainu_E ); break;
+			case 'A04D': tmr = Spells_Handler( abil, source, target, targX, targY, @Akainu_R ); break;
+			case 'A04E': tmr = Spells_Handler( abil, source, target, targX, targY, @Akainu_T ); break;
+			// Reinforce Spells
+			case 'A04G': tmr = Spells_Handler( abil, source, nil, targX, targY, @Reinforce_Q ); break;
+			case 'A04H': tmr = Spells_Handler( abil, source, target, targX, targY, @Reinforce_W ); break;
+			case 'A04I': tmr = Spells_Handler( abil, source, nil, targX, targY, @Reinforce_E ); break;
+			case 'A04J': tmr = Spells_Handler( abil, source, target, targX, targY, @Reinforce_R ); break;
+			case 'A04K': tmr = Spells_Handler( abil, source, nil, targX, targY, @Reinforce_T ); break;
+			// Arcueid Spells
+			case 'A01N': tmr = Spells_Handler( abil, source, nil, targX, targY, @Arcueid_Q ); break;
+			case 'A01Y': tmr = Spells_Handler( abil, source, nil, targX, targY, @Arcueid_W ); break;
+			case 'A026': tmr = Spells_Handler( abil, source, nil, targX, targY, @Arcueid_E ); break;
+			case 'A027': tmr = Spells_Handler( abil, source, target, targX, targY, @Arcueid_R ); break;
+			case 'A02A': tmr = Spells_Handler( abil, source, nil, targX, targY, @Arcueid_T ); break;
+		}
+	}
+
+	// if ( tmr == nil || !TimerIsPaused( tmr ) ) { return; }
+}
+//
+
+void InitHero( unit u )
+{
+	int hid = GetHandleId( u );
+
+	if ( u == nil || LoadBoolean( GameHT, hid, 'INIT' ) ) { return; }
+
+	int uid = GetUnitTypeId( u );
+
+	switch( uid )
+	{
+		case 'H00A': // Nanaya
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 1, ACF_CreateSound( "GeneralSounds\\KickSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 2, ACF_CreateSound( "GeneralSounds\\GlassShatterSound.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellV.mp3"  ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q1', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellQ.mp3"  ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W1', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellW.wav"  ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E1', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellE1.wav" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E2', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellE2.wav" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R1', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellR1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R2', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellR2.wav" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T1', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellT1.wav" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T2', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellT2.wav" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T3', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellT3.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			break;
+		}
+		case 'H00B': // Toono
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 1, ACF_CreateSound( "GeneralSounds\\KickSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 2, ACF_CreateSound( "GeneralSounds\\GlassShatterSound.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundV1.mp3"  ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q1', ACF_CreateSound( "Characters\\NanayaShiki\\Sounds\\NanayaShikiSpellQ.mp3"  ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W1', ACF_CreateSound( "Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundW1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E2', ACF_CreateSound( "Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundE2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E3', ACF_CreateSound( "Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundE3.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R1', ACF_CreateSound( "Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundR1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R2', ACF_CreateSound( "Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundR2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R3', ACF_CreateSound( "Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundR3.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T1', ACF_CreateSound( "Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundT1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T2', ACF_CreateSound( "Characters\\ToonoShiki\\Sounds\\ToonoShikiSoundT2.mp3" ) );
+				
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			break;
+		}
+		case 'H00C': // Ryougi
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 0, ACF_CreateSound( "GeneralSounds\\BloodFlow.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellDSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q1', ACF_CreateSound( "Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellQSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W1', ACF_CreateSound( "Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellWSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E1', ACF_CreateSound( "Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellESound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R1', ACF_CreateSound( "Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellRSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R2', ACF_CreateSound( "Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellRSound2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T1', ACF_CreateSound( "Characters\\RyougiShiki\\Sounds\\RyougiShikiSpellTSound1.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			break;
+		}
+		case 'H00D': // Saber Alter
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterC1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q1', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterQ1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q2', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterQ2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W1', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterW1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W2', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterW2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W3', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterW3.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E1', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterE1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E2', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterE2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R1', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterR1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R2', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterR2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T1', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterT1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T2', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterT2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T3', ACF_CreateSound( "Characters\\SaberAlter\\Sounds\\SaberAlterT3.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			break;
+		}
+		case 'H00E': // Saber Nero
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 1, ACF_CreateSound( "GeneralSounds\\KickSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 2, ACF_CreateSound( "GeneralSounds\\GlassShatterSound.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\SaberNero\\Sounds\\SaberNeroSoundQ1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W1', ACF_CreateSound( "Characters\\SaberNero\\Sounds\\SaberNeroSoundW1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E1', ACF_CreateSound( "Characters\\SaberNero\\Sounds\\SaberNeroSoundE1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R1', ACF_CreateSound( "Characters\\SaberNero\\Sounds\\SaberNeroSoundR2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T1', ACF_CreateSound( "Characters\\SaberNero\\Sounds\\SaberNeroSoundT1.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			timer tmr = CreateTimer( );
+			int t_hid = GetHandleId( tmr );
+			SaveUnitHandle( GameHT, t_hid, 'usrc', u );
+			TimerStart( tmr, 1.f, true, 
+				function( )
+				{
+					int hid = GetHandleId( GetExpiredTimer( ) );
+					unit source = LoadUnitHandle( GameHT, hid, 'usrc' ); if ( IsUnitDead( source ) ) { return; }
+					float hpMax = GetUnitMaxLife( source );
+					float hpCur = GetUnitCurrentLife( source );
+					SetUnitCurrentLife( source, ( hpMax - hpCur ) * .04f + hpCur );
+				}
+			 );
+
+			break;
+		}
+		case 'H00F': // Kuchiki Byakuya
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 1, ACF_CreateSound( "GeneralSounds\\KickSound1.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellDSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellQSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellQSound2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellWSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellESound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellRSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellRSound2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellTSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellTSound2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\KuchikiByakuya\\Sounds\\KuchikiByakuyaSpellTSound3.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			break;
+		}
+		case 'H00G': // Akame
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 0, ACF_CreateSound( "GeneralSounds\\BloodFlow.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 1, ACF_CreateSound( "GeneralSounds\\KickSound1.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\Akame\\Sounds\\AkameSpellDSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q1', ACF_CreateSound( "Characters\\Akame\\Sounds\\AkameSpellQSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W1', ACF_CreateSound( "Characters\\Akame\\Sounds\\AkameSpellWSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E1', ACF_CreateSound( "Characters\\Akame\\Sounds\\AkameSpellESound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R1', ACF_CreateSound( "Characters\\Akame\\Sounds\\AkameSpellRSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R2', ACF_CreateSound( "Characters\\Akame\\Sounds\\AkameSpellRSound2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T1', ACF_CreateSound( "Characters\\Akame\\Sounds\\AkameSpellTSound1.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			break;
+		}
+		case 'H00H': // Scathach
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 2, ACF_CreateSound( "GeneralSounds\\GlassShatterSound.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q1', ACF_CreateSound( "Characters\\Scathach\\Sounds\\ScathachSpellQFirstSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q2', ACF_CreateSound( "Characters\\Scathach\\Sounds\\ScathachSpellQSecondSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q3', ACF_CreateSound( "Characters\\Scathach\\Sounds\\ScathachSpellQThirdSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W1', ACF_CreateSound( "Characters\\Scathach\\Sounds\\ScathachSpellWSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E1', ACF_CreateSound( "Characters\\Scathach\\Sounds\\ScathachSpellESound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R1', ACF_CreateSound( "Characters\\Scathach\\Sounds\\ScathachSpellRSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R2', ACF_CreateSound( "Characters\\Scathach\\Sounds\\ScathachSpellRSound2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T1', ACF_CreateSound( "Characters\\Scathach\\Sounds\\ScathachSpellTSound1.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			break;
+		}
+		case 'H00I': // Akainu
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'D1', ACF_CreateSound( "Characters\\Akainu\\Sounds\\AkainuSpellDSound.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q1', ACF_CreateSound( "Characters\\Akainu\\Sounds\\AkainuSpellQSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W1', ACF_CreateSound( "Characters\\Akainu\\Sounds\\AkainuSpellWSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E1', ACF_CreateSound( "Characters\\Akainu\\Sounds\\AkainuSpellESound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R1', ACF_CreateSound( "Characters\\Akainu\\Sounds\\AkainuSpellRSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R2', ACF_CreateSound( "Characters\\Akainu\\Sounds\\AkainuSpellRSound2.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T1', ACF_CreateSound( "Characters\\Akainu\\Sounds\\AkainuSpellTSound1.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			break;
+		}
+		case 'H00J': // Reinforce
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q1', ACF_CreateSound( "Characters\\Reinforce\\Sounds\\ReinforceSpellQSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W1', ACF_CreateSound( "Characters\\Reinforce\\Sounds\\ReinforceSpellWSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E1', ACF_CreateSound( "Characters\\Reinforce\\Sounds\\ReinforceSpellESound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R1', ACF_CreateSound( "Characters\\Reinforce\\Sounds\\ReinforceSpellCSound1.mp3" ) ); // R1
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R2', ACF_CreateSound( "Characters\\Reinforce\\Sounds\\ReinforceSpellRSound1.mp3" ) ); // R2
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T1', ACF_CreateSound( "Characters\\Reinforce\\Sounds\\ReinforceSpellTSound1.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			break;
+		}
+		case 'H00K': // Arcueid
+		{
+			if ( !LoadBoolean( SoundHT, hid, 'gsnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 0, ACF_CreateSound( "GeneralSounds\\BloodFlow.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 1, ACF_CreateSound( "GeneralSounds\\KickSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'gsnd' + 3, ACF_CreateSound( "GeneralSounds\\SlamSound.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'gsnd', true );
+			}
+
+			if ( !LoadBoolean( SoundHT, hid, 'psnd' ) )
+			{
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'Q1', ACF_CreateSound( "Characters\\Arcueid\\Sounds\\ArcueidSpellQSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'W1', ACF_CreateSound( "Characters\\Arcueid\\Sounds\\ArcueidSpellWSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'E1', ACF_CreateSound( "Characters\\Arcueid\\Sounds\\ArcueidSpellESound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'R1', ACF_CreateSound( "Characters\\Arcueid\\Sounds\\ArcueidSpellRSound1.mp3" ) );
+				SaveSoundHandle( SoundHT, hid, 'psnd' + 'T1', ACF_CreateSound( "Characters\\Arcueid\\Sounds\\ArcueidSpellTSound1.mp3" ) );
+
+				SaveBoolean( SoundHT, hid, 'psnd', true );
+			}
+
+			if ( !LoadBoolean( GameHT, uid, 'INIT' ) )
+			{
+				SaveBoolean( GameHT, 'A02A', 'PATH', true );
+				SaveBoolean( GameHT, 'A026', 'PATH', true );
+
+				SaveBoolean( GameHT, uid, 'INIT', true );
+			}
+
+			break;
+		}
+		default: return;
+	}
+
+	if ( !LoadBoolean( GameHT, hid, 'INIT' ) )
+	{
+		HeroProcessAbilityDisplay( u, true );
+
+		SaveBoolean( GameHT, hid, 'INIT', true );
+	}
+}
+
+void OnAnyChatEvent( )
+{
+	player p = GetTriggerPlayer( );
+	int pid = GetPlayerId( p );
+	int p_team = GetPlayerTeam( p );
+	string msg = GetEventPlayerChatString( );
+	int trig = msg[0];
+
+	switch( trig )
+	{
+		case '-':
+		{
+			string cmd = msg.substr( 1 );
+			string payload = "";
+			int space = cmd.findFirstOf( " " );
+
+			if ( space != -1 )
+			{
+				payload = cmd.substr( space + 1 );
+				cmd = cmd.substr( 0, space - 1 );
+			}
+
+			if ( cmd == "save" )
+			{
+				SaveUnitAxis( p, true );
+			}
+			else if ( cmd == "t" )
+			{
+				int p_hid = GetHandleId( p );
+
+				if ( !LoadBoolean( DataHT, p_hid, 'ISTP' ) ) { return; }
+
+				int tpCD = LoadInteger( GameHT, p_hid, 'tptm' );
+				unit hero = MUnitArray[pid];
+
+				if ( IsUnitCCed( hero ) || IsUnitPaused( hero ) )
+				{
+					DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c0000ffffUnable to teleport!" );
+				}
+				else
+				{
+					if ( tpCD == 0 )
+					{
+						timer tmr = CreateTimer( );
+						int hid = GetHandleId( tmr );
+
+						SavePlayerHandle( GameHT, hid, '+ply', p );
+						SaveInteger( GameHT, p_hid, 'tptm', 30 );
+
+						TeleportToSavedLocation( p );
+
+						TimerStart( tmr, 1.f, true, 
+							function( )
+							{
+								timer tmr = GetExpiredTimer( );
+								int hid = GetHandleId( tmr );
+								player p = LoadPlayerHandle( GameHT, hid, '+ply' );
+								int p_hid = GetHandleId( p );
+								int cd = LoadInteger( GameHT, p_hid, 'tptm' ) - 1;
+
+								if ( cd > 0 )
+								{
+									SaveInteger( GameHT, p_hid, 'tptm', cd );
+								}
+								else
+								{
+									SaveInteger( GameHT, p_hid, 'tptm', 0 );
+									PauseTimer( tmr );
+									FlushChildHashtable( GameHT, hid );
+									DestroyTimer( tmr );
+								}
+							}
+						 );
+					}
+					else
+					{
+						DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c00ffff00Teleportation Cooldown: " + I2S( tpCD ) + " seconds|r|c00ff0000!|r" );
+					}
+				}
+
+				break;
+			}
+			else if ( cmd == "combinations" )
+			{
+				DisplayTimedTextToPlayer( p, 0.f, 0.f, 10.f, "*Mithril Shield+Champion Belt = |c0000ff00Gold Shield|r
+				*u's Axe + Ninja's Slipper = |c0000ff00Minotaur's Axe|r
+				*Speed Boots + Ninja's Slipper = |c0000ff00Blink Boots|r
+				*Red Stone + Ninja's Slipper + Champion Belt = |c0000ff00Gold Medal|r
+				*Red Stone + Red Stone = |c0000ff00Crystal|r
+				*Mithril Shield + u's Axe = |c0000ff00Sword of King|r
+				*Red Tablet + Stealth Cap = |c0000ff00Stealth Scroll|r" );
+			}
+			else if ( cmd == "1" )
+			{
+				if ( !HealthDisplayBooleanArray[pid] )
+				{
+					DisplayTextToPlayer( p, 0, 0, "Health display by text is: |c0000ffffOn|r" );
+				}
+				else
+				{
+					DisplayTextToPlayer( p, 0, 0, "Health display by text is: |c00ff0000Off|r" );
+				}
+
+				HealthDisplayBooleanArray[pid] = !HealthDisplayBooleanArray[pid];
+			}
+			else if ( cmd == "2" )
+			{
+				if ( !ESCLocationSaveBooleanArray[pid] )
+				{
+					DisplayTextToPlayer( p, 0, 0, "Push ESC to save current position function is: |c0000ffffActivated|r" );
+				}
+				else
+				{
+					DisplayTextToPlayer( p, 0, 0, "Push ESC to save current position function is: |c00ff0000Deactivated|r" );
+				}
+
+				ESCLocationSaveBooleanArray[pid] = !ESCLocationSaveBooleanArray[pid];
+			}
+			else if ( cmd == "3" )
+			{
+				int p_hid = GetHandleId( p );
+
+				DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c0000ffffDisplaying the saved position" );
+				if ( GetLocalPlayer( ) == p )
+				{
+					ACF_PingMinimap( p, LoadReal( DataHT, p_hid, '+tpX' ), LoadReal( DataHT, p_hid, '+tpY' ), false );
+				}
+			}
+			else if ( cmd == "4" )
+			{
+				DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c0000ffffDisplaying the saved position" );
+
+				if ( GetLocalPlayer( ) == p )
+				{
+					for ( int i = 0; i < PLAYER_NEUTRAL_AGGRESSIVE; i++ )
+					{
+						player p_other = Player( i ); if ( p == p_other || !IsPlayerAlly( p, p_other ) || GetPlayerSlotState( p ) != PLAYER_SLOT_STATE_PLAYING ) { continue; }
+						int p_hid = GetHandleId( p_other );
+						ACF_PingMinimap( p, LoadReal( DataHT, p_hid, '+tpX' ), LoadReal( DataHT, p_hid, '+tpY' ), false );
+					}
+				}
+			}
+			else if ( cmd == "commands" )
+			{
+				DisplayTextToPlayer( p, 0.f, 0.f, "|c0080ff00-testcommands|r: |c0000ffffDisplays available test commands|r.
+				|c0080ff00-camera 50~250|r: |c0000ffffMap camera distance change|r.
+				|c0080ff00-combinations|r: |c0000ffffA list of item combinations|r.
+				|c0080ff00-T|r: |c0000ffffTeleports you to the saved location ( Requires 8 bosses killed )|r.
+				|c0080ff00-1|r: |c0000ffffWrites exact amount of hp of target if his hp exceeds 10000|r.
+				|c0080ff00-2|r: |c0000ffffPush ESC button 2 times to save your current position|r.
+				|c0080ff00-3|r: |c0000ffffShows the location where you saved|r.
+				|c0080ff00-4|r: |c0000ffffShows the location where you and your teammates saved|r.
+				|c0080ff00-clear|r: |c0000ffffClears text messages from chat|r.
+				|c0080ff00-Contacts|r: |c0000ffffDisplays Map Maker and Contact information|r." );
+			}
+			else if ( cmd == "testcommands" )
+			{
+				DisplayTextToPlayer( p, 0.f, 0.f, "|c0080ff00-nc|r: |c0000ffffRemoves cooldowns on abilities|r.
+				|c0080ff00-heroes|r: |c0000ffffGrants you all heroes available in the game|r.
+				|c0080ff00-gold|r: |c0000ffffGrants you 100000000 gold when used|r.
+				|cFFFFCC00-level XX|r: |c0000ffffSets the level of selected u to XX|r.
+				|c0080ff00-nocreep|r: |c0000ffffStops mobs spawning on mid|r.
+				|c0080ff00-testunit|r: |c0000ffffSpawns a unit, that has a lot of hp|r." );
+			}
+			else if ( cmd == "contacts" )
+			{
+				DisplayTextToPlayer( p, 0.f, 0.f, "|cFFFFCC00Map Maker and Contact Info:|r Unryze ( https://vk.com/acfwc3 / https://vendev.info/ )
+
+				|cFFFFCC00Helpers:|r Andutrache, Nelu_o, Maou, Sanyabane and Saasura" );
+			}
+			else if ( cmd == "non" || cmd == "noff" )
+			{
+				bool isEnable = cmd == "non";
+
+				if ( isEnable )
+				{
+					DisplayTextToPlayer( p, .0f, .0f, "|c0000FF00Notifications have been enabled!" );
+				}
+				else
+				{
+					DisplayTextToPlayer( p, .0f, .0f, "|c00ff0000Notifications have been disabled!" );
+				}
+				
+				SaveBoolean( DataHT, GetHandleId( p ), 'ntfc', isEnable );
+			}
+			else if ( cmd == "clear" )
+			{
+				if ( GetLocalPlayer( ) == p ) { ClearTextMessages( ); }
+			}
+
+			if ( TestCommandEnabled )
+			{
+				if ( cmd == "nc" )
+				{
+					bool toggleMode = true;
+					bool isEnabled = TMR_ResetCD != nil ? TimerIsPaused( TMR_ResetCD ) : true;
+
+					if ( TMR_ResetCD == nil )
+					{
+						TMR_ResetCD = CreateTimer( );
+						toggleMode = false;
+						TimerStart( TMR_ResetCD, .01f, true,
+							function( )
+							{
+								GroupEnumUnitsInRect( GroupEnum, worldBounds, Condition( function( ) { return IsUnitHero( GetFilterUnit( ) ); } ) );
+
+								for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
+								{
+									if ( GetPlayerId( GetOwningPlayer( u ) ) >= PLAYER_NEUTRAL_AGGRESSIVE ) { continue; }
+									UnitResetCooldown( u );
+								}
+							}
+						 );
+					}
+
+					DisplayTimedTextToPlayer( p, .0f, .0f, 10.f, isEnabled ? "|c0000FF00No-CoolDown Mode Operation Enabled!" : "|c00ff0000No-CoolDown Mode Operation Disabled!" );
+
+					if ( !toggleMode ) { return; }
+
+					TimerIsPaused( TMR_ResetCD ) ? ResumeTimer( TMR_ResetCD ) : PauseTimer( TMR_ResetCD );
+				}
+				else if ( cmd == "nocreep" )
+				{
+					if ( B_IsCreepSpawn )
+					{
+						DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c00ff0000Creeps on mid will no longer spawn.|r" );
+					}
+					else
+					{
+						DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c0000ff00Creeps on mid will start to spawn.|r" );
+					}
+
+					B_IsCreepSpawn = !B_IsCreepSpawn;
+				}
+				else if ( cmd == "testunit" )
+				{
+					DisplayTimedTextToPlayer( p, .0f, .0f, 5.f, "|c0000ff00Test unit created.|r" );
+					CreateUnit( Player( PLAYER_NEUTRAL_AGGRESSIVE ), 'tstu', 0.f, -500.f, 270.f );
+				}
+			}
+
+			break;
+		}
+	}
+}
+
+void DefaultCommandsTriggers( )
+{
+	trigger t;
+
+	t = CreateTrigger( );
+	TriggerRegisterAnyPlayerEventRW( t, EVENT_PLAYER_END_CINEMATIC );
+	TriggerAddAction( t, @ESCToSaveAction );
+
+	t = CreateTrigger( );
+	TriggerRegisterPlayerChatEventRW( t, "", false );
+	TriggerAddAction( t, @OnAnyChatEvent );
+
+	t = CreateTrigger( );
+	TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_SELECTED );
+	TriggerAddAction( t, @HealthDisplayReaderAction );
+}
+
+void CreateLocalTimers( )
+{
+	TimerStart( CreateTimer( ), 30.f, true, 
+		function( )
+		{
+			UnitResetCooldown( LoadUnitHandle( DataHT, 'BOSS', 'unit' ) );
+
+			player p = GetLocalPlayer( );
+			int hid = GetHandleId( p );
+
+			if ( LoadBoolean( DataHT, hid, 'ntfc' ) )
+			{
+				DisplayTextToPlayer( p, 0.f, 0.f, "|c0080ff00-commands|r: |c0000ffffdisplays available in-game commands|r.
+				|c0080ff00-testcommands|r: |c0000ffffdisplays available in-game test commands|r.
+				|c0080ff00-noff/-non|r: |c0000ffffdisables/enables -commands notification|r." );
+			}
+		}
+	 );
+}
+
+void GameTriggers( )
+{
+	trigger t;
+
+	TR_SelectionMode = CreateTrigger( );
+	TriggerRegisterDialogEvent( TR_SelectionMode, ModeSelectionDialog );
+	TriggerAddAction( TR_SelectionMode, @ModeSelectionFunction2 );
+
+	t = CreateTrigger( );
+
+	for ( int i = 0; i < PLAYER_NEUTRAL_AGGRESSIVE; i++ )
+	{
+		player p = Player( i );
+
+		if ( GetPlayerSlotState( p ) == PLAYER_SLOT_STATE_PLAYING && GetPlayerController( p ) == MAP_CONTROL_USER )
+		{
+			TotalPlayers++;
+			TeamPlayers[ GetPlayerTeam( p ) ]++;
+		}
+
+		TriggerRegisterPlayerAllianceChange( t, p, ALLIANCE_SHARED_CONTROL );
+	}
+	TriggerAddAction( t, @DisableSharedUnitsAct );
+
+	t = CreateTrigger( );
+	TriggerRegisterTimerEvent( t, 0, false );
+	TriggerAddAction( t, @MultiBoardCreationFunction1 );
+
+	t = CreateTrigger( );
+	TriggerRegisterAnyPlayerEventRW( t, EVENT_PLAYER_LEAVE );
+	TriggerAddAction( t, @RegisterPlayerLeaveAction );
+
+	t = CreateTrigger( );
+	TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_HERO_LEVEL );
+	TriggerAddAction( t, @OnHeroLevel );
+
+	t = CreateTrigger( );
+	TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_PICKUP_ITEM );
+	TriggerAddAction( t, @OnAnyItemPick );
+
+	t = CreateTrigger( );
+	TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_DROP_ITEM );
+	TriggerAddAction( t, @OnAnyItemDrop );
+
+	t = CreateTrigger( );
+	TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_USE_ITEM );
+	TriggerAddAction( t, @OnAnyItemUsed );
+
+	t = CreateTrigger( );
+	TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_SPELL_CAST );
+	TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_SPELL_EFFECT );
+	TriggerAddAction( t, @OnAnySpellAction );
+
+	t = CreateTrigger( );
+	TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_PROJECTILE_HIT );
+	TriggerAddAction( t, @OnPlayerUnitProjectileHit );
+
+	t = CreateTrigger( );
+	TriggerRegisterAnyUnitEventRW( t, EVENT_PLAYER_UNIT_DAMAGED );
+	TriggerAddAction( t, @OnPlayerUnitDamaged );
+
+	t = CreateTrigger( );
+	TriggerRegisterGameEvent( t, EVENT_GAME_WIDGET_DEATH );
+	TriggerAddAction( t, @OnAnyWidgetDeath );
+
+	TR_HeroSelection = CreateTrigger( );
+	DisableTrigger( TR_HeroSelection );
+	TriggerRegisterAnyUnitEventRW( TR_HeroSelection, EVENT_PLAYER_UNIT_SELECTED );
+	TriggerAddAction( TR_HeroSelection, @HeroSelectionAction );
+
+	t = CreateTrigger( );
+	TriggerRegisterDialogEvent( t, KillSelectionDialog );
+	TriggerAddAction( t, @KillSelectionDialogAction );
+}
+
+void AllRegions( )
+{
+	CircleRectArr[0] = Rect( -2688.f, 704.f, -2432.f, 960.f ); // TL
+	CircleRectArr[1] = Rect( -2688.f, -1920.f, -2432.f, -1600.f ); // BL
+	CircleRectArr[2] = Rect( -672.f, -1184.f, 672.f, 160.f ); // Center
+	CircleRectArr[3] = Rect( 2464.f, -1920.f, 2720.f, -1600.f ); // TR
+	CircleRectArr[4] = Rect( 2464.f, 704.f, 2720.f, 960.f ); // BR
+	
+	array<int> shopList = { 'mtk3', 'mtk4', 'mtk5', 'mtk1', 'mtk2' };
+
+	for ( int team = 0; team < 2; team++ )
+	{
+		unit u = CreateUnit( Player( 10 + team ), 'base', team == 0 ? -4350.f : 4350.f, -500.f, 270.f );
+		SetUnitVertexColor( u, 255, 255, 255, 75 );
+
+		for ( uint i = 0; i < CircleRectArr.length( ); i++ )
+		{
+			float x = team == 0 ? -5184.f : 5120.f;
+			float y = -256.f * i;
+			float targX = GetRectCenterX( CircleRectArr[i] );
+			float targY = GetRectCenterY( CircleRectArr[i] );
+
+			u = CreateUnit( Player( PLAYER_NEUTRAL_PASSIVE ), 'wgt1', x, y, 270.f );
+
+			WaygateSetDestination( u, targX, targY );
+			CreateUnit( Player( PLAYER_NEUTRAL_PASSIVE ), 'cofp', targX, targY, 270.f );
+			WaygateActivate( u, true );
+		}
+
+		for ( uint i = 0; i < shopList.length( ); i++ )
+		{
+			int typeId = shopList[i];
+
+			float x = 4032.f + ( i <= 1 ? i * 356.f : ( i - 2 ) * 256.f );
+			float y = i <= 1 ? -128.f : -1088.f;
+
+			u = CreateUnit( Player( PLAYER_NEUTRAL_PASSIVE ), typeId, team == 0 ? -x : x, y, 270.f );
+		}
+	}
+
+	trigger t;
+	region reg;
+	rect rec;
+
+	worldBounds = GetWorldBounds( );
+
+	t = CreateTrigger( );
+
+	reg = CreateRegion( );
+	rec = Rect( -5440.f, -1440.f, -3520.f, 480.f );
+	RegionAddRect( reg, rec );
+	SetRect( rec, 3520.f, -1440.f, 5440.f, 480.f );
+	RegionAddRect( reg, rec );
+	TriggerRegisterEnterRegion( t, reg, nil );
+	TriggerAddAction( t, 
+		function( )
+		{
+			OnAnyUnitEnterRegion( GetEnteringUnit( ), GetTriggeringRegion( ), nil );
+		}
+	 );
+	SaveRegionHandle( DataHT, 'regs', 'BASE', reg );
+	RemoveRect( rec );
+
+	t = CreateTrigger( );
+	reg = CreateRegion( );
+	RegionAddRect( reg, CircleRectArr[0] ); // TL
+	TriggerRegisterEnterRegion( t, reg, nil );
+	TriggerAddAction( t, 
+		function( )
+		{
+			OnAnyUnitEnterRegion( GetEnteringUnit( ), GetTriggeringRegion( ), CircleRectArr[0] );
+		}
+	 );
+
+	t = CreateTrigger( );
+	reg = CreateRegion( );
+	RegionAddRect( reg, CircleRectArr[1] ); // BL
+	TriggerRegisterEnterRegion( t, reg, nil );
+	TriggerAddAction( t, 
+		function( )
+		{
+			OnAnyUnitEnterRegion( GetEnteringUnit( ), GetTriggeringRegion( ), CircleRectArr[1] );
+		}
+	 );
+
+	t = CreateTrigger( );
+	reg = CreateRegion( );
+	RegionAddRect( reg, CircleRectArr[3] ); // TR
+	TriggerRegisterEnterRegion( t, reg, nil );
+	TriggerAddAction( t, 
+		function( )
+		{
+			OnAnyUnitEnterRegion( GetEnteringUnit( ), GetTriggeringRegion( ), CircleRectArr[3] );
+		}
+	 );
+
+	t = CreateTrigger( );
+	reg = CreateRegion( );
+	RegionAddRect( reg, CircleRectArr[4] ); // BR
+	TriggerRegisterEnterRegion( t, reg, nil );
+	TriggerAddAction( t, 
+		function( )
+		{
+			OnAnyUnitEnterRegion( GetEnteringUnit( ), GetTriggeringRegion( ), CircleRectArr[4] );
+		}
+	 );
+}
+
+void CreateAllUnits( )
+{
+	player p = Player( PLAYER_NEUTRAL_AGGRESSIVE );
+	unit u = CreateUnit( p, LoadInteger( DataHT, GetRandomInt( 1, TotalHeroes ), 'type' ), 0.f, -3900.f, 90.f ); // boss
+	SaveUnitHandle( DataHT, 'BOSS', 'unit', u );
+
+	InitHero( u );
+	SetHeroLevel( u, 50, false );
+	HeroUnlockAbilities( u );
+	SetHeroStr( u, 5000, false );
+	SetHeroAgi( u, 5000, false );
+	SetHeroInt( u, 5000, false );
+	UnitAddAbility( u, 'A017' );
+	UnitAddAbility( u, 'A02F' );
+	UnitAddItemById( u, 'I03S' );
+	UnitAddItemById( u, 'I00S' );
+	UnitAddItemById( u, 'I00U' );
+	UnitAddItemById( u, 'I00H' );
+	UnitAddItemById( u, 'I00T' );
+	UnitAddItemById( u, 'I00R' );
+	SetPlayerHandicapXP( p, 3 );
+	StartAI( u );
+}
+
+void QuestCreationFunction( )
+{
+	quest QuestCreation = CreateQuest( );
+	QuestSetTitle( QuestCreation, "|cFFFFCC00Gameplay Information|r" );
+	QuestSetDescription( QuestCreation, "|c0000ffffWhen you kill 8 bosses on the lanes you will get -T command|r.
+	|cFFFFCC00-T|r: |c0000ffffTeleports you to your|r |cFFFFCC00-save|r |c0000ffff( saved ) location|r.
 	|cFFFFCC00-commands|r – |c0000ffffShows in-game commands|r.
 
 	|cFFFFCC00Single Player Test Commands:|r
 	|cFFFFCC00-nc|r – |c0000ffffRemoves cooldowns on abilities|r.
 	|cFFFFCC00-heroes|r – |c0000ffffSpawns all the heroes on the base|r.
 	|cFFFFCC00-gold X|r – |c0000ffffInstantly gives 10000000 gold to player X|r.
-	|cFFFFCC00-level X|r – |c0000ffffSets the level of selected hero to X|r.
-	|cFFFFCC00-NoCreep|r – |c0000ffffDisables creep spawn system in the middle|r.
-	|cFFFFCC00-SpawnTestUnit|r – |c0000ffffSpawns a test unit for spell testing|r." );
-    QuestSetIconPath(QuestCreation, "Characters\\SaberAlter\\ReplaceableTextures\\CommandButtons\\BTNSaberAlterIcon.blp");
-    QuestSetRequired(QuestCreation, true);
-    QuestSetDiscovered(QuestCreation, true);
-    QuestSetCompleted(QuestCreation, false);
-    QuestCreation = CreateQuest();
-    QuestSetTitle(QuestCreation, "|cFFFFCC00Map Credits|r");
-    QuestSetDescription(QuestCreation, "|c0000ffffThese are the people who have contributed to the map|r:
+	|cFFFFCC00-level X|r – |c0000ffffSets the level of selected u to X|r.
+	|cFFFFCC00-nocreep|r – |c0000ffffDisables creep spawn system in the middle|r.
+	|cFFFFCC00-testunit|r – |c0000ffffSpawns a test unit for spell testing|r." );
+	QuestSetIconPath( QuestCreation, "Characters\\SaberAlter\\ReplaceableTextures\\CommandButtons\\BTNSaberAlterIcon.blp" );
+	QuestSetRequired( QuestCreation, true );
+	QuestSetDiscovered( QuestCreation, true );
+	QuestSetCompleted( QuestCreation, false );
+	QuestCreation = CreateQuest( );
+	QuestSetTitle( QuestCreation, "|cFFFFCC00Map Credits|r" );
+	QuestSetDescription( QuestCreation, "|c0000ffffThese are the people who have contributed to the map|r:
 	|c00FFFF00Andutrache / Nelu_o|r |c00FF0000[FOCS English Team]|r
 	|c00FF7F00Space_GlobalTM|r / |c0096FF96gnusik533|r |c0000ffff[ACF Team]|r
 	|c00FFFF00Illussionisst / Tekirinmaru / mansuraybov12 / AK-Kisame / brostopchat|r |c006969FF[Bug Reports]|r
@@ -9096,141 +9312,113 @@ void QuestCreationFunction()
 	|c00FFFF00Sanyabane|r |c006969FF[Sounds / Textures]|r
 	|c00FFFF00Saasura / x10azgmfx / moon_shin / Nagne|r |c006969FF[Animations]|r
 	|c00FFFF00Cytyscwyt / Mr.Yagyu|r |c006969FF[Models]|r" );
-    QuestSetIconPath(QuestCreation, "Characters\\SaberNero\\ReplaceableTextures\\CommandButtons\\BTNSaberNeroIcon.blp");
-    QuestSetRequired(QuestCreation, false);
-    QuestSetDiscovered(QuestCreation, true);
-    QuestSetCompleted(QuestCreation, false);
-    QuestCreation = CreateQuest();
-    QuestSetTitle(QuestCreation, "|cFFFFCC00Sponsor Sites|r");
-    QuestSetDescription(QuestCreation, "|cFFFFCC00VK Group|r: |c0000ffffhttps://vk.com/acfwc3|r
+	QuestSetIconPath( QuestCreation, "Characters\\SaberNero\\ReplaceableTextures\\CommandButtons\\BTNSaberNeroIcon.blp" );
+	QuestSetRequired( QuestCreation, false );
+	QuestSetDiscovered( QuestCreation, true );
+	QuestSetCompleted( QuestCreation, false );
+	QuestCreation = CreateQuest( );
+	QuestSetTitle( QuestCreation, "|cFFFFCC00Sponsor Sites|r" );
+	QuestSetDescription( QuestCreation, "|cFFFFCC00VK Group|r: |c0000ffffhttps://vk.com/unryzeworkshop|r
 	|cFFFFCC00Platform|r: |c0000ffffhttps://warcis.com|r
 	|cFFFFCC00Host Bot Forum|r: |c0000ffffhttps://vendev.info|r
 	|cFFFFCC00WC3 Models and Maps|r: |c0000ffffhttp://chaosrealm.info|r" );
-    QuestSetIconPath(QuestCreation, "Characters\\Scathach\\ReplaceableTextures\\CommandButtons\\BTNScathachIcon.blp");
-    QuestSetRequired(QuestCreation, false);
-    QuestSetDiscovered(QuestCreation, true);
-    QuestSetCompleted(QuestCreation, false);
+	QuestSetIconPath( QuestCreation, "Characters\\Scathach\\ReplaceableTextures\\CommandButtons\\BTNScathachIcon.blp" );
+	QuestSetRequired( QuestCreation, false );
+	QuestSetDiscovered( QuestCreation, true );
+	QuestSetCompleted( QuestCreation, false );
 }
 
-void MapCameraBounds()
+void MapCameraBounds( )
 {
-    float minX = - 6144.f + GetCameraMargin(CAMERA_MARGIN_LEFT);
-    float minY = - 5120.f + GetCameraMargin(CAMERA_MARGIN_BOTTOM);
-    float maxX = 6144.f - GetCameraMargin(CAMERA_MARGIN_RIGHT);
-    float maxY = 7168.f - GetCameraMargin(CAMERA_MARGIN_TOP);
-    SetCameraBounds(minX, minY, maxX, maxY, minX, maxY, maxX, minY);
+	float minX = -6144.f + GetCameraMargin( CAMERA_MARGIN_LEFT );
+	float minY = -5120.f + GetCameraMargin( CAMERA_MARGIN_BOTTOM );
+	float maxX = 6144.f - GetCameraMargin( CAMERA_MARGIN_RIGHT );
+	float maxY = 7168.f - GetCameraMargin( CAMERA_MARGIN_TOP );
+
+	SetCameraBounds( minX, minY, maxX, maxY, minX, maxY, maxX, minY );
 }
 
-void TestTriggers()
+void SoloGameDetection( )
 {
-    trigger t;
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-nc", true);
-    TriggerAddAction(t, @NoCooldownActivationAction);
-
-    ResetCDTrigger = CreateTrigger();
-    DisableTrigger(ResetCDTrigger);
-    TriggerRegisterTimerEvent(ResetCDTrigger, .01f, true);
-    TriggerAddAction(ResetCDTrigger, @ResetCooldownTimedAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-heroes", true);
-    TriggerAddAction(t, @AllHeroPickAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-NoCreep", true);
-    TriggerAddAction(t, @NoCreepAction);
-
-    t = CreateTrigger();
-    TriggerRegisterPlayerChatEventRW(t, "-SpawnTestUnit", true);
-    TriggerAddAction(t, @TestUnitSpawnAction);
-}
-void SoloGameDetection()
-{
-    GR_LeftSide = CreateGroup();
-    GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'U001' , - 2200.f, 2800.f, 270);
-    GroupAddUnit( GR_LeftSide, GlobalUnit);
-    GR_RightSide = CreateGroup();
-    GlobalUnit = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), 'U001' , 2200.f, 2800.f, 270);
-    GroupAddUnit( GR_RightSide, GlobalUnit);
-    if (TeamPlayers[0] == 0 || TeamPlayers[1] == 0)
-    {
-        SameHeroBoolean = true;
-        for ( int i = 0; i < TotalHeroes; i++ )
-        {
-            HeroInit(i + 1);
-        }
-        KillLimitInteger1 = 999999999;
-        B_IsCreepSpawn = false;
-        DestroyTrigger(TR_SelectionMode);
-        TestTriggers( );
-        EnableTrigger(GameTrigArr[7]);
-        TimerStart(CreateTimer(), 1, true, @InGameTimerAction);
-    }
-    else
-    {
-        TimerStart(CreateTimer(), 2, false, @ModeSelectionFunction1);
-        CreepSpawn1Action( );
-    }
+	if ( TeamPlayers[0] == 0 || TeamPlayers[1] == 0 )
+	{
+		SameHeroBoolean = true;
+		KillLimit = 999999999;
+		B_IsCreepSpawn = false;
+		DestroyTrigger( TR_SelectionMode );
+		TestCommandEnabled = true;
+		EnableTrigger( TR_HeroSelection );
+		TimerStart( CreateTimer( ), 1.f, true, @InGameTimerAction );
+	}
+	else
+	{
+		TimerStart( CreateTimer( ), 2.f, false, @ModeSelectionFunction1 );
+		CreepSpawn1Action( );
+	}
 }
 
-void MapDataSetting()
+void MapDataSetting( )
 {
-    SetWaterBaseColor(255, 255, 255, 255);
-    SetSkyModel("Environment\\Sky\\Sky\\SkyLight.mdl");
-    SetDayNightModels("Environment\\DNC\\DNCLordaeron\\DNCLordaeronTerrain\\DNCLordaeronTerrain.mdl", "Environment\\DNC\\DNCLordaeron\\DNCLordaeronUnit\\DNCLordaeronUnit.mdl");
-    SetFloatGameState(GAME_STATE_TIME_OF_DAY, 12.f);
-    SetTimeOfDayScale(0.f);
-    SuspendTimeOfDay(true);
-    SetTerrainFogEx(0, 3000.f, 5000.f, .5f, .0f, .0f, .0f);
-    NewSoundEnvironment("Default");
-    SetMapMusic("Music", true, 0);
-    SetMapFlag(MAP_LOCK_RESOURCE_TRADING, true);
-    SetMapFlag(MAP_FOG_HIDE_TERRAIN, true);
-    SetMapFlag(MAP_SHARED_ADVANCED_CONTROL, false);
-    FogEnable(false);
-    FogMaskEnable(false);
+	SetWaterBaseColor( 255, 255, 255, 255 );
+	SetSkyModel( "Environment\\Sky\\Sky\\SkyLight.mdl" );
+	SetDayNightModels( "Environment\\DNC\\DNCLordaeron\\DNCLordaeronTerrain\\DNCLordaeronTerrain.mdl", "Environment\\DNC\\DNCLordaeron\\DNCLordaeronUnit\\DNCLordaeronUnit.mdl" );
+	SetFloatGameState( GAME_STATE_TIME_OF_DAY, 12.f );
+	SetTimeOfDayScale( 0.f );
+	SuspendTimeOfDay( true );
+	SetTerrainFogEx( 0, 3000.f, 5000.f, .5f, .0f, .0f, .0f );
+	NewSoundEnvironment( "Default" );
+	SetMapMusic( "Music", true, 0 );
+	SetMapFlag( MAP_LOCK_RESOURCE_TRADING, true );
+	SetMapFlag( MAP_FOG_HIDE_TERRAIN, true );
+	SetMapFlag( MAP_SHARED_ADVANCED_CONTROL, false );
+	FogEnable( false );
+	FogMaskEnable( false );
 }
 
-void main()
+void InitBuffData( )
 {
-    //InitBlizzard( );
-    BossCheckInit( );
-    HeroPickArrayCreation( );
-    GameSounds( );
-    AllRegions( );
-    CreateAllUnits( );
-    GameCreateVariables( );
-    GameCameraSystemInit( );
-    DefaultCommandsTriggers( );
-    GameTriggers( );
-    CreateLocalTimers( );
-    EnterRectEventsFunction( );
-    MapDataSetting( );
-    MapCameraBounds( );
-    QuestCreationFunction( );
-    MapStartData( );
-    PlayerNameSettingAction( );
-    SoloGameDetection( );
-    UnitCreationAction( );
+	int bid = 'B006';
+
+	SetBuffBaseRealFieldById( bid, ABILITY_RLF_DAMAGE_PER_SECOND_POI1, .0f );
+	SetBuffBaseRealFieldById( bid, ABILITY_RLF_DURATION_HERO, 5.f );
+	SetBuffBaseRealFieldById( bid, ABILITY_RLF_DURATION_NORMAL, 5.f );
 }
 
-void config()
+void main( )
 {
-    SetPlayers(10);
-    SetTeams(2);
+	//InitBlizzard( );
+	InitBuffData( );
+	BossCheckInit( );
+	BossSystem::Init( );
+	HeroPickArrayCreation( );
+	AllRegions( );
+	CreateAllUnits( );
+	GameCreateVariables( );
+	GameCameraSystemInit( );
+	DefaultCommandsTriggers( );
+	GameTriggers( );
+	CreateLocalTimers( );
+	MapDataSetting( );
+	MapCameraBounds( );
+	QuestCreationFunction( );
+	MapStartData( );
+	PlayerNameSettingAction( );
+	SoloGameDetection( );
+	UnitCreationAction( );
+}
 
-    for ( int i = 0; i < 12; i++ )
-    {
-        if ( i == 8 || i == 9 )
-        {
-            continue;
-        }
-        player p = Player( i );
-        SetPlayerTeam( p, i > 3 && i != 10 ? 1 : 0 );
-        SetPlayerRaceSelectable( p, false );
-        SetPlayerController( p, i < 10 ? MAP_CONTROL_USER : MAP_CONTROL_COMPUTER );
-        SetPlayerRacePreference( p, RACE_PREF_HUMAN );
-    }
+void config( )
+{
+	SetPlayers( 10 );
+	SetTeams( 2 );
+
+	for ( int i = 0; i < PLAYER_NEUTRAL_AGGRESSIVE; i++ )
+	{
+		if ( i == 8 || i == 9 ) { continue; }
+		player p = Player( i );
+		SetPlayerTeam( p, i > 3 && i != 10 ? 1 : 0 );
+		SetPlayerRaceSelectable( p, false );
+		SetPlayerController( p, i < 10 ? MAP_CONTROL_USER : MAP_CONTROL_COMPUTER );
+		SetPlayerRacePreference( p, RACE_PREF_HUMAN );
+	}
 }
