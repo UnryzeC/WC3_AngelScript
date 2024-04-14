@@ -6864,6 +6864,7 @@ void Akainu_E( )
 		SetProjectileWeaponType( proj, WEAPON_TYPE_WHOKNOWS );
 		SetProjectileArc( proj, .0f );
 		SetProjectileSpeed( proj, 1500.f );
+		LaunchProjectileTarget( proj, LoadUnitHandle( GameHT, hid, 'utrg' ) );
 		SaveInteger( GameHT, GetHandleId( proj ), 'atid', LoadInteger( GameHT, hid, 'atid' ) );
 
 		ReleaseTimer( tmr );
