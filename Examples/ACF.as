@@ -20,13 +20,13 @@ float MapMaxY = 3350.f - GetCameraMargin( CAMERA_MARGIN_TOP );
 timer CreepUpgradeTimer1 = CreateTimer( );
 timer CreepSpawnerTimer1 = CreateTimer( );
 timer KillSelectionTimer = CreateTimer( );
-rect worldBounds;
-multiboard MainMultiboard;
+rect worldBounds = nil;
+multiboard MainMultiboard = nil;
 timer TMR_ResetCD = nil;
-timerdialog ModeSelectionTD;
-unit SelectionUnit;
-effect Ef_Selection;
-effect Ef_SelectionBack;
+timerdialog ModeSelectionTD = nil;
+unit SelectionUnit = nil;
+effect Ef_Selection = nil;
+effect Ef_SelectionBack = nil;
 array<button> SameHeroModeButtonArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<bool> TeamOneSelected( PLAYER_NEUTRAL_AGGRESSIVE );
 array<bool> TeamTwoSelected( PLAYER_NEUTRAL_AGGRESSIVE );
@@ -47,8 +47,8 @@ array<rect> CircleRectArr( 5 );
 array<string> PlayerColorStringArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<string> PlayerColoredNameArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<string> PlayerNameArray( PLAYER_NEUTRAL_AGGRESSIVE );
-trigger TR_SelectionMode;
-trigger TR_HeroSelection;
+trigger TR_SelectionMode = nil;
+trigger TR_HeroSelection = nil;
 array<unit> U_SelectionSelArr( PLAYER_NEUTRAL_AGGRESSIVE );
 array<unit> U_SelectionDumArr( PLAYER_NEUTRAL_AGGRESSIVE );
 array<unit> HeroUnitArray( PLAYER_NEUTRAL_AGGRESSIVE );
@@ -341,7 +341,7 @@ void DialogShow( dialog dg, bool isShow )
 texttag TextTagCreate( string word, float x, float y, float z, float size, int red, int green, int blue, int alpha )
 {
 	texttag txtTag = CreateTextTag( );
-	SetTextTagText( txtTag, word, size * 0.023f / 10.f );
+	SetTextTagText( txtTag, word, size * .023f / 10.f );
 	SetTextTagPos( txtTag, x, y, z );
 	SetTextTagColor( txtTag, red, green, blue, alpha );
 	return txtTag;
@@ -359,11 +359,11 @@ void ACF_PlaySoundWithVolume( sound soundHandle, float volumePercent, float star
 		return;
 	}
 
-	int result = MathIntegerClamp( R2I( volumePercent * I2R( 127 ) * .01f ), 0, 127 );
+	int result = MathIntegerClamp( R2I( volumePercent * 1.27f ), 0, 127 );
 
 	SetSoundVolume( soundHandle, result );
 	StartSound( soundHandle );
-	SetSoundPlayPosition( soundHandle, R2I( startingOffset * 1000 ) );
+	SetSoundPlayPosition( soundHandle, R2I( startingOffset * 1000.f ) );
 }
 
 void PlayHeroSound( unit u, uint childKey, float volume, float startingOffset )
@@ -8865,7 +8865,7 @@ void OnAnyChatEvent( )
 									DestroyTimer( tmr );
 								}
 							}
-						 );
+						);
 					}
 					else
 					{
