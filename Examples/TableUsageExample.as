@@ -20,5 +20,5 @@ void TestFunc( )
 
   unit u2 = CreateUnit( Player( 0 ), 'Hamg', .0, .0, .0 );
 
-  unitTable.set( 0, u2 ); // change current unit with value from u2.
+  unitTable.set( 0, u2 ); // change current unit with value from u2, only works if key exists, if .delete was used, we need to set it via unitTable[ 0 ].
 }
