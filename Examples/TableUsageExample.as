@@ -8,7 +8,7 @@ void TestFunc( )
 
   if ( unitTable.exists( 0 ) )
   {
-    bool isValid = dict.get( 0, unit );
+    bool isValid = unitTable.get( 0, unit );
 
     if ( isValid && isDelete )
     {
