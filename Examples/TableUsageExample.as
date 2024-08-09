@@ -16,5 +16,9 @@ void TestFunc( )
     }
   }
 
-  unit u = unit( unitTable[ 0 ] ); // get value with key 0 and cast it to unit.
+  unit u = unit( unitTable[ 0 ] ); // get value with key 0 and cast it to unit. | could also be used via cast<unit>( unitTable[ 0 ] ).
+
+  unit u2 = CreateUnit( Player( 0 ), 'Hamg', .0, .0, .0 );
+
+  unitTable.set( 0, u2 ); // change current unit with value from u2.
 }
