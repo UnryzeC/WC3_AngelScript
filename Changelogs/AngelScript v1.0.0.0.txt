@@ -1,0 +1,6 @@
+Initial release.
+
+Edit 27.02.2024:
+
+Fixed crash from handle comparisons.
+Fixed crash from GetEventPlayerChatString and GetEventPlayerChatStringMatched.
