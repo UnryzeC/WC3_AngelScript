@@ -1,0 +1,5 @@
+1. Added support for character literals, i.e. 'I000' instead of FourCC( "I000" ).
+2. Enhanced literal support from 1 or 4 only to 1 to 8, i.e. 'I0' and 'I000000I' both will be valid.
+3. Fixed fatal error when null-byte string was assigned to string.
+	Note: this is mostly related to LoadStr.
+4. "main" function is no longer called in lobby.
