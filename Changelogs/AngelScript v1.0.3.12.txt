@@ -1,0 +1,2 @@
+1. Fixed handle to nil comparison, when handle was not initialised.
+2. Added "table" type, this is same "dictionary" but uses uint64 as keys instead of string.
