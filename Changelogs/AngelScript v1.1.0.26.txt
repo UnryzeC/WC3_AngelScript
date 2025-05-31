@@ -1,0 +1,2 @@
+1. Fixed table.get method not working properly with keys.
+    Note: it was trying to default to uint, even when uint64 was provided.
