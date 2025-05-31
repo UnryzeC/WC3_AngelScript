@@ -1,0 +1,3 @@
+1. Added implicit conversion of all jass handle types to int/uint, this omits the need for GetHandleId.
+2. Added proper handling of .as file outside of MPQs.
+3. Added "../" path resolver for both MPQ and FileSystem.
