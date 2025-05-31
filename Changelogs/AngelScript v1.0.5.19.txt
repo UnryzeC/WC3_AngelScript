@@ -1,0 +1,4 @@
+AngelScript v1.0.5.19
+
+1. Fixed some of the internal std::string interactions via caching.
+	Note: sadly for CAgent fields to properly be editable, strings have to be cached, as fields only contain pointers, not actual text itself.
