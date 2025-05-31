@@ -1,0 +1,11 @@
+Release
+
+1. AngelScript base code updated to 2.36.1.
+2. Added std:sleep_ns(uint64_t) as internal API, this takes nanoseconds.
+3. Added std:sleep_us(uint64_t) as internal API, this takes microseconds.
+4. Added std:sleep_ms(uint64_t) as internal API, this takes milliseconds.
+5. Added std:sleep(double) as internal API, this takes float/double.
+6. TriggerSleepAction now uses std::sleep(double), previously it was doing nothing.
+7. Changed << and <<= operations from Logical to Arithmetic.
+8. Changed >>, >>> and >>= operations from Logical to Arithmetic.
+9. Added <<< as Logical operation.
