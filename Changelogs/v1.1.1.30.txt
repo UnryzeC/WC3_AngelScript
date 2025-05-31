@@ -1,0 +1,6 @@
+1. Fixed leaking Contexts on any function/timer tick calls.
+2. Added std::command(string) that contains following commands:
+    1) AngelScript commands, i.e. "l b", "l s" and others, these can be found either on AngelScript GitHub or via their files.
+    2) "string_count", "string_clear_temp", "string_cache" and "commands". Use std::command( "commands" ) to get their description.
+3. Added a way to stop AngelScript from caching strings via: std::enable_string_caching(bool) or via "string_cache 1" command.
+4. Internal rollback to asCContext::PushCallState() and asCContext::PopCallState().
