@@ -1,0 +1,5 @@
+1. AngelScript base code updated to 2.37.0.
+2. Rewritten all sleep related functions, now they work properly.
+Note: it is still NOT suggested utilising sleep anywhere apart from test code, timers are still better.
+3. Removed "scriptVar", "scriptVar &opAssign(const ? &in)", as it was not working properly.
+4. Rewritten internal JassParse, now it shares its logic with UjAPI.
