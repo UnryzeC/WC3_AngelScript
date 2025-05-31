@@ -1,0 +1,2 @@
+1, Enabled string multi-line support, so """ is no longer needed.
+2. Fixed exceptions/crashes on heavily string-used maps, this was done via introduction of AS string caching.
