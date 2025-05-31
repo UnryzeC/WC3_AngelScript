@@ -1,0 +1,6 @@
+1. Fixed crash from comparison of any and all handles.
+2. Fixed crash from GetEventPlayerChatString.
+3. Fixed crash from GetEventPlayerChatStringMatched.
+4. Added int64 std::chrono::get_ns.
+5. Added int64 std::chrono::get_us.
+6. Added int64 std::chrono::get_ms.
