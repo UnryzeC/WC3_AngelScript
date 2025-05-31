@@ -1,0 +1,1 @@
+1. Fixed 1.27a/1.27b/1.28f support.
