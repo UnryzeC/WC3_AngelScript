@@ -20,13 +20,13 @@ float MapMaxY = 3350.f - GetCameraMargin( CAMERA_MARGIN_TOP );
 timer CreepUpgradeTimer1 = CreateTimer( );
 timer CreepSpawnerTimer1 = CreateTimer( );
 timer KillSelectionTimer = CreateTimer( );
-rect worldBounds = nil;
-multiboard MainMultiboard = nil;
+rect worldBounds;
+multiboard MainMultiboard;
 timer TMR_ResetCD = nil;
-timerdialog ModeSelectionTD = nil;
-unit SelectionUnit = nil;
-effect Ef_Selection = nil;
-effect Ef_SelectionBack = nil;
+timerdialog ModeSelectionTD;
+unit SelectionUnit;
+effect Ef_Selection;
+effect Ef_SelectionBack;
 array<button> SameHeroModeButtonArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<bool> TeamOneSelected( PLAYER_NEUTRAL_AGGRESSIVE );
 array<bool> TeamTwoSelected( PLAYER_NEUTRAL_AGGRESSIVE );
@@ -47,8 +47,8 @@ array<rect> CircleRectArr( 5 );
 array<string> PlayerColorStringArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<string> PlayerColoredNameArray( PLAYER_NEUTRAL_AGGRESSIVE );
 array<string> PlayerNameArray( PLAYER_NEUTRAL_AGGRESSIVE );
-trigger TR_SelectionMode = nil;
-trigger TR_HeroSelection = nil;
+trigger TR_SelectionMode;
+trigger TR_HeroSelection;
 array<unit> U_SelectionSelArr( PLAYER_NEUTRAL_AGGRESSIVE );
 array<unit> U_SelectionDumArr( PLAYER_NEUTRAL_AGGRESSIVE );
 array<unit> HeroUnitArray( PLAYER_NEUTRAL_AGGRESSIVE );
@@ -341,7 +341,7 @@ void DialogShow( dialog dg, bool isShow )
 texttag TextTagCreate( string word, float x, float y, float z, float size, int red, int green, int blue, int alpha )
 {
 	texttag txtTag = CreateTextTag( );
-	SetTextTagText( txtTag, word, size * .023f / 10.f );
+	SetTextTagText( txtTag, word, size * 0.023f / 10.f );
 	SetTextTagPos( txtTag, x, y, z );
 	SetTextTagColor( txtTag, red, green, blue, alpha );
 	return txtTag;
@@ -359,11 +359,11 @@ void ACF_PlaySoundWithVolume( sound soundHandle, float volumePercent, float star
 		return;
 	}
 
-	int result = MathIntegerClamp( R2I( volumePercent * 1.27f ), 0, 127 );
+	int result = MathIntegerClamp( R2I( volumePercent * I2R( 127 ) * .01f ), 0, 127 );
 
 	SetSoundVolume( soundHandle, result );
 	StartSound( soundHandle );
-	SetSoundPlayPosition( soundHandle, R2I( startingOffset * 1000.f ) );
+	SetSoundPlayPosition( soundHandle, R2I( startingOffset * 1000 ) );
 }
 
 void PlayHeroSound( unit u, uint childKey, float volume, float startingOffset )
@@ -6854,13 +6854,14 @@ void Akainu_E( )
 
 		SetUnitTimeScale( source, 1 );
 
-		projectile proj = CreateProjectileEx( source, 'B-Mi', 0 );
+		projectile proj = CreateProjectile( 'B-Mi', MathPointProjectionX( x, angle, 40.f ), MathPointProjectionY( y, angle, 40.f ), GetUnitZ( source ) + 100.f, angle );
+
+		SetProjectileUnitData( proj, source, 0 );
 		SetProjectileModel( proj, "Characters\\Akainu\\magmablast2.mdl" ); // Characters\\Akainu\\moon_shin_mg1.mdl
 		SetProjectileScale( proj, 1.5f );
-		SetProjectilePositionWithZ( proj, MathPointProjectionX( x, angle, 40.f ), MathPointProjectionY( y, angle, 40.f ), GetUnitZ( source ) + 100.f );
-		SetProjectileDamage( proj, 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true ) );
+		SetProjectileDamage( proj, 0, 250.f + 50.f * GetHeroLevel( source ) + GetHeroInt( source, true ) );
 		SetProjectileAttackType( proj, ATTACK_TYPE_NORMAL );
-		SetProjectileDamageType( proj, DAMAGE_TYPE_MAGIC );
+		SetProjectileDamageType( proj, 0, DAMAGE_TYPE_MAGIC );
 		SetProjectileWeaponType( proj, WEAPON_TYPE_WHOKNOWS );
 		SetProjectileArc( proj, .0f );
 		SetProjectileSpeed( proj, 1500.f );
@@ -8865,7 +8866,7 @@ void OnAnyChatEvent( )
 									DestroyTimer( tmr );
 								}
 							}
-						);
+						 );
 					}
 					else
 					{
@@ -8997,7 +8998,15 @@ void OnAnyChatEvent( )
 						TimerStart( TMR_ResetCD, .01f, true,
 							function( )
 							{
-								GroupEnumUnitsInRect( GroupEnum, worldBounds, Condition( function( ) { return IsUnitHero( GetFilterUnit( ) ); } ) );
+								GroupEnumUnitsInRect( GroupEnum, worldBounds, 
+									Condition
+									( 
+										function( )
+										{
+											return IsUnitHero( GetFilterUnit( ) );
+										}
+									)
+								);
 
 								for ( unit u = GroupForEachUnit( GroupEnum ); u != nil; u = GroupForEachUnit( GroupEnum ) )
 								{
