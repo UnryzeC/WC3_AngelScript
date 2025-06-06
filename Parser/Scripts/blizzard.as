@@ -294,9 +294,9 @@ const int bj_MINIMAPPINGSTYLE_ATTACK = 2;
 const float bj_CORPSE_MAX_DEATH_TIME = 8.f;
 const int bj_CORPSETYPE_FLESH = 0;
 const int bj_CORPSETYPE_BONE = 1;
-const int bj_ELEVATOR_BLOCKER_CODE = FourCC( 'DTep' );
-const int bj_ELEVATOR_CODE01 = FourCC( 'DTrf' );
-const int bj_ELEVATOR_CODE02 = FourCC( 'DTrx' );
+const int bj_ELEVATOR_BLOCKER_CODE = 'DTep';
+const int bj_ELEVATOR_CODE01 = 'DTrf';
+const int bj_ELEVATOR_CODE02 = 'DTrx';
 const int bj_ELEVATOR_WALL_TYPE_ALL = 0;
 const int bj_ELEVATOR_WALL_TYPE_EAST = 1;
 const int bj_ELEVATOR_WALL_TYPE_NORTH = 2;
@@ -949,12 +949,7 @@ void PolledWait( float duration )
 
 int IntegerTertiaryOp( bool flag, int valueA, int valueB )
 {
-    if ( flag )
-	{
-        return valueA;
-	}
-
-	return valueB;
+	return flag ? valueA : valueB;
 }
 
 void DoNothing( ) { }
@@ -2698,7 +2693,7 @@ unit GetKillingUnitBJ( )
 
 unit CreateUnitAtLocSaveLast( player id, int unitid, location loc, float face )
 {
-    if ( unitid == FourCC( 'ugol' ) )
+    if ( unitid == 'ugol' )
 	{
         bj_lastCreatedUnit = CreateBlightedGoldmine( id, GetLocationX( loc ), GetLocationY( loc ), face );
 	}
@@ -3074,7 +3069,7 @@ void ShowUnitShow( unit whichUnit )
 
 bool IssueHauntOrderAtLocBJFilter( )
 {
-    return GetUnitTypeId( GetFilterUnit( ) ) == FourCC( 'ngol' );
+    return GetUnitTypeId( GetFilterUnit( ) ) == 'ngol';
 }
 
 bool IssueHauntOrderAtLocBJ( unit whichPeon, location loc )
@@ -3092,12 +3087,12 @@ bool IssueHauntOrderAtLocBJ( unit whichPeon, location loc )
     }
 
     // Issue the Haunt Gold Mine order.
-    return IssueTargetOrderById( whichPeon, FourCC( 'ugol' ), goldMine );
+    return IssueTargetOrderById( whichPeon, 'ugol', goldMine );
 }
 
 bool IssueBuildOrderByIdLocBJ( unit whichPeon, int unitId, location loc )
 {
-    if ( unitId == FourCC( 'ugol' ) )
+    if ( unitId == 'ugol' )
 	{
         return IssueHauntOrderAtLocBJ( whichPeon, loc );
 	}
@@ -3390,7 +3385,7 @@ unit ReplaceUnitBJ( unit whichUnit, int newUnitId, int unitStateMethod )
     ShowUnit( oldUnit, false );
 
     // Create the replacement unit.
-    if ( newUnitId == FourCC( 'ugol' ) )
+    if ( newUnitId == 'ugol' )
 	{
         newUnit = CreateBlightedGoldmine( GetOwningPlayer( oldUnit ), GetUnitX( oldUnit ), GetUnitY( oldUnit ), GetUnitFacing( oldUnit ) );
 	}
@@ -6380,7 +6375,7 @@ void SetPlayerTechMaxAllowedSwap( int techid, int maximum, player whichPlayer )
 
 void SetPlayerMaxHeroesAllowed( int maximum, player whichPlayer )
 {
-    SetPlayerTechMaxAllowed( whichPlayer, FourCC( 'HERO' ), maximum );
+    SetPlayerTechMaxAllowed( whichPlayer, 'HERO', maximum );
 }
 
 int GetPlayerTechCountSimple( int techid, player whichPlayer )
@@ -7265,7 +7260,7 @@ float GetRectHeightBJ( rect r )
 unit BlightGoldMineForPlayerBJ( unit goldMine, player whichPlayer )
 {
     // Make sure we're replacing a Gold Mine && !some other type of unit.
-    if ( GetUnitTypeId( goldMine ) != FourCC( 'ngol' ) )
+    if ( GetUnitTypeId( goldMine ) != 'ngol' )
 	{
         return nil;
     }
@@ -7489,34 +7484,34 @@ void MeleeStartingHeroLimit( )
         SetPlayerMaxHeroesAllowed( bj_MELEE_HERO_LIMIT, p );
 
         // each player is restricted to a limit per hero type as well
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Hamg' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Hmkg' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Hpal' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Hblm' ), bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Hamg', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Hmkg', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Hpal', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Hblm', bj_MELEE_HERO_TYPE_LIMIT );
 
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Obla' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Ofar' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Otch' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Oshd' ), bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Obla', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Ofar', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Otch', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Oshd', bj_MELEE_HERO_TYPE_LIMIT );
 
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Edem' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Ekee' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Emoo' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Ewar' ), bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Edem', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Ekee', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Emoo', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Ewar', bj_MELEE_HERO_TYPE_LIMIT );
 
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Udea' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Udre' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Ulic' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Ucrl' ), bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Udea', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Udre', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Ulic', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Ucrl', bj_MELEE_HERO_TYPE_LIMIT );
 
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Npbm' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Nbrn' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Nngs' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Nplh' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Nbst' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Nalc' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Ntin' ), bj_MELEE_HERO_TYPE_LIMIT );
-        ReducePlayerTechMaxAllowed( p, FourCC( 'Nfir' ), bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Npbm', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Nbrn', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Nngs', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Nplh', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Nbst', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Nalc', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Ntin', bj_MELEE_HERO_TYPE_LIMIT );
+        ReducePlayerTechMaxAllowed( p, 'Nfir', bj_MELEE_HERO_TYPE_LIMIT );
 	}
 }
 
@@ -7532,7 +7527,7 @@ void MeleeGrantItemsToHero( unit whichUnit )
     // If we haven't twinked N heroes for this player yet, twink away.
     if ( bj_meleeTwinkedHeroes[owner] < bj_MELEE_MAX_TWINKED_HEROES )
 	{
-        UnitAddItemById( whichUnit, FourCC( 'stwp' ) );
+        UnitAddItemById( whichUnit, 'stwp' );
         bj_meleeTwinkedHeroes[owner]++;
     }
 }
@@ -7618,7 +7613,7 @@ void MeleeEnumFindNearestMine( )
 {
     unit enumUnit = GetEnumUnit( );
 
-    if ( GetUnitTypeId( enumUnit ) == FourCC( 'ngol' ) )
+    if ( GetUnitTypeId( enumUnit ) == 'ngol' )
 	{
         location unitLoc = GetUnitLoc( enumUnit );
         float dist = DistanceBetweenPoints( unitLoc, bj_meleeNearestMineToLoc );
@@ -7733,17 +7728,17 @@ void MeleeStartingUnitsHuman( player whichPlayer, location startLoc, bool doHero
     if ( nearestMine != nil )
 	{
         // Spawn Town Hall at the start location.
-        townHall = CreateUnitAtLoc( whichPlayer, FourCC( 'htow' ), startLoc, bj_UNIT_FACING );
+        townHall = CreateUnitAtLoc( whichPlayer, 'htow', startLoc, bj_UNIT_FACING );
         
         // Spawn Peasants near the mine.
         nearMineLoc = MeleeGetProjectedLoc( GetUnitLoc( nearestMine ), startLoc, 320, 0 );
         peonX = GetLocationX( nearMineLoc );
         peonY = GetLocationY( nearMineLoc );
-        CreateUnit( whichPlayer, FourCC( 'hpea' ), peonX + 0.f * unitSpacing, peonY + 1.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'hpea' ), peonX + 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'hpea' ), peonX - 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'hpea' ), peonX + 0.6f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'hpea' ), peonX - 0.6f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'hpea', peonX + 0.f * unitSpacing, peonY + 1.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'hpea', peonX + 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'hpea', peonX - 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'hpea', peonX + 0.6f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'hpea', peonX - 0.6f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
 
         // Set random hero spawn point to be off to the side of the start location.
         heroLoc = MeleeGetProjectedLoc( GetUnitLoc( nearestMine ), startLoc, 384, 45 );
@@ -7751,16 +7746,16 @@ void MeleeStartingUnitsHuman( player whichPlayer, location startLoc, bool doHero
     else
 	{
         // Spawn Town Hall at the start location.
-        townHall = CreateUnitAtLoc( whichPlayer, FourCC( 'htow' ), startLoc, bj_UNIT_FACING );
+        townHall = CreateUnitAtLoc( whichPlayer, 'htow', startLoc, bj_UNIT_FACING );
         
         // Spawn Peasants directly south of the town hall.
         peonX = GetLocationX( startLoc );
         peonY = GetLocationY( startLoc ) - 224.f;
-        CreateUnit( whichPlayer, FourCC( 'hpea' ), peonX + 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'hpea' ), peonX + 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'hpea' ), peonX + 0.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'hpea' ), peonX - 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'hpea' ), peonX - 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'hpea', peonX + 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'hpea', peonX + 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'hpea', peonX + 0.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'hpea', peonX - 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'hpea', peonX - 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
 
         // Set random hero spawn point to be just south of the start location.
         heroLoc = Location( peonX, peonY - 2.00 * unitSpacing );
@@ -7768,8 +7763,8 @@ void MeleeStartingUnitsHuman( player whichPlayer, location startLoc, bool doHero
 
     if ( townHall != nil )
 	{
-        UnitAddAbilityBJ( FourCC( 'Amic' ), townHall );
-        UnitMakeAbilityPermanentBJ( true, FourCC( 'Amic' ), townHall );
+        UnitAddAbilityBJ( 'Amic', townHall );
+        UnitMakeAbilityPermanentBJ( true, 'Amic', townHall );
     }
 
     if ( doHeroes )
@@ -7778,7 +7773,7 @@ void MeleeStartingUnitsHuman( player whichPlayer, location startLoc, bool doHero
         // Otherwise, give them a "free hero" token.
         if ( useRandomHero )
 		{
-            MeleeRandomHeroLoc( whichPlayer, FourCC( 'Hamg' ), FourCC( 'Hmkg' ), FourCC( 'Hpal' ), FourCC( 'Hblm' ), heroLoc );
+            MeleeRandomHeroLoc( whichPlayer, 'Hamg', 'Hmkg', 'Hpal', 'Hblm', heroLoc );
 		}
         else
 		{
@@ -7813,17 +7808,17 @@ void MeleeStartingUnitsOrc( player whichPlayer, location startLoc, bool doHeroes
     if ( nearestMine != nil )
 	{
         // Spawn Great Hall at the start location.
-        CreateUnitAtLoc( whichPlayer, FourCC( 'ogre' ), startLoc, bj_UNIT_FACING );
+        CreateUnitAtLoc( whichPlayer, 'ogre', startLoc, bj_UNIT_FACING );
         
         // Spawn Peons near the mine.
         nearMineLoc = MeleeGetProjectedLoc( GetUnitLoc( nearestMine ), startLoc, 320, 0 );
         peonX = GetLocationX( nearMineLoc );
         peonY = GetLocationY( nearMineLoc );
-        CreateUnit( whichPlayer, FourCC( 'opeo' ), peonX + 0.f * unitSpacing, peonY + 1.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'opeo' ), peonX + 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'opeo' ), peonX - 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'opeo' ), peonX + 0.6f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'opeo' ), peonX - 0.6f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'opeo', peonX + 0.f * unitSpacing, peonY + 1.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'opeo', peonX + 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'opeo', peonX - 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'opeo', peonX + 0.6f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'opeo', peonX - 0.6f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
 
         // Set random hero spawn point to be off to the side of the start location.
         heroLoc = MeleeGetProjectedLoc( GetUnitLoc( nearestMine ), startLoc, 384, 45 );
@@ -7831,16 +7826,16 @@ void MeleeStartingUnitsOrc( player whichPlayer, location startLoc, bool doHeroes
     else
     {
         // Spawn Great Hall at the start location.
-        CreateUnitAtLoc( whichPlayer, FourCC( 'ogre' ), startLoc, bj_UNIT_FACING );
+        CreateUnitAtLoc( whichPlayer, 'ogre', startLoc, bj_UNIT_FACING );
         
         // Spawn Peons directly south of the town hall.
         peonX = GetLocationX( startLoc );
         peonY = GetLocationY( startLoc ) - 224.f;
-        CreateUnit( whichPlayer, FourCC( 'opeo' ), peonX + 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'opeo' ), peonX + 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'opeo' ), peonX + 0.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'opeo' ), peonX - 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'opeo' ), peonX - 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'opeo', peonX + 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'opeo', peonX + 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'opeo', peonX + 0.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'opeo', peonX - 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'opeo', peonX - 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
 
         // Set random hero spawn point to be just south of the start location.
         heroLoc = Location( peonX, peonY - 2.f * unitSpacing );
@@ -7852,7 +7847,7 @@ void MeleeStartingUnitsOrc( player whichPlayer, location startLoc, bool doHeroes
         // Otherwise, give them a "free hero" token.
         if ( useRandomHero )
 		{
-            MeleeRandomHeroLoc( whichPlayer, FourCC( 'Obla' ), FourCC( 'Ofar' ), FourCC( 'Otch' ), FourCC( 'Oshd' ), heroLoc );
+            MeleeRandomHeroLoc( whichPlayer, 'Obla', 'Ofar', 'Otch', 'Oshd', heroLoc );
 		}
         else
 		{
@@ -7888,7 +7883,7 @@ void MeleeStartingUnitsUndead( player whichPlayer, location startLoc, bool doHer
     if ( nearestMine != nil )
 	{
         // Spawn Necropolis at the start location.
-        CreateUnitAtLoc( whichPlayer, FourCC( 'unpl' ), startLoc, bj_UNIT_FACING );
+        CreateUnitAtLoc( whichPlayer, 'unpl', startLoc, bj_UNIT_FACING );
         
         // Replace the nearest gold mine with a blighted version.
         nearestMine = BlightGoldMineForPlayerBJ( nearestMine, whichPlayer );
@@ -7897,15 +7892,15 @@ void MeleeStartingUnitsUndead( player whichPlayer, location startLoc, bool doHer
         location nearTownLoc = MeleeGetProjectedLoc( startLoc, GetUnitLoc( nearestMine ), 288, 0 );
         ghoulX = GetLocationX( nearTownLoc );
         ghoulY = GetLocationY( nearTownLoc );
-        bj_ghoul[ GetPlayerId( whichPlayer ) ] = CreateUnit( whichPlayer, FourCC( 'ugho' ), ghoulX + 0.f * unitSpacing, ghoulY + 0.f * unitSpacing, bj_UNIT_FACING );
+        bj_ghoul[ GetPlayerId( whichPlayer ) ] = CreateUnit( whichPlayer, 'ugho', ghoulX + 0.f * unitSpacing, ghoulY + 0.f * unitSpacing, bj_UNIT_FACING );
 
         // Spawn Acolytes near the mine.
         location nearMineLoc = MeleeGetProjectedLoc( GetUnitLoc( nearestMine ), startLoc, 320, 0 );
         peonX = GetLocationX( nearMineLoc );
         peonY = GetLocationY( nearMineLoc );
-        CreateUnit( whichPlayer, FourCC( 'uaco' ), peonX + 0.f * unitSpacing, peonY + 0.5f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'uaco' ), peonX + 0.65f * unitSpacing, peonY - 0.5f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'uaco' ), peonX - 0.65f * unitSpacing, peonY - 0.5f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'uaco', peonX + 0.f * unitSpacing, peonY + 0.5f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'uaco', peonX + 0.65f * unitSpacing, peonY - 0.5f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'uaco', peonX - 0.65f * unitSpacing, peonY - 0.5f * unitSpacing, bj_UNIT_FACING );
 
         // Create a patch of blight around the gold mine.
         SetBlightLoc( whichPlayer,nearMineLoc, 768, true );
@@ -7916,15 +7911,15 @@ void MeleeStartingUnitsUndead( player whichPlayer, location startLoc, bool doHer
     else
 	{
         // Spawn Necropolis at the start location.
-        CreateUnitAtLoc( whichPlayer, FourCC( 'unpl' ), startLoc, bj_UNIT_FACING );
+        CreateUnitAtLoc( whichPlayer, 'unpl', startLoc, bj_UNIT_FACING );
         
         // Spawn Acolytes && Ghoul directly south of the Necropolis.
         peonX = GetLocationX( startLoc );
         peonY = GetLocationY( startLoc ) - 224.f;
-        CreateUnit( whichPlayer, FourCC( 'uaco' ), peonX - 1.5f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'uaco' ), peonX - 0.5f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'uaco' ), peonX + 0.5f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'ugho' ), peonX + 1.5f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'uaco', peonX - 1.5f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'uaco', peonX - 0.5f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'uaco', peonX + 0.5f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ugho', peonX + 1.5f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
 
         // Create a patch of blight around the start location.
         SetBlightLoc( whichPlayer,startLoc, 768, true );
@@ -7939,7 +7934,7 @@ void MeleeStartingUnitsUndead( player whichPlayer, location startLoc, bool doHer
         // Otherwise, give them a "free hero" token.
         if ( useRandomHero ) 
 		{
-            MeleeRandomHeroLoc( whichPlayer, FourCC( 'Udea' ), FourCC( 'Udre' ), FourCC( 'Ulic' ), FourCC( 'Ucrl' ), heroLoc );
+            MeleeRandomHeroLoc( whichPlayer, 'Udea', 'Udre', 'Ulic', 'Ucrl', heroLoc );
 		}
         else
 		{
@@ -7981,7 +7976,7 @@ void MeleeStartingUnitsNightElf( player whichPlayer, location startLoc, bool doH
         // the X && Y values to within minTreeDist of the Gold Mine.
         nearMineLoc = MeleeGetProjectedLoc( GetUnitLoc( nearestMine ), startLoc, 650, 0 );
         nearMineLoc = MeleeGetLocWithinRect( nearMineLoc, GetRectFromCircleBJ( GetUnitLoc( nearestMine ), minTreeDist ) );
-        tree = CreateUnitAtLoc( whichPlayer, FourCC( 'etol' ), nearMineLoc, bj_UNIT_FACING );
+        tree = CreateUnitAtLoc( whichPlayer, 'etol', nearMineLoc, bj_UNIT_FACING );
         IssueTargetOrder( tree, "entangleinstant", nearestMine );
 
         // Spawn Wisps at the start location.
@@ -7989,11 +7984,11 @@ void MeleeStartingUnitsNightElf( player whichPlayer, location startLoc, bool doH
         wispLoc = MeleeGetLocWithinRect( wispLoc, GetRectFromCircleBJ( GetUnitLoc( nearestMine ), minWispDist ) );
         peonX = GetLocationX( wispLoc );
         peonY = GetLocationY( wispLoc );
-        CreateUnit( whichPlayer, FourCC( 'ewsp' ), peonX + 0.f * unitSpacing, peonY + 1.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'ewsp' ), peonX + 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'ewsp' ), peonX - 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'ewsp' ), peonX + 0.58f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'ewsp' ), peonX - 0.58f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ewsp', peonX + 0.f * unitSpacing, peonY + 1.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ewsp', peonX + 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ewsp', peonX - 1.f * unitSpacing, peonY + 0.15f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ewsp', peonX + 0.58f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ewsp', peonX - 0.58f * unitSpacing, peonY - 1.f * unitSpacing, bj_UNIT_FACING );
 
         // Set random hero spawn point to be off to the side of the start location.
         heroLoc = MeleeGetProjectedLoc( GetUnitLoc( nearestMine ), startLoc, 384, 45 );
@@ -8001,16 +7996,16 @@ void MeleeStartingUnitsNightElf( player whichPlayer, location startLoc, bool doH
     else
     {
         // Spawn Tree of Life at the start location.
-        CreateUnitAtLoc( whichPlayer, FourCC( 'etol' ), startLoc, bj_UNIT_FACING );
+        CreateUnitAtLoc( whichPlayer, 'etol', startLoc, bj_UNIT_FACING );
 
         // Spawn Wisps directly south of the town hall.
         peonX = GetLocationX( startLoc );
         peonY = GetLocationY( startLoc ) - 224.f;
-        CreateUnit( whichPlayer, FourCC( 'ewsp' ), peonX - 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'ewsp' ), peonX - 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'ewsp' ), peonX + 0.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'ewsp' ), peonX + 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
-        CreateUnit( whichPlayer, FourCC( 'ewsp' ), peonX + 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ewsp', peonX - 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ewsp', peonX - 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ewsp', peonX + 0.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ewsp', peonX + 1.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
+        CreateUnit( whichPlayer, 'ewsp', peonX + 2.f * unitSpacing, peonY + 0.f * unitSpacing, bj_UNIT_FACING );
 
         // Set random hero spawn point to be just south of the start location.
         heroLoc = Location( peonX, peonY - 2.f * unitSpacing );
@@ -8022,7 +8017,7 @@ void MeleeStartingUnitsNightElf( player whichPlayer, location startLoc, bool doH
         // Otherwise, give them a "free hero" token.
         if ( useRandomHero )
 		{
-            MeleeRandomHeroLoc( whichPlayer, FourCC( 'Edem' ), FourCC( 'Ekee' ), FourCC( 'Emoo' ), FourCC( 'Ewar' ), heroLoc );
+            MeleeRandomHeroLoc( whichPlayer, 'Edem', 'Ekee', 'Emoo', 'Ewar', heroLoc );
 		}
         else
 		{
@@ -8047,7 +8042,7 @@ void MeleeStartingUnitsUnknownRace( player whichPlayer, location startLoc, bool 
 
 	for ( int i = 0; i < bj_MAX_PLAYERS; i++ )
 	{
-		CreateUnit( whichPlayer, FourCC( 'nshe' ), GetLocationX( startLoc ) + GetRandomReal( -256.f, 256.f ), GetLocationY( startLoc ) + GetRandomReal( -256.f, 256.f ), GetRandomReal( .0f, 360.f ) );
+		CreateUnit( whichPlayer, 'nshe', GetLocationX( startLoc ) + GetRandomReal( -256.f, 256.f ), GetLocationY( startLoc ) + GetRandomReal( -256.f, 256.f ), GetRandomReal( .0f, 360.f ) );
 	}
 
     if ( doHeroes )
@@ -9261,7 +9256,7 @@ void InitBlizzardGlobals( )
     bj_cineModePriorMaskSetting = IsFogMaskEnabled( );
 
     // Init Trigger Queue
-	for ( int i = 0; i <= bj_MAX_QUEUED_TRIGGERS; i++ )
+	for ( int i = 0; i < bj_MAX_QUEUED_TRIGGERS; i++ )
 	{
         bj_queuedExecTriggers[i] = nil;
         bj_queuedExecUseConds[i] = false;
@@ -9333,19 +9328,19 @@ void InitSummonableCaps( )
         // upgraded units
         // Note: Only do this if the corresponding upgrade is !yet researched
         // Barrage - Siege Engines
-        if ( !GetPlayerTechResearched( p, FourCC( 'Rhrt' ), true ) )
+        if ( !GetPlayerTechResearched( p, 'Rhrt', true ) )
 		{
-            SetPlayerTechMaxAllowed( p, FourCC( 'hrtt' ), 0 );
+            SetPlayerTechMaxAllowed( p, 'hrtt', 0 );
         }
 
         // Berserker Upgrade - Troll Berserkers
-        if ( !GetPlayerTechResearched( p, FourCC( 'Robk' ), true ) )
+        if ( !GetPlayerTechResearched( p, 'Robk', true ) )
 		{
-            SetPlayerTechMaxAllowed( p, FourCC( 'otbk' ), 0 );
+            SetPlayerTechMaxAllowed( p, 'otbk', 0 );
         }
 
         // max skeletons per player
-        SetPlayerTechMaxAllowed( p, FourCC( 'uske' ), bj_MAX_SKELETONS );
+        SetPlayerTechMaxAllowed( p, 'uske', bj_MAX_SKELETONS );
 	}
 }
 
@@ -9624,4 +9619,3 @@ item WidgetDropItem( widget inWidget, int inItemID )
 
     return CreateItem( inItemID, x, y );
 }
-
