@@ -47,3 +47,22 @@ void TestAsHashtable( )
 		}
 	);
 }
+
+void IterateAll( )
+{
+	timer t = CreateTimer( ); // any other refCounted handle (agent) will do.
+	uint32 hid = GetHandleId( t ); // this just used as an example, easier to let game provide handleId.
+	table tableTest = { };
+
+	tableTest[ uint64( hid ) << 32 | 'unit' ] = 1;
+	tableTest[ uint64( hid ) << 32 | 'pimp' ] = 2;
+	tableTest[ uint64( hid ) << 32 | 'appl' ] = 3;
+	tableTest[ uint64( hid ) << 32 | '+loc' ] = 4;
+
+	array<uint64> keys = tableTest.getKeys( );
+
+	for ( uint64 i = 0; i < keys.length( ); i++ )
+	{
+		print( "key = " + uint32( keys[i] >> 32 ) + " | " + Id2String( uint32( keys[i] ) ) + "\n" );
+	}
+}
