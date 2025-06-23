@@ -95,11 +95,16 @@ namespace Test::Frame
     void Slider( )
     {
         framehandle gameUI = GetOriginFrame( ORIGIN_FRAME_GAME_UI, 0 );
-        framehandle slider = CreateFrameByType( "SCROLLBAR", "TestSlider", gameUI, "QuestMainListScrollBar", 0 );
+        framehandle slider = CreateFrameByType( "SLIDER", "TestSlider", gameUI, "", 0 );
 
         ClearFrameAllPoints( slider );
         SetFrameAbsolutePoint( slider, FRAMEPOINT_CENTER, .3f, .4f );
         SetFrameSize( slider, 0.012f, 0.06f );
+
+        SetFrameBackdropTexture( slider, 0, "UI\\Widgets\\Glues\\GlueScreen-Scrollbar-BackdropBackground.blp", true, true, "UI\\Widgets\\Glues\\GlueScreen-Scrollbar-BackdropBorder.blp", 0xFF, true );
+        SetFrameStepSize( slider, 1.f );
+        SetFrameMinMaxValues( slider, 1.f, 1.f );
+        return;
 
         TriggerAPI::RegisterFrameEvent
         (
@@ -128,5 +133,47 @@ namespace Test::Frame
                 print( "GetTriggerFrameReal: " + GetTriggerFrameReal( ) + "\n" );
             }
         );
+    }
+
+    void ListBox( )
+    {
+        framehandle gameUI = GetOriginFrame( ORIGIN_FRAME_GAME_UI, 0 );
+        framehandle myListBox = CreateFrameByType( "LISTBOX", "", gameUI, "", 0 );
+
+        ClearFrameAllPoints( myListBox );
+        SetFrameRelativePoint( myListBox, FRAMEPOINT_CENTER, gameUI, FRAMEPOINT_CENTER, -.2f, .0f );
+        SetFrameSize( myListBox, .12f, .15f );
+        SetFrameItemsBorder( myListBox, .01f );
+        SetFrameItemsHeight( myListBox, .02f );
+        SetFrameControlFlag( myListBox, CONTROL_STYLE_DRAW, true );
+        SetFrameBackdropTexture( myListBox, 1, "UI\\widgets\\BattleNet\\bnet-tooltip-background.blp", true, true, "UI\\widgets\\BattleNet\\bnet-tooltip-border.blp", BORDER_FLAG_ALL, false );
+        SetFrameBorderSize( myListBox, 1, .0125f );
+        SetFrameBackgroundSize( myListBox, 1, .256f );
+        SetFrameBackgroundInsets( myListBox, 1, .005f, .005f, .005f, .005f );
+        AddFrameSlider( myListBox );
+
+        float itemHeight = GetFrameItemsHeight( myListBox );
+        framehandle listScrollFrame = GetFrameChild( myListBox, 2 );
+
+        for ( int32 i = 0; i < 15; i++ )
+        {
+            framehandle backDropFrame = CreateFrameByType( "BACKDROP", "", listScrollFrame, "", 0 );
+            framehandle listItemFrame = AddFrameListItem( myListBox, "", backDropFrame );
+
+            SetFrameBackdropTexture( backDropFrame, 1, "UI\\widgets\\BattleNet\\bnet-tooltip-background.blp", true, true, "UI\\widgets\\BattleNet\\bnet-tooltip-border.blp", BORDER_FLAG_ALL, false );
+            SetFrameHeight( backDropFrame, .02f );
+            SetFrameBorderSize( backDropFrame, 1, .0125f );
+            SetFrameBackgroundSize( backDropFrame, 1, .128f );
+            SetFrameBackgroundInsets( backDropFrame, 1, .005f, .005f, .005f, .005f );
+            
+            framehandle textFrame = CreateFrameByType( "TEXT", "", backDropFrame, "", 0 );
+            ClearFrameAllPoints( textFrame );
+            //SetFrameAbsolutePoint( textFrame, FRAMEPOINT_CENTER, .0f, .0f );
+            SetFrameRelativePoint( textFrame, FRAMEPOINT_CENTER, backDropFrame, FRAMEPOINT_CENTER, .0f, .0f );
+            SetFrameText( textFrame, IntToChar( 'A' + i ) );
+
+            //SetFrameRelativePoint( textFrame, FRAMEPOINT_CENTER, listItemFrame, FRAMEPOINT_CENTER, .0, .0 );
+            //framehandle listItemFrame = AddFrameListItem( myListBox, "New Item " + IntToChar( start + i ), null );
+        }
     }
 }
