@@ -35,15 +35,19 @@ Note, this project was made exclusively for UjAPI, so it's required to use it.
 
 ## How to code
 
-1. Creater war3map.as.
+1. Create war3map.as.
 2. Write your code.
 3. Add war3map.as to map via Import manager or MPQ with scripts\\war3map.as or war3map.as path.
+   Note: loading files from WC3 folder where map resides is possible, via #import, which can also import code from files in the MPQ.
 4. Launch map and enjoy.
 
 ## Credits
 
 ### Creator/Developer:
 * Unryze (me) - creating and maintaining UjAPI.
+
+### Based on:
+* https://www.angelcode.com/angelscript/
 
 ### Contributors:
 * GPSProlapse - for helping me embed AngelScript.
