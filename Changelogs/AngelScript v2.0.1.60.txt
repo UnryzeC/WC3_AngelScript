@@ -1,0 +1,1 @@
+1. Updated table type to mimic all new changes to dictionary from AngelScript 2.38.0, aka foreach and other changes.
