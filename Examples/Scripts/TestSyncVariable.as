@@ -10,23 +10,23 @@ namespace Test::Sync::Variable
         {
             TriggerAPI::RegisterPlayerSyncEvent
             (
-                tString = CreateTrigger( ),
+                tString = Jass::CreateTrigger( ),
                 prefix,
                 false,
                 null,
                 function( )
                 {
-                    print( "[EVENT_PLAYER_SYNC_PREFIX]: " + GetTimeStamp( false, 0 ) + "\n" );
-                    print( "Prefix: " + GetTriggerSyncPrefix( ) + "\n" );
+                    print( "[EVENT_PLAYER_SYNC_PREFIX]: " + Jass::GetTimeStamp( false, 0 ) + "\n" );
+                    print( "Prefix: " + Jass::GetTriggerSyncPrefix( ) + "\n" );
                     print( "==========================================================\n" );
-                    print( "Data: " + GetTriggerSyncData( ) + "\n" );
+                    print( "Data: " + Jass::GetTriggerSyncData( ) + "\n" );
                 }
             );
         }
 
-        if ( GetLocalPlayer( ) == Player( 0 ) )
+        if ( Jass::GetLocalPlayer( ) == Jass::Player( 0 ) )
         {
-            SendSyncData
+            Jass::SendSyncData
             ( 
                 prefix,
                 data

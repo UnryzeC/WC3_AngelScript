@@ -4,9 +4,9 @@ namespace Test::Illusion
     {
         int count = 0;
 
-        for ( int i = 0; i < UnitInventorySize( u ); i++ )
+        for ( int i = 0; i < Jass::UnitInventorySize( u ); i++ )
         {
-            if ( UnitItemInSlot( u, i ) != nil ) { count++; }
+            if ( Jass::UnitItemInSlot( u, i ) != nil ) { count++; }
         }
 
         return count;
@@ -18,9 +18,9 @@ namespace Test::Illusion
 
         UnitInventorySetSize( u, 12 );
 
-        for ( int i = 0; i < UnitInventorySize( u ); i++ )
+        for ( int i = 0; i < Jass::UnitInventorySize( u ); i++ )
         {
-            UnitAddItemById( u, itemId );
+            Jass::UnitAddItemById( u, itemId );
         }
     }
 
@@ -28,29 +28,29 @@ namespace Test::Illusion
     {
         FillInventory( u );
 
-        if ( GetUnitManaRegen( u ) < 100.f )
+        if ( Jass::GetUnitManaRegen( u ) < 100.f )
         {
-            SetUnitManaRegen( u, 100. );
+            Jass::SetUnitManaRegen( u, 100. );
         }
 
-        if ( GetUnitAbility( u, 'AOmi' ) != nil ) { return; }
+        if ( Jass::GetUnitAbility( u, 'AOmi' ) != nil ) { return; }
 
-        UnitAddAbility( u, 'AOmi' );
-        SetUnitAbilityLevel( u, 'AOmi', 3 );
+        Jass::UnitAddAbility( u, 'AOmi' );
+        Jass::SetUnitAbilityLevel( u, 'AOmi', 3 );
     }
 
     void TestWandOfIllusions( unit u )
     {
         FillInventory( u );
 
-        if ( GetUnitManaRegen( u ) < 100.f )
+        if ( Jass::GetUnitManaRegen( u ) < 100.f )
         {
-            SetUnitManaRegen( u, 100. );
+            Jass::SetUnitManaRegen( u, 100. );
         }
 
-        if ( GetUnitAbility( u, 'AIil' ) != nil ) { return; }
+        if ( Jass::GetUnitAbility( u, 'AIil' ) != nil ) { return; }
 
-        UnitAddAbility( u, 'AIil' );
+        Jass::UnitAddAbility( u, 'AIil' );
     }
 
     void main( )

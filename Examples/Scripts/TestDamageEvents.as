@@ -5,56 +5,50 @@ namespace Test::Damage
     unit UnitSource;
     unit UnitTarget;
     bool isDebug = true;
-    player printOnlyForPlayer = Player( 0 );
+    player printOnlyForPlayer = Jass::Player( 0 );
 
     void OnUnitAnyDamageDebug( string funcName )
     {
-        unit unitTarget = GetTriggerUnit( ); // GetEventDamageTarget( ) // 
-        unit unitSource = GetEventDamageSource( );
-        player playerSource = GetOwningPlayer( unitSource );
-        player playerTarget = GetTriggerPlayer( );
-        int damageFlags = GetEventDamageFlags( );
-        int actualAttackFlag = BitwiseShiftLeft( 1, 30 );
+        unit unitTarget = Jass::GetTriggerUnit( ); // GetEventDamageTarget( ) // 
+        unit unitSource = Jass::GetEventDamageSource( );
+        player playerSource = Jass::GetOwningPlayer( unitSource );
+        player playerTarget = Jass::GetTriggerPlayer( );
+        int damageFlags = Jass::GetEventDamageFlags( );
+        int actualAttackFlag = Jass::BitwiseShiftLeft( 1, 30 );
         
         if ( playerTarget == nil )
         {
-            playerTarget = GetOwningPlayer( unitTarget );
+            playerTarget = Jass::GetOwningPlayer( unitTarget );
         }
 
         if ( isDebug && ( printOnlyForPlayer != nil ? playerSource == printOnlyForPlayer : true ) )
         {
             print( "======" + funcName + "=====\n" );
 
-            print( "IsAttack = " + B2S( GetEventIsAttack( ) ) + "\n" );
-            print( "IsAttackFlag & 0x100: " + B2S( BitwiseAND( damageFlags, 0x100 ) > 0 ) + "\n" );
-            print( "IsRanged = " + B2S( GetEventIsRanged( ) ) + "\n" );
+            print( "IsAttack = " + Jass::GetEventIsAttack( ) + "\n" );
+            print( "IsAttackFlag & 0x100: " + ( Jass::BitwiseAND( damageFlags, 0x100 ) > 0 ) + "\n" );
+            print( "IsRanged = " + Jass::GetEventIsRanged( ) + "\n" );
 
-            print( "damageFlags = " + IntToHex( GetEventIsAttack( ) ? damageFlags - actualAttackFlag : damageFlags ) + "\n" );
+            print( "damageFlags = " + Jass::IntToHex( Jass::GetEventIsAttack( ) ? damageFlags - actualAttackFlag : damageFlags ) + "\n" );
 
-            print( "AttackType = " + I2S( GetHandleId( GetEventAttackType( ) ) ) + "\n" );
-            print( "DamageType = " + I2S( GetHandleId( GetEventDamageType( ) ) ) + "\n" );
-            print( "WeaponType = " + I2S( GetHandleId( GetEventWeaponType( ) ) ) + "\n" );
+            print( "AttackType = " + Jass::GetHandleId( Jass::GetEventAttackType( ) ) + "\n" );
+            print( "DamageType = " + Jass::GetHandleId( Jass::GetEventDamageType( ) ) + "\n" );
+            print( "WeaponType = " + Jass::GetHandleId( Jass::GetEventWeaponType( ) ) + "\n" );
 
-            print( "DamagedPlayer: " + GetPlayerName( playerTarget ) + "\n" );
-            print( "Source: " + GetUnitName( unitSource ) + " -> (" + I2S( GetHandleId( unitSource ) ) + ")\n" );
-            print( "Target: " + GetUnitName( unitTarget ) + " -> (" + I2S( GetHandleId( unitTarget ) ) + ")\n" );
-            print( "Pre-damage: " + R2S( GetEventPreDamage( ) ) + " | " + "Damage: " + R2S( GetEventDamage( ) ) + "\n" );
+            print( "DamagedPlayer: " + Jass::GetPlayerName( playerTarget ) + "\n" );
+            print( "Source: " + Jass::GetUnitName( unitSource ) + " -> (" + Jass::GetHandleId( unitSource ) + ")\n" );
+            print( "Target: " + Jass::GetUnitName( unitTarget ) + " -> (" + Jass::GetHandleId( unitTarget ) + ")\n" );
+            print( "Pre-damage: " + Jass::GetEventPreDamage( ) + " | " + "Damage: " + Jass::GetEventDamage( ) + "\n" );
             print( "================\n" );
         }
     }
 
-    void main( )
-    {
-        UnitSource = CreateUnit( Player( 0 ), 'Hamg', .0, .0, .0 );
-        UnitTarget = CreateUnit( Player( 1 ), 'Hblm', .0, .0, .0 );
-
-        SetUnitLifeRegen( UnitSource, 100.f );
-        SetUnitLifeRegen( UnitTarget, 100.f );
-
-        TriggerAPI::RegisterAnyPlayerUnitEvent
+	void Register( )
+	{
+        TriggerAPI::RegisterPlayerUnitEvent
         (
-            CreateTrigger( ),
-            EVENT_PLAYER_UNIT_DAMAGING,
+            Jass::CreateTrigger( ),
+            Jass::EVENT_PLAYER_UNIT_DAMAGING,
             null,
             function( )
             {
@@ -62,15 +56,29 @@ namespace Test::Damage
             }
         );
 
-        TriggerAPI::RegisterAnyPlayerUnitEvent
+        TriggerAPI::RegisterPlayerUnitEvent
         (
-            CreateTrigger( ),
-            EVENT_PLAYER_UNIT_DAMAGED,
+            Jass::CreateTrigger( ),
+            Jass::EVENT_PLAYER_UNIT_DAMAGED,
             null,
             function( )
             {
                 OnUnitAnyDamageDebug( "OnUnitDamaged" );
             }
         );
+	}
+	
+	void CreateUnits( )
+	{
+	    UnitSource = Jass::CreateUnit( Jass::Player( 0 ), 'Hamg', .0, .0, .0 );
+        UnitTarget = Jass::CreateUnit( Jass::Player( 1 ), 'Hblm', .0, .0, .0 );
+
+        Jass::SetUnitLifeRegen( UnitSource, 100.f );
+        Jass::SetUnitLifeRegen( UnitTarget, 100.f );
+	}
+
+    void main( )
+    {
+
     }
 }

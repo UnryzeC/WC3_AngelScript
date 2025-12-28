@@ -4,42 +4,56 @@ namespace Test::Sync::Hashtable
 {
     trigger trig = nil;
 
-    void Integer( hashtable ht )
+    void Register( trigger t, hashtable ht )
     {
-        if ( trig == nil )
-        {
-            TriggerAPI::RegisterPlayerHashtableSyncEvent
-            (
-                trig = CreateTrigger( ),
-                ht,
-                null,
-                function( )
+        TriggerAPI::RegisterPlayerHashtableSyncEvent
+        (
+            t,
+            ht,
+            null,
+            function( )
+            {
+                hashtable ht = Jass::GetSyncSavedHashtable( );
+                uint32 keyParent = Jass::GetSyncSavedParentKey( );
+                uint32 keyChild = Jass::GetSyncSavedChildKey( );
+
+                print( "[EVENT_PLAYER_SYNC_HASHTABLE]: " + Jass::GetTimeStamp( false, 0 ) + "\n" );
+                print( "GetSyncSavedHashtable: " + ht + "\n" );
+                print( "GetSyncSavedParentKey: " + keyParent + "\n" );
+                print( "GetSyncSavedChildKey: " + keyChild + "\n" );
+                print( "GetSyncSavedVariableType: " + Jass::GetSyncSavedVariableType( ) + "\n" );
+
+                if ( Jass::GetSyncSavedVariableType( ) == Jass::VARIABLE_TYPE_INTEGER )
                 {
-                    hashtable ht = GetSyncSavedHashtable( );
-                    uint32 keyParent = GetSyncSavedParentKey( );
-                    uint32 keyChild = GetSyncSavedChildKey( );
-
-                    print( "[EVENT_PLAYER_SYNC_HASHTABLE]: " + GetTimeStamp( false, 0 ) + "\n" );
-                    print( "GetSyncSavedHashtable: " + ht + "\n" );
-                    print( "GetSyncSavedParentKey: " + keyParent + "\n" );
-                    print( "GetSyncSavedChildKey: " + keyChild + "\n" );
-                    print( "GetSyncSavedVariableType: " + GetSyncSavedVariableType( ) + "\n" );
-
-                    if ( GetSyncSavedVariableType( ) == VARIABLE_TYPE_INTEGER )
-                    {
-                        print( "Value: " + LoadInteger( ht, keyParent, keyChild ) + "\n" );
-                    }
-
-                    print( "==========================================================\n" );
+                    print( "Value: " + Jass::LoadInteger( ht, keyParent, keyChild ) + "\n" );
                 }
-            );
-        }
+                else if ( Jass::GetSyncSavedVariableType( ) == Jass::VARIABLE_TYPE_REAL )
+                {
+                    print( "Value: " + Jass::LoadReal( ht, keyParent, keyChild ) + "\n" );
+                }
 
-        if ( GetLocalPlayer( ) == Player( 0 ) )
+                print( "==========================================================\n" );
+            }
+        );
+    }
+
+    void TestInteger( hashtable ht, player fromPlayer = Jass::Player( 0 ) )
+    {
+        if ( Jass::GetLocalPlayer( ) == fromPlayer )
         {
-            SaveInteger( ht, 123, 321, 100500 );
+            Jass::SaveInteger( ht, 123, 321, 100500 );
 
-            SyncSavedInteger( ht, 123, 321 );
+            Jass::SyncSavedInteger( ht, 123, 321 );
+        }
+    }
+
+    void TestReal( hashtable ht, player fromPlayer = Jass::Player( 0 ) )
+    {
+        if ( Jass::GetLocalPlayer( ) == fromPlayer )
+        {
+            Jass::SaveReal( ht, 1234, 4321, 123.456f );
+
+            Jass::SyncSavedReal( ht, 1234, 4321 );
         }
     }
 }

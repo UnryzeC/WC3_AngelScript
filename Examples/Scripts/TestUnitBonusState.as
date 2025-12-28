@@ -5,9 +5,9 @@ namespace Test::Unit::BonusState
         buff buf = nil;
         uint32 bid = 'Bdbb';
 
-        for( int i = 0; ( buf = GetUnitBuffEx( u, bid, i ) ) != nil; i++ )
+        for( int i = 0; ( buf = Jass::GetUnitBuffEx( u, bid, i ) ) != nil; i++ )
         {
-            if ( GetBuffRealField( buf, ABILITY_RLF_DATA_FIELD_A ) == -9876.f )
+            if ( Jass::GetBuffRealField( buf, ABILITY_RLF_DATA_FIELD_A ) == -9876.f )
             {
                 break;
             }
@@ -15,19 +15,19 @@ namespace Test::Unit::BonusState
 
         if ( buf == nil )
         {
-            UnitAddBuffByIdEx( u, bid, false );
-            buf = GetUnitBuffEx( u, bid, 0 );
+            Jass::UnitAddBuffByIdEx( u, bid, false );
+            buf = Jass::GetUnitBuffEx( u, bid, 0 );
             SetBuffDrawEnabled( buf, false );
-            SetBuffRealField( buf, ABILITY_RLF_DATA_FIELD_A, -9876.f );
+            Jass::SetBuffRealField( buf, ABILITY_RLF_DATA_FIELD_A, -9876.f );
         }
 
         if ( buf == nil ) { return; }
 
         print( "=====================================\n" );
         print( "Test::Unit::BonusState::Apply:\n" );
-        print( "buf: " + GetHandleId( buf ) + "\n" );
-        SetBuffRealField( buf, ABILITY_RLF_DATA_FIELD_F, hpBonus );
-        SetBuffRealField( buf, ABILITY_RLF_DATA_FIELD_H, mpBonus );
+        print( "buf: " + Jass::GetHandleId( buf ) + "\n" );
+        Jass::SetBuffRealField( buf, ABILITY_RLF_DATA_FIELD_F, hpBonus );
+        Jass::SetBuffRealField( buf, ABILITY_RLF_DATA_FIELD_H, mpBonus );
         print( "=====================================\n" );
     }
 }

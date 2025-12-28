@@ -7,32 +7,32 @@ namespace Test::DynamicTooltips
     {
         Init( );
 
-        auto a = GetUnitAbility( u, 'A00B' );
+        auto a = Jass::GetUnitAbility( u, 'A00B' );
 
         if ( a == nil )
         {
-            UnitAddAbility( u, 'A00B' );
-            a = GetUnitAbility( u, 'A00B' );
+            Jass::UnitAddAbility( u, 'A00B' );
+            a = Jass::GetUnitAbility( u, 'A00B' );
         }
 
-        auto tmr = CreateTimer( );
-        auto hid = GetHandleId( tmr );
+        auto tmr = Jass::CreateTimer( );
+        auto hid = Jass::GetHandleId( tmr );
 
-        SaveUnitHandle( ht, hid, '+src', u );
-        SaveAbilityHandle( ht, hid, 'abil', a );
+        Jass::SaveUnitHandle( ht, hid, '+src', u );
+        Jass::SaveAbilityHandle( ht, hid, 'abil', a );
 
-        TimerStart
+        Jass::TimerStart
         (
             tmr,
             1.f,
             true,
             function( )
             {
-                auto a = LoadAbilityHandle( ht, GetHandleId( GetExpiredTimer( ) ), 'abil' );
+                auto a = Jass::LoadAbilityHandle( ht, Jass::GetHandleId( Jass::GetExpiredTimer( ) ), 'abil' );
 
-                for ( auto i = GetHandleId( ABILITY_RLF_DATA_FIELD_A ); i <= GetHandleId( ABILITY_RLF_DATA_FIELD_I ); i++ )
+                for ( auto i = Jass::GetHandleId( Jass::ABILITY_RLF_DATA_FIELD_A ); i <= Jass::GetHandleId( Jass::ABILITY_RLF_DATA_FIELD_I ); i++ )
                 {
-                    SetAbilityRealLevelField( a, ConvertAbilityRealLevelField( i ), 0, GetRandomReal( 5.f, 99.f ) );
+                    Jass::SetAbilityRealLevelField( a, Jass::ConvertAbilityRealLevelField( i ), 0, Jass::GetRandomReal( 5.f, 99.f ) );
                 }
             }
         );
@@ -48,23 +48,23 @@ namespace Test::DynamicTooltips
 
         if ( it == nil )
         {
-            it = UnitAddItemById( u, itemId );
+            it = Jass::UnitAddItemById( u, itemId );
         }
 
-        auto tmr = CreateTimer( );
-        auto hid = GetHandleId( tmr );
+        auto tmr = Jass::CreateTimer( );
+        auto hid = Jass::GetHandleId( tmr );
 
-        SaveUnitHandle( ht, hid, '+src', u );
-        SaveItemHandle( ht, hid, 'item', it );
+        Jass::SaveUnitHandle( ht, hid, '+src', u );
+        Jass::SaveItemHandle( ht, hid, 'item', it );
 
-        TimerStart
+        Jass::TimerStart
         (
             tmr,
             1.f,
             true,
             function( )
             {
-                SetAbilityRealLevelField( GetItemAbilityById( LoadItemHandle( ht, GetHandleId( GetExpiredTimer( ) ), 'item' ), 'AIcf' ), ABILITY_RLF_DATA_FIELD_A, 0, GetRandomReal( 5.f, 99.f ) );
+                Jass::SetAbilityRealLevelField( Jass::GetItemAbilityById( Jass::LoadItemHandle( ht, Jass::GetHandleId( Jass::GetExpiredTimer( ) ), 'item' ), 'AIcf' ), Jass::ABILITY_RLF_DATA_FIELD_A, 0, Jass::GetRandomReal( 5.f, 99.f ) );
             }
         );
 
@@ -77,7 +77,7 @@ namespace Test::DynamicTooltips
 
         for ( uint i = 0; i < keys.length( ); i++ )
         {
-            PauseTimer( timer( tbl_timers[ keys[i] ] ) );
+            Jass::PauseTimer( timer( tbl_timers[ keys[i] ] ) );
         }
     }
 
@@ -85,7 +85,7 @@ namespace Test::DynamicTooltips
     {
         if ( ht == nil )
         {
-            ht = InitHashtable( );
+            ht = Jass::InitHashtable( );
         }
     }
 }

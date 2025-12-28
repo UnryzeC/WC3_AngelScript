@@ -4,10 +4,10 @@ namespace Test::Sleep
 {
     void main( )
     {
-        print( "1: " + GetTimeStamp( false, 0 ) + "\n" );
+        print( "1: " + Jass::GetTimeStamp( false, 0 ) + "\n" );
         std::sleep( 2.f );
-        print( "2: " + GetTimeStamp( false, 0 ) + "\n" );
+        print( "2: " + Jass::GetTimeStamp( false, 0 ) + "\n" );
         std::sleep( 3.f );
-        print( "3: " + GetTimeStamp( false, 0 ) + "\n" );
+        print( "3: " + Jass::GetTimeStamp( false, 0 ) + "\n" );
     }
 }
