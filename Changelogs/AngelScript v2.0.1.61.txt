@@ -1,0 +1,2 @@
+1. Returned tableValue &opAssign(const ?&in), that previously was breaking normal value assignments.
+2. Returned void set(const uint64 &in, const ?&in), that previously was breaking normal value assignments.
