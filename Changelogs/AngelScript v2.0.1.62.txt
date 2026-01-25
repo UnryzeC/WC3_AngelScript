@@ -1,0 +1,2 @@
+1. Fixed script loading from MPQ that gets broken on any file containing "..\\" that is included in a subsequent file after war3map.as.
+2. Disabled signed/unsigned warning printing, as it was redundant and just annoying.
