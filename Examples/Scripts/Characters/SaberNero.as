@@ -23,10 +23,8 @@ namespace SaberNero
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -84,10 +82,8 @@ namespace SaberNero
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -144,10 +140,8 @@ namespace SaberNero
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -242,10 +236,8 @@ namespace SaberNero
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -360,10 +352,8 @@ namespace SaberNero
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }

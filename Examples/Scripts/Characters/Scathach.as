@@ -37,7 +37,7 @@ namespace Scathach
         int hid = Jass::GetHandleId( tmr );
         int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) || ticks == 300 )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) || ticks == 300 )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
@@ -90,7 +90,7 @@ namespace Scathach
         int hid = Jass::GetHandleId( tmr );
         int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) || ticks == 300 )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) || ticks == 300 )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
@@ -131,7 +131,7 @@ namespace Scathach
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
@@ -196,7 +196,7 @@ namespace Scathach
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
@@ -270,7 +270,7 @@ namespace Scathach
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             HandleListCleanEffects( Jass::LoadHandleList( DataHT, hid, 'elst' ), true, true );
             SpellAPI::ReleaseTimer( DataHT, tmr );
@@ -456,7 +456,7 @@ namespace Scathach
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'E1' );
 
@@ -538,7 +538,7 @@ namespace Scathach
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
         

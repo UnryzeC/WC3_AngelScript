@@ -59,7 +59,7 @@ namespace Akame
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'D1' );
             SpellAPI::ReleaseTimer( DataHT, tmr );
@@ -102,7 +102,7 @@ namespace Akame
         int hid = Jass::GetHandleId( tmr );
         int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) || ticks == 200 )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) || ticks == 200 )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
@@ -165,11 +165,11 @@ namespace Akame
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
-            if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+            if ( SpellAPI::Stop( DataHT, hid, 0 ) )
             {
                 Sound::StopHero( SoundHT, source, 'psnd' + 'W1' );
             }
@@ -239,7 +239,7 @@ namespace Akame
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'E1' );
             SpellAPI::ReleaseTimer( DataHT, tmr );
@@ -295,11 +295,11 @@ namespace Akame
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
-            if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+            if ( SpellAPI::Stop( DataHT, hid, 0 ) )
             {
                 Sound::StopHero( SoundHT, source, 'gsnd' + 0 );
                 Sound::StopHero( SoundHT, source, 'gsnd' + 1 );
@@ -455,7 +455,7 @@ namespace Akame
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 

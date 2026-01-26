@@ -22,47 +22,50 @@ namespace Arcueid
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( !SpellAPI::Stop( DataHT, hid, 0 ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            int ticks = SpellAPI::Tick( DataHT, hid );
+            SpellAPI::ReleaseTimer( DataHT, tmr );
+            return;
+        }
 
-            if ( ticks == 0 )
+        int ticks = SpellAPI::Tick( DataHT, hid );
+
+        if ( ticks == 0 )
+        {
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+
+            Sound::PlayHero( SoundHT, source, 'psnd' + 'Q1', 100.f, .0f );
+            StunUnit( source, .25f );
+            Jass::SetUnitTimeScale( source, 2 );
+            Jass::SetUnitAnimation( source, "Spell One" );
+        }
+        else if ( ticks == 20 )
+        {
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            float dmg = 250.f + Jass::GetHeroLevel( source ) * 70.f + Jass::GetHeroInt( source, true );
+            float x = Jass::LoadReal( DataHT, hid, 'srcX' );
+            float y = Jass::LoadReal( DataHT, hid, 'srcY' );
+            group gEnum = Jass::LoadGroupHandle( DataHT, Jass::GetHandleId( source ), 'egrp' );
+
+            Sound::PlayHero( SoundHT, source, 'gsnd' + 0, 100.f, .0f );
+            Jass::GroupEnumUnitsInRange( gEnum, Jass::LoadReal( DataHT, hid, 'trgX' ), Jass::LoadReal( DataHT, hid, 'trgY' ), 300.f, nil );
+
+            for ( unit u = Jass::GroupForEachUnit( gEnum ); u != nil; u = Jass::GroupForEachUnit( gEnum ) )
             {
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
-                Sound::PlayHero( SoundHT, source, 'psnd' + 'Q1', 100.f, .0f );
-                StunUnit( source, .25f );
-                Jass::SetUnitTimeScale( source, 2 );
-                Jass::SetUnitAnimation( source, "Spell One" );
-            }
-            else if ( ticks == 20 )
-            {
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                float dmg = 250.f + Jass::GetHeroLevel( source ) * 70.f + Jass::GetHeroInt( source, true );
-                float x = Jass::LoadReal( DataHT, hid, 'srcX' );
-                float y = Jass::LoadReal( DataHT, hid, 'srcY' );
-                group gEnum = Jass::LoadGroupHandle( DataHT, Jass::GetHandleId( source ), 'egrp' );
-
-                Sound::PlayHero( SoundHT, source, 'gsnd' + 0, 100.f, .0f );
-                Jass::GroupEnumUnitsInRange( gEnum, Jass::LoadReal( DataHT, hid, 'trgX' ), Jass::LoadReal( DataHT, hid, 'trgY' ), 300.f, nil );
-
-                for ( unit u = Jass::GroupForEachUnit( gEnum ); u != nil; u = Jass::GroupForEachUnit( gEnum ) )
+                if ( Jass::IsUnitEnemy( u, Jass::GetOwningPlayer( source ) ) )
                 {
-                    if ( Jass::IsUnitEnemy( u, Jass::GetOwningPlayer( source ) ) )
-                    {
-                        float u_x = Jass::GetUnitX( u );
-                        float u_y = Jass::GetUnitY( u );
-                        float angle = Jass::MathAngleBetweenPoints( x, y, u_x, u_y );
+                    float u_x = Jass::GetUnitX( u );
+                    float u_y = Jass::GetUnitY( u );
+                    float angle = Jass::MathAngleBetweenPoints( x, y, u_x, u_y );
 
-                        Displacer::Unit::Move( u, angle, -300.f, .5f, .01f, 250.f );
-                        DamageTarget( source, u, dmg );
-                        Jass::DestroyEffect( Jass::AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", u_x, u_y ) );
-                    }
+                    Displacer::Unit::Move( u, angle, -300.f, .5f, .01f, 250.f );
+                    DamageTarget( source, u, dmg );
+                    Jass::DestroyEffect( Jass::AddSpecialEffect( "GeneralEffects\\BloodEffect1.mdx", u_x, u_y ) );
                 }
-
-                Jass::SetUnitTimeScale( source, 1.f );
-                SpellAPI::ReleaseTimer( DataHT, tmr );
             }
+
+            Jass::SetUnitTimeScale( source, 1.f );
+            SpellAPI::ReleaseTimer( DataHT, tmr );
         }
     }
 
@@ -70,61 +73,65 @@ namespace Arcueid
     {
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
+
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
+        {
+            SpellAPI::ReleaseTimer( DataHT, tmr );
+            return;
+        }
+
         int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( !SpellAPI::Stop( DataHT, hid, 0 ) )
+        if ( ticks == 0 )
         {
-            if ( ticks == 0 )
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+
+            Sound::PlayHero( SoundHT, source, 'psnd' + 'W1', 100.f, .0f );
+
+            StunUnit( source, .4f );
+            Jass::SetUnitTimeScale( source, 1.75f );
+            Jass::SetUnitAnimation( source, "Spell Five" );
+        }
+        if ( ticks == 10 )
+        {
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            float x = Jass::GetUnitX( source );
+            float y = Jass::GetUnitY( source );
+
+            for ( int i = 0; i < 5; i++ )
             {
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
-                Sound::PlayHero( SoundHT, source, 'psnd' + 'W1', 100.f, .0f );
-
-                StunUnit( source, .4f );
-                Jass::SetUnitTimeScale( source, 1.75f );
-                Jass::SetUnitAnimation( source, "Spell Five" );
+                effect ef = EffectAPI::CreateEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, .0f, Jass::GetRandomReal( 1.5f, 2.f ), 1.5f );
+                Jass::SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
+                EffectAPI::SetTimedLife( ef, 4.f );
             }
-            if ( ticks == 10 )
-            {
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                float x = Jass::GetUnitX( source );
-                float y = Jass::GetUnitY( source );
+        }
+        else if ( ticks == 25 )
+        {
+            player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            float x = Jass::GetUnitX( source );
+            float y = Jass::GetUnitY( source );
+            float dmg = 350.f + 60.f * Jass::GetHeroLevel( source ) + Jass::GetHeroInt( source, true );
+            group gEnum = Jass::LoadGroupHandle( DataHT, Jass::GetHandleId( source ), 'egrp' );
 
-                for ( int i = 0; i < 5; i++ )
+            Jass::GroupEnumUnitsInRange( gEnum, x, y, 450.f, nil );
+
+            for ( unit u = Jass::GroupForEachUnit( gEnum ); u != nil; u = Jass::GroupForEachUnit( gEnum ) )
+            {
+                if ( Jass::IsUnitAlive( u ) && Jass::IsUnitEnemy( u, p ) )
                 {
-                    effect ef = EffectAPI::CreateEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, .0f, Jass::GetRandomReal( 1.5f, 2.f ), 1.5f );
-                    Jass::SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
-                    EffectAPI::SetTimedLife( ef, 4.f );
+                    float targX = Jass::GetUnitX( u );
+                    float targY = Jass::GetUnitY( u );
+                    float angle = Jass::MathAngleBetweenPoints( x, y, targX, targY );
+
+                    War3Image::DisplaceLinear( u, angle, 200.f, .15f, .01f, false, false );
+                    DamageTarget( source, u, dmg );
                 }
             }
-            else if ( ticks == 25 )
-            {
-                player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                float x = Jass::GetUnitX( source );
-                float y = Jass::GetUnitY( source );
-                float dmg = 350.f + 60.f * Jass::GetHeroLevel( source ) + Jass::GetHeroInt( source, true );
-                group gEnum = Jass::LoadGroupHandle( DataHT, Jass::GetHandleId( source ), 'egrp' );
-
-                Jass::GroupEnumUnitsInRange( gEnum, x, y, 450.f, nil );
-
-                for ( unit u = Jass::GroupForEachUnit( gEnum ); u != nil; u = Jass::GroupForEachUnit( gEnum ) )
-                {
-                    if ( Jass::IsUnitAlive( u ) && Jass::IsUnitEnemy( u, p ) )
-                    {
-                        float targX = Jass::GetUnitX( u );
-                        float targY = Jass::GetUnitY( u );
-                        float angle = Jass::MathAngleBetweenPoints( x, y, targX, targY );
-
-                        War3Image::DisplaceLinear( u, angle, 200.f, .15f, .01f, false, false );
-                        DamageTarget( source, u, dmg );
-                    }
-                }
-            }
-            else if ( ticks == 40 )
-            {
-                SpellAPI::ReleaseTimer( DataHT, tmr );
-            }
+        }
+        else if ( ticks == 40 )
+        {
+            SpellAPI::ReleaseTimer( DataHT, tmr );
         }
     }
 
@@ -132,63 +139,67 @@ namespace Arcueid
     {
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
+
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
+        {
+            SpellAPI::ReleaseTimer( DataHT, tmr );
+            return;
+        }
+    
         int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( !SpellAPI::Stop( DataHT, hid, 0 ) )
+        if ( ticks == 0 )
         {
-            if ( ticks == 0 )
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            float x = Jass::GetUnitX( source );
+            float y = Jass::GetUnitY( source );
+            effect ef = EffectAPI::CreateEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, .0f, 1.5f, 1.5f );
+            
+            EffectAPI::SetTimedLife( ef, 4.f );
+            StunUnit( source, .25f );
+            Jass::SetUnitAnimation( source, "Attack Two" );
+            Jass::DestroyEffect( Jass::AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", x, y ) );
+        }
+        else if ( ticks == 15 )
+        {
+            Jass::ShowUnit( Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), false );
+        }
+        else if ( ticks >= 25 )
+        {
+            player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            float targX = Jass::LoadReal( DataHT, hid, 'trgX' );
+            float targY = Jass::LoadReal( DataHT, hid, 'trgY' );
+            float dmg = 100.f * Jass::GetHeroLevel( source ) + Jass::GetHeroInt( source, true );
+
+            Sound::PlayHero( SoundHT, source, 'gsnd' + 3, 60.f, .0f );
+            SetUnitXY( source, targX, targY );
+            Jass::ShowUnit( source, true );
+            SelectUnit( source, p );
+
+            group gEnum = Jass::LoadGroupHandle( DataHT, Jass::GetHandleId( source ), 'egrp' );
+
+            Jass::GroupEnumUnitsInRange( gEnum, targX, targY, 400.f, nil );
+
+            for ( unit u = Jass::GroupForEachUnit( gEnum ); u != nil; u = Jass::GroupForEachUnit( gEnum ) )
             {
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                float x = Jass::GetUnitX( source );
-                float y = Jass::GetUnitY( source );
-                effect ef = EffectAPI::CreateEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, .0f, 1.5f, 1.5f );
-                
+                if ( Jass::IsUnitAlive( u ) && Jass::IsUnitEnemy( u, p ) )
+                {
+                    DamageTarget( source, u, dmg );
+                    StunUnit( u, 1.f );
+                }
+            }
+
+            Jass::DestroyEffect( Jass::AddSpecialEffect( "GeneralEffects\\SlamEffect.mdx", targX, targY ) );
+
+            for ( int i = 0; i < 3; i++ )
+            {
+                effect ef = EffectAPI::CreateEx( "GeneralEffects\\ValkDust.mdl", targX, targY, .0f, .0f, Jass::GetRandomReal( 1.5f, 2.f ), 1.5f );
+                Jass::SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
                 EffectAPI::SetTimedLife( ef, 4.f );
-                StunUnit( source, .25f );
-                Jass::SetUnitAnimation( source, "Attack Two" );
-                Jass::DestroyEffect( Jass::AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", x, y ) );
             }
-            else if ( ticks == 15 )
-            {
-                Jass::ShowUnit( Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), false );
-            }
-            else if ( ticks >= 25 )
-            {
-                player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                float targX = Jass::LoadReal( DataHT, hid, 'trgX' );
-                float targY = Jass::LoadReal( DataHT, hid, 'trgY' );
-                float dmg = 100.f * Jass::GetHeroLevel( source ) + Jass::GetHeroInt( source, true );
 
-                Sound::PlayHero( SoundHT, source, 'gsnd' + 3, 60.f, .0f );
-                SetUnitXY( source, targX, targY );
-                Jass::ShowUnit( source, true );
-                SelectUnit( source, p );
-
-                group gEnum = Jass::LoadGroupHandle( DataHT, Jass::GetHandleId( source ), 'egrp' );
-
-                Jass::GroupEnumUnitsInRange( gEnum, targX, targY, 400.f, nil );
-
-                for ( unit u = Jass::GroupForEachUnit( gEnum ); u != nil; u = Jass::GroupForEachUnit( gEnum ) )
-                {
-                    if ( Jass::IsUnitAlive( u ) && Jass::IsUnitEnemy( u, p ) )
-                    {
-                        DamageTarget( source, u, dmg );
-                        StunUnit( u, 1.f );
-                    }
-                }
-
-                Jass::DestroyEffect( Jass::AddSpecialEffect( "GeneralEffects\\SlamEffect.mdx", targX, targY ) );
-
-                for ( int i = 0; i < 3; i++ )
-                {
-                    effect ef = EffectAPI::CreateEx( "GeneralEffects\\ValkDust.mdl", targX, targY, .0f, .0f, Jass::GetRandomReal( 1.5f, 2.f ), 1.5f );
-                    Jass::SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
-                    EffectAPI::SetTimedLife( ef, 4.f );
-                }
-
-                SpellAPI::ReleaseTimer( DataHT, tmr );
-            }
+            SpellAPI::ReleaseTimer( DataHT, tmr );
         }
     }
 
@@ -196,56 +207,59 @@ namespace Arcueid
     {
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
+
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
+        {
+            SpellAPI::ReleaseTimer( DataHT, tmr );
+            return;
+        }
+    
         int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( !SpellAPI::Stop( DataHT, hid, 0 ) )
+        if ( ticks == 0 )
         {
-            if ( ticks == 0 )
-            {
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                unit target = Jass::LoadUnitHandle( DataHT, hid, 'utrg' );
-                
-                StunUnit( source, .8f );
-                Jass::SetUnitTimeScale( source, 1.75f );
-                Jass::SetUnitAnimation( source, "Attack Slam" );
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            unit target = Jass::LoadUnitHandle( DataHT, hid, 'utrg' );
+            
+            StunUnit( source, .8f );
+            Jass::SetUnitTimeScale( source, 1.75f );
+            Jass::SetUnitAnimation( source, "Attack Slam" );
 
-                DisableTeleport( target, .8f );
-            }
-            else if ( ticks == 15 )
-            {
-                player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                unit target = Jass::LoadUnitHandle( DataHT, hid, 'utrg' );
-                float x = Jass::GetUnitX( source );
-                float y = Jass::GetUnitY( source );
-                float targX = Jass::GetUnitX( target );
-                float targY = Jass::GetUnitY( target );
-                float angle = Jass::MathAngleBetweenPoints( x, y, targX, targY );
-                float dmg = Jass::GetHeroLevel( source ) * 150 + Jass::GetHeroInt( source, true ) * .5f;
-
-                effect ef = EffectAPI::CreateEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, angle, 1.5f, 1.5f );
-                Jass::SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
-                EffectAPI::SetTimedLife( ef, 4.f );
-
-                Sound::PlayHero( SoundHT, source, 'gsnd' + 1, 60.f, .0f );
-                DamageTarget( source, target, dmg );
-                Jass::SetUnitFlyHeight( target, 600.f, 4000.f );
-            }
-            else if ( ticks == 25 )
-            {
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                Jass::DestroyEffect( Jass::AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", Jass::GetUnitX( source ), Jass::GetUnitY( source ) ) );
-            }
-            else if ( ticks == 30 )
-            {
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
-                Jass::SetUnitFlyHeight( source, 700.f, 4000.f );
-                Jass::SetUnitAnimation( source, "Attack Two" );
-            }
+            DisableTeleport( target, .8f );
         }
+        else if ( ticks == 15 )
+        {
+            player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            unit target = Jass::LoadUnitHandle( DataHT, hid, 'utrg' );
+            float x = Jass::GetUnitX( source );
+            float y = Jass::GetUnitY( source );
+            float targX = Jass::GetUnitX( target );
+            float targY = Jass::GetUnitY( target );
+            float angle = Jass::MathAngleBetweenPoints( x, y, targX, targY );
+            float dmg = Jass::GetHeroLevel( source ) * 150 + Jass::GetHeroInt( source, true ) * .5f;
 
-        if ( ticks == 60 )
+            effect ef = EffectAPI::CreateEx( "GeneralEffects\\ValkDust.mdl", x, y, .0f, angle, 1.5f, 1.5f );
+            Jass::SetSpecialEffectAlpha( ef, 0xB9 ); // rgba -> 255, 255, 255, 185
+            EffectAPI::SetTimedLife( ef, 4.f );
+
+            Sound::PlayHero( SoundHT, source, 'gsnd' + 1, 60.f, .0f );
+            DamageTarget( source, target, dmg );
+            Jass::SetUnitFlyHeight( target, 600.f, 4000.f );
+        }
+        else if ( ticks == 25 )
+        {
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            Jass::DestroyEffect( Jass::AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", Jass::GetUnitX( source ), Jass::GetUnitY( source ) ) );
+        }
+        else if ( ticks == 30 )
+        {
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+
+            Jass::SetUnitFlyHeight( source, 700.f, 4000.f );
+            Jass::SetUnitAnimation( source, "Attack Two" );
+        }
+        else if ( ticks == 60 )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
             unit target = Jass::LoadUnitHandle( DataHT, hid, 'utrg' );
@@ -306,79 +320,82 @@ namespace Arcueid
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( !SpellAPI::Stop( DataHT, hid, 0 ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            int ticks = SpellAPI::Tick( DataHT, hid );
+            SpellAPI::ReleaseTimer( DataHT, tmr );
+            return;
+        }
 
-            if ( ticks == 0 )
+        int ticks = SpellAPI::Tick( DataHT, hid );
+
+        if ( ticks == 0 )
+        {
+            player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            float x = Jass::LoadReal( DataHT, hid, 'srcX' );
+            float y = Jass::LoadReal( DataHT, hid, 'srcY' );
+
+            Sound::PlayHero( SoundHT, source, 'psnd' + 'T1', 100.f, .0f );
+            StunUnit( source, .5f );
+            EffectAPI::SetTimedLife( Jass::AddSpecialEffect( "GeneralEffects\\ValkDust.mdl", Jass::GetUnitX( source ), Jass::GetUnitY( source ) ), 4.f );
+            Jass::SetUnitAnimation( source, "Spell Six" );
+
+            Jass::DestroyEffect( Jass::AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", x, y ) );
+        }
+        else if ( ticks == 25 )
+        {
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+
+            Jass::ShowUnit( source, false );
+            SetUnitXY( source, Jass::LoadReal( DataHT, hid, 'trgX' ), Jass::LoadReal( DataHT, hid, 'trgY' ) );
+        }
+        else if ( ticks == 45 )
+        {
+            player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            float targX = Jass::LoadReal( DataHT, hid, 'trgX' );
+            float targY = Jass::LoadReal( DataHT, hid, 'trgY' );
+            float dmg = 200.f * Jass::GetHeroLevel( source ) + Jass::GetHeroInt( source, true );
+            group gEnum = Jass::LoadGroupHandle( DataHT, Jass::GetHandleId( source ), 'egrp' );
+
+            Jass::GroupEnumUnitsInRange( gEnum, targX, targY, 600.f, nil );
+
+            for ( unit u = Jass::GroupForEachUnit( gEnum ); u != nil; u = Jass::GroupForEachUnit( gEnum ) )
             {
-                player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                float x = Jass::LoadReal( DataHT, hid, 'srcX' );
-                float y = Jass::LoadReal( DataHT, hid, 'srcY' );
-
-                Sound::PlayHero( SoundHT, source, 'psnd' + 'T1', 100.f, .0f );
-                StunUnit( source, .5f );
-                EffectAPI::SetTimedLife( Jass::AddSpecialEffect( "GeneralEffects\\ValkDust.mdl", Jass::GetUnitX( source ), Jass::GetUnitY( source ) ), 4.f );
-                Jass::SetUnitAnimation( source, "Spell Six" );
-
-                Jass::DestroyEffect( Jass::AddSpecialEffect( "GeneralEffects\\BlackBlink.mdx", x, y ) );
-            }
-            else if ( ticks == 25 )
-            {
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
-                Jass::ShowUnit( source, false );
-                SetUnitXY( source, Jass::LoadReal( DataHT, hid, 'trgX' ), Jass::LoadReal( DataHT, hid, 'trgY' ) );
-            }
-            else if ( ticks == 45 )
-            {
-                player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                float targX = Jass::LoadReal( DataHT, hid, 'trgX' );
-                float targY = Jass::LoadReal( DataHT, hid, 'trgY' );
-                float dmg = 200.f * Jass::GetHeroLevel( source ) + Jass::GetHeroInt( source, true );
-                group gEnum = Jass::LoadGroupHandle( DataHT, Jass::GetHandleId( source ), 'egrp' );
-    
-                Jass::GroupEnumUnitsInRange( gEnum, targX, targY, 600.f, nil );
-
-                for ( unit u = Jass::GroupForEachUnit( gEnum ); u != nil; u = Jass::GroupForEachUnit( gEnum ) )
+                if ( Jass::IsUnitEnemy( u, p ) )
                 {
-                    if ( Jass::IsUnitEnemy( u, p ) )
+                    for ( int i = 0; i < 3; i++ )
                     {
-                        for ( int i = 0; i < 3; i++ )
-                        {
-                            effect ef = EffectAPI::CreateEx( "GeneralEffects\\ShortSlash\\ShortSlash.mdl", Jass::GetUnitX( u ), Jass::GetUnitY( u ), Jass::GetUnitFlyHeight( u ) + 50.f, i * Jass::GetRandomInt( 60, 90 ), Jass::GetRandomReal( .75f, 1.f ), Jass::GetRandomReal( .75f, 1.f ) );
-                            Jass::DestroyEffect( ef );
-                        }
-
-                        DamageTarget( source, u, dmg );
-                        Jass::DestroyEffect( Jass::AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "chest" ) );
-                        Jass::DestroyEffect( Jass::AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "head" ) );
+                        effect ef = EffectAPI::CreateEx( "GeneralEffects\\ShortSlash\\ShortSlash.mdl", Jass::GetUnitX( u ), Jass::GetUnitY( u ), Jass::GetUnitFlyHeight( u ) + 50.f, i * Jass::GetRandomInt( 60, 90 ), Jass::GetRandomReal( .75f, 1.f ), Jass::GetRandomReal( .75f, 1.f ) );
+                        Jass::DestroyEffect( ef );
                     }
+
+                    DamageTarget( source, u, dmg );
+                    Jass::DestroyEffect( Jass::AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "chest" ) );
+                    Jass::DestroyEffect( Jass::AddSpecialEffectTarget( "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl", u, "head" ) );
                 }
             }
-            else if ( ticks == 50 )
+        }
+        else if ( ticks == 50 )
+        {
+            player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
+            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
+            float targX = Jass::LoadReal( DataHT, hid, 'trgX' );
+            float targY = Jass::LoadReal( DataHT, hid, 'trgY' );
+
+            Jass::ShowUnit( source, true );
+            Jass::SetUnitAnimation( source, "Stand" );
+            SelectUnit( source, p );
+
+            for ( int i = 0; i < 3; i++ )
             {
-                player p = Jass::LoadPlayerHandle( DataHT, hid, '+ply' );
-                unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-                float targX = Jass::LoadReal( DataHT, hid, 'trgX' );
-                float targY = Jass::LoadReal( DataHT, hid, 'trgY' );
-
-                Jass::ShowUnit( source, true );
-                Jass::SetUnitAnimation( source, "Stand" );
-                SelectUnit( source, p );
-
-                for ( int i = 0; i < 3; i++ )
-                {
-                    effect ef = Jass::AddSpecialEffect( "GeneralEffects\\ValkDust.mdl", targX, targY );
-                    Jass::SetSpecialEffectScale( ef, 2.f );
-                    Jass::SetSpecialEffectTimeScale( ef, Jass::GetRandomReal( .5f, 2.f ) );
-                    EffectAPI::SetTimedLife( ef, 4.f );
-                }
-
-                SpellAPI::ReleaseTimer( DataHT, tmr );
+                effect ef = Jass::AddSpecialEffect( "GeneralEffects\\ValkDust.mdl", targX, targY );
+                Jass::SetSpecialEffectScale( ef, 2.f );
+                Jass::SetSpecialEffectTimeScale( ef, Jass::GetRandomReal( .5f, 2.f ) );
+                EffectAPI::SetTimedLife( ef, 4.f );
             }
+
+            SpellAPI::ReleaseTimer( DataHT, tmr );
         }
     }
 

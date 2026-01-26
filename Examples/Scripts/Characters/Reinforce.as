@@ -23,7 +23,7 @@ namespace Reinforce
         int hid = Jass::GetHandleId( tmr );
         unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Sound::StopHero( SoundHT, source, 'psnd' + 'Q1' );
 
@@ -113,7 +113,7 @@ namespace Reinforce
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
         
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'W1' );
             HandleListCleanEffects( Jass::LoadHandleList( DataHT, hid, 'elst' ), true, true );
@@ -189,7 +189,11 @@ namespace Reinforce
         int hid = Jass::GetHandleId( tmr );
         int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0 ) ) { return; }
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
+        {
+            SpellAPI::ReleaseTimer( DataHT, tmr );
+            return;
+        }
 
         if ( ticks == 0 )
         {
@@ -239,7 +243,7 @@ namespace Reinforce
         int hid = Jass::GetHandleId( tmr );
         unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
             Sound::StopHero( SoundHT, source, 'psnd' + 'R1' );
             SpellAPI::ReleaseTimer( DataHT, tmr );

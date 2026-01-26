@@ -22,7 +22,7 @@ namespace KuchikiByakuya
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Jass::DestroyEffect( Jass::LoadEffectHandle( DataHT, hid, '+eff' ) );
             SpellAPI::ReleaseTimer( DataHT, tmr );
@@ -92,10 +92,8 @@ namespace KuchikiByakuya
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             HandleListCleanEffects( Jass::LoadHandleList( DataHT, hid, 'elst' ), true, true );
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
@@ -174,10 +172,8 @@ namespace KuchikiByakuya
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -259,10 +255,8 @@ namespace KuchikiByakuya
         int hid = Jass::GetHandleId( tmr );
         int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) || ticks > 1000 )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) || ticks > 1000 )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             HandleListCleanEffects( Jass::LoadHandleList( DataHT, hid, 'elst' ), true, true );
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
@@ -349,10 +343,8 @@ namespace KuchikiByakuya
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }

@@ -35,7 +35,7 @@ namespace ToonoShiki
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'Q1' );
             SpellAPI::ReleaseTimer( DataHT, tmr );
@@ -97,7 +97,7 @@ namespace ToonoShiki
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'W1' );
             SpellAPI::ReleaseTimer( DataHT, tmr );
@@ -177,7 +177,7 @@ namespace ToonoShiki
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
@@ -250,10 +250,8 @@ namespace ToonoShiki
 
         int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) && ticks < 160 )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) && ticks < 160 )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -391,10 +389,8 @@ namespace ToonoShiki
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }

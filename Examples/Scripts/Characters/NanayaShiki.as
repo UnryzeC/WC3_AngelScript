@@ -35,7 +35,7 @@ namespace NanayaShiki
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'Q1' );
             SpellAPI::ReleaseTimer( DataHT, tmr );
@@ -109,7 +109,7 @@ namespace NanayaShiki
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'W1' );
             SpellAPI::ReleaseTimer( DataHT, tmr );
@@ -202,9 +202,9 @@ namespace NanayaShiki
 
         if ( !Jass::LoadBoolean( DataHT, hid, 'isex' ) )
         {
-            if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+            if ( SpellAPI::Stop( DataHT, hid, 1 ) )
             {
-                if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+                if ( SpellAPI::Stop( DataHT, hid, 0 ) )
                 {
                     Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'R2' );
                 }
@@ -255,9 +255,9 @@ namespace NanayaShiki
         {
             if ( ticks < 125 )
             {
-                if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+                if ( SpellAPI::Stop( DataHT, hid, 1 ) )
                 {
-                    if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+                    if ( SpellAPI::Stop( DataHT, hid, 0 ) )
                     {
                         Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'R2' );
                     }
@@ -379,9 +379,8 @@ namespace NanayaShiki
         int hid = Jass::GetHandleId( tmr );
         int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) || ticks == 305 )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) || ticks == 305 )
         {
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -503,7 +502,7 @@ namespace NanayaShiki
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Jass::DestroyEffect( Jass::LoadEffectHandle( DataHT, hid, '+eff' ) );
             SpellAPI::ReleaseTimer( DataHT, tmr );

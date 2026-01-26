@@ -67,7 +67,7 @@ namespace Akainu
         int hid = Jass::GetHandleId( tmr );
         unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
             Sound::StopHero( SoundHT, source, 'psnd' + 'R1' );
             Sound::StopHero( SoundHT, source, 'psnd' + 'R2' );
@@ -161,13 +161,15 @@ namespace Akainu
     {
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
-        int ticks = SpellAPI::Tick( DataHT, hid );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'E1' );
             SpellAPI::ReleaseTimer( DataHT, tmr );
+            return;
         }
+
+        int ticks = SpellAPI::Tick( DataHT, hid );
 
         if ( ticks == 0 )
         {
@@ -229,7 +231,7 @@ namespace Akainu
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 1, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 1 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'R1' );
             SpellAPI::ReleaseTimer( DataHT, tmr );
@@ -277,7 +279,7 @@ namespace Akainu
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
 
@@ -365,7 +367,7 @@ namespace Akainu
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'T1' );
             HandleListCleanEffects( Jass::LoadHandleList( DataHT, hid, 'elst' ), true, true );

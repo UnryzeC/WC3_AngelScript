@@ -22,11 +22,9 @@ namespace SaberAlter
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
-            Sound::StopHero( SoundHT, source, 'psnd' + 'D1' );
+            Sound::StopHero( SoundHT, Jass::LoadUnitHandle( DataHT, hid, 'usrc' ), 'psnd' + 'D1' );
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -79,10 +77,8 @@ namespace SaberAlter
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -141,10 +137,8 @@ namespace SaberAlter
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -206,7 +200,7 @@ namespace SaberAlter
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
@@ -278,10 +272,8 @@ namespace SaberAlter
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
-            unit source = Jass::LoadUnitHandle( DataHT, hid, 'usrc' );
-
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
         }
@@ -356,7 +348,7 @@ namespace SaberAlter
         timer tmr = Jass::GetExpiredTimer( );
         int hid = Jass::GetHandleId( tmr );
 
-        if ( SpellAPI::Stop( DataHT, hid, 0, true ) )
+        if ( SpellAPI::Stop( DataHT, hid, 0 ) )
         {
             SpellAPI::ReleaseTimer( DataHT, tmr );
             return;
