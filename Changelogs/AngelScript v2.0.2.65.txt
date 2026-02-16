@@ -1,0 +1,5 @@
+1. Fixed dictionary / table not working properly with 32bit values.
+2. United all codebase for library and parser, now they will always have identical code in the end.
+  Note: while initial slight differences didn't cause much change, it was a hassle to have 2 separate codebases.
+3. AngelScript library now has module tracking to prevent secondary library from loading.
+  Note: this only will work starting this version with all libraries equal or higher version than this.
