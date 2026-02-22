@@ -1,7 +1,8 @@
 1. Fixed dictionary / table not working properly with 32bit values.
 2. United all codebase for library and parser, now they will always have identical code in the end.
   Note: while initial slight differences didn't cause much change, it was a hassle to have 2 separate codebases.
-3. AngelScript library now has module tracking to prevent secondary library from loading.
-  Note: this only will work starting this version with all libraries equal or higher version than this.
-4. Fixed Dictionary and Table both being unable to work on int32 / uint32 / int / uint.
+3. Fixed Dictionary and Table both being unable to work on int32 / uint32 / int / uint.
   Note: this was due to the reason it being designed for 64bit values or objects.
+4. Library now has module tracking to prevent secondary library from loading, and it's able to see newer modules if they were loaded and so on.
+  Note: this only will work starting this version with all libraries equal or higher version than this.
+    Modules: AngelScript, FastMenu, FPSUnlocker, UnlockMapSize, MultiWindow, RepplaySpeedUnlocker, UjAPI and WFE.
