@@ -3,3 +3,5 @@
   Note: while initial slight differences didn't cause much change, it was a hassle to have 2 separate codebases.
 3. AngelScript library now has module tracking to prevent secondary library from loading.
   Note: this only will work starting this version with all libraries equal or higher version than this.
+4. Fixed Dictionary and Table both being unable to work on int32 / uint32 / int / uint.
+  Note: this was due to the reason it being designed for 64bit values or objects.
