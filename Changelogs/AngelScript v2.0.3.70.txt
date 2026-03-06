@@ -1,0 +1,5 @@
+1. Fully rewritten jass type handling, now arrays can use .find and other methods on them.
+2. Added asBEHAVE_CONSTRUCT for jass types, now unit(1048673) will work and uint id = uint(units[2]) as well.
+  Note: this makes Jass casting natives pretty much useless now.
+3. Added support for .asbin, engine will still prioritise .as file, this may be subject to change.
+  Note: this means, if you have both binary and normal script, normal script will have priority.
