@@ -1,0 +1,7 @@
+1. Fixed "Module unload" issue upon game restard or parser finishing the run through the code.
+2. Fixed "fatal error" in AngelScript Parser whenever any timer was involved.
+3. Added CLI option for map parsing.
+4. Added GeneratePredefined option for parser, this will generate a file with everything that was registered in the engine.
+5. Fully rewritten Timer processing in Parser, this should prevent a rare, but occuring crash.
+6. Changed CContextManager to pointer, so it's properly cleaned, previously was used as direct object.
+7. Fixed CContext cleanup mess, as previously destructor was manually called, which was a "bandaid" solution.
