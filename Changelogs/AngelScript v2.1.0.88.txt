@@ -1,0 +1,8 @@
+Changes:
+
+1. Added manager safety check in OnGameUIPauseGame, to prevent crash on pause, when AngelScript is not involved.
+2. Added std::string::hash, this mimics StringHash 1 to 1, but without needing to call for the native.
+3. Added std::string::hash64.
+4. Added ParseModes for AngelScript, to make "fake" parsing simpler.
+5. All RCString hooks removed, now they are handled seamlessly, as they were supposed to, without ANY VOODOO MAGIC.
+6. Jass Strings are now parsed as rcstringId for return values and rcstring &in for parameters.
